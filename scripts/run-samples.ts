@@ -1,6 +1,8 @@
 // Runs every case of a subject, compares the outputs and prints what happened.
 // Usage: npm run samples                      the estimate subject: run and compare (no API calls)
-//        npm run samples -- --judge           also ask Claude to judge (uses ANTHROPIC_API_KEY from .env)
+//        npm run samples -- --judge           also ask Claude to judge (uses ANTHROPIC_API_KEY from .env),
+//                                             at most JUDGE_WITHOUT_ASKING cases; more are held and counted
+//        npm run samples -- --judge-all       judge every case that needs Claude, however many
 //        npm run samples -- --subject <name>  samples/<name>/ or targets/<name>/ instead
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -12,12 +14,13 @@ import type { Comparison } from "../lib/compare/compare-case";
 import { SetupError } from "../lib/errors";
 import { VERDICT_LABEL, type CaseVerdict } from "../lib/judge/verdict";
 import { describeOutcome } from "../lib/runner/outcome";
-import { runPipeline } from "../lib/pipeline";
+import { JUDGE_WITHOUT_ASKING, runPipeline } from "../lib/pipeline";
 import { loadSubject } from "../lib/subject";
 
 const root = process.cwd();
 const runsRoot = join(root, "runs");
-const withJudge = process.argv.includes("--judge");
+const judgeAll = process.argv.includes("--judge-all");
+const withJudge = judgeAll || process.argv.includes("--judge");
 const subjectArg = process.argv.indexOf("--subject");
 const subjectId = subjectArg === -1 ? undefined : process.argv[subjectArg + 1];
 
@@ -27,7 +30,16 @@ async function main(): Promise<void> {
   const refused = withJudge ? whyNotSending(config, "judge") : null;
   if (refused) throw new SetupError(refused.message, refused.nextStep);
   const client = withJudge ? createClient() : null;
-  const report = await runPipeline({ subjectId: id, config, adapter, root: runRoot, prepare: workDir !== null, runsRoot, client });
+  const report = await runPipeline({
+    subjectId: id,
+    config,
+    adapter,
+    root: runRoot,
+    prepare: workDir !== null,
+    runsRoot,
+    client,
+    judgeLimit: judgeAll ? null : JUDGE_WITHOUT_ASKING,
+  });
 
   console.log(`${report.configName}`);
   console.log(`記録: ${join(runsRoot, report.runId)}\n`);
@@ -41,6 +53,10 @@ async function main(): Promise<void> {
     printComparison(c.comparison);
     if (c.verdict) printVerdict(c.verdict);
     console.log();
+  }
+  if (report.judgeHeld) {
+    console.log(`⚠️ Claude に判定させる入力が ${report.judgeHeld.count} 件あるので、送らずに止めました（確かめずに送るのは ${report.judgeHeld.limit} 件まで。1件ごとに1回呼びます）`);
+    console.log("→ 送ってよければ npm run samples -- --judge-all で流し直してください（画面なら「N 件を Claude に判定させる」）");
   }
 }
 

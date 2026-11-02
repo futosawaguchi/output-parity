@@ -8,9 +8,10 @@ import type { ProgressEvent, RunReport } from "./pipeline";
 /**
  * run: executes the programs / rejudge: judges the bundled outputs again without running them /
  * cause: looks for the cause of one case in the source / verify: applies an edit to work/ and
- * runs everything again / undo: puts work/ back to the original. Each one ends in a report.
+ * runs everything again / undo: puts work/ back to the original / judge: judges the cases a run
+ * held back until a person confirmed how many would be sent. Each one ends in a report.
  */
-export type JobKind = "run" | "rejudge" | "cause" | "verify" | "undo";
+export type JobKind = "run" | "rejudge" | "cause" | "verify" | "undo" | "judge";
 
 /** subjectId: the subject the job works on (lib/subject.ts). The page shows only its own subject's job. */
 type JobBase = { jobId: string; kind: JobKind; subjectId: string; progress: ProgressEvent[] };

@@ -47,7 +47,19 @@ export type RunReport = {
   cases: CaseReport[];
   /** Set when this report is the run after applying an edit, or the refusal to apply it. */
   fixAttempt?: FixAttempt;
+  /**
+   * Set when more cases needed Claude than may be sent without asking: none was sent, and these
+   * many wait for a person to confirm (judgeWaiting).
+   */
+  judgeHeld?: { count: number; limit: number };
 };
+
+/**
+ * How many cases may be sent to Claude for judging in one go before a person is asked. Each case
+ * is one call with the whole new output; a system where everything differs would otherwise send
+ * every case at once.
+ */
+export const JUDGE_WITHOUT_ASKING = 10;
 
 export type PipelineOptions = {
   /** Recorded in the report (lib/subject.ts). */
@@ -63,10 +75,15 @@ export type PipelineOptions = {
   keepOld?: Map<string, SlotResult>;
   /** Pass a client to judge; null to stop after comparing. The client is created by the caller. */
   client: Anthropic | null;
+  /** At most this many cases are judged without asking (default JUDGE_WITHOUT_ASKING); null for no limit. */
+  judgeLimit?: number | null;
   onProgress?: (event: ProgressEvent) => void;
 };
 
-/** Run → compare → judge, one case at a time. Throws only SetupError (the user's setup is broken). */
+/**
+ * Run → compare for every case, then judge the cases the machine could not settle. Throws only
+ * SetupError (the user's setup is broken).
+ */
 export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
   const { config, adapter, client } = opts;
   const report = (message: string, caseId = "") => opts.onProgress?.({ caseId, message });
@@ -80,9 +97,9 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
   const startedAt = new Date();
   const run = await createRunDir(opts.runsRoot, startedAt);
 
-  const cases: CaseReport[] = [];
+  const checked: Checked[] = [];
   const environments = summarizeEnvironments(config.run.environments);
-  const record = sentRecorder(join(opts.runsRoot, "sent"));
+  const checkOpts: CheckOptions = { adapter, client, environments, record: sentRecorder(join(opts.runsRoot, "sent")), onProgress: opts.onProgress };
   for (const testCase of config.cases) {
     const caseId = testCase.id;
     report(
@@ -92,8 +109,9 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
       caseId,
     );
     const result = await runCase(config, testCase, cwd, join(run.path, caseId), opts.keepOld?.get(caseId));
-    cases.push(await checkCase(result, testCase, { adapter, client, environments, record, onProgress: opts.onProgress }));
+    checked.push({ result, report: await checkCase(result, testCase, { ...checkOpts, client: null }) });
   }
+  const { cases, held } = await judgeWaiting(checked, checkOpts, opts.judgeLimit === undefined ? JUDGE_WITHOUT_ASKING : opts.judgeLimit);
 
   const runReport: RunReport = {
     runId: run.id,
@@ -106,10 +124,35 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
     startedAt: startedAt.toISOString(),
     finishedAt: new Date().toISOString(),
     cases,
+    ...(held ? { judgeHeld: held } : {}),
   };
   await writeFile(join(run.path, "report.json"), JSON.stringify(runReport, null, 2) + "\n");
   report("終わりました");
   return runReport;
+}
+
+/** A case that has run and been compared, with what is needed to judge it later. */
+export type Checked = { result: CaseResult; report: CaseReport };
+
+/**
+ * Asks Claude about the cases the machine could not settle (DESIGN 7-4e). When there are more
+ * than `limit` (null: no limit), none is sent: the count is returned for a person to confirm, and
+ * those cases stay unjudged rather than guessed. Without a client nothing is sent either.
+ */
+export async function judgeWaiting(
+  checked: Checked[],
+  opts: CheckOptions,
+  limit: number | null,
+): Promise<{ cases: CaseReport[]; held: RunReport["judgeHeld"] | null }> {
+  const waiting = checked.filter((c) => c.report.verdict === null).length;
+  if (!opts.client || waiting === 0) return { cases: checked.map((c) => c.report), held: null };
+  if (limit !== null && waiting > limit) {
+    opts.onProgress?.({ caseId: "", message: `Claude に判定させる入力が ${waiting} 件あるので、送らずに止めました` });
+    return { cases: checked.map((c) => c.report), held: { count: waiting, limit } };
+  }
+  const cases: CaseReport[] = [];
+  for (const c of checked) cases.push(c.report.verdict === null ? await checkCase(c.result, c.report, opts) : c.report);
+  return { cases, held: null };
 }
 
 export type CheckOptions = {

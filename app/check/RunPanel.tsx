@@ -26,7 +26,7 @@ type SubjectEntry = { id: string; name: string | null };
 const POLL_MS = 1000;
 
 /** Where each kind of job is started (lib/jobs.ts says what each one does). */
-const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge", cause: "/api/cause", verify: "/api/apply", undo: "/api/undo" };
+const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge", cause: "/api/cause", verify: "/api/apply", undo: "/api/undo", judge: "/api/judge" };
 
 /**
  * The subject in the address (?subject=), or none for the default one. Read when needed rather
@@ -196,6 +196,7 @@ export function RunPanel() {
           cause={causeActions}
           // A shipped result is only being looked at: going back is showing the bundled report again.
           onUndo={() => (shown.origin === "bundled" && shown.fixAttempt ? setReport(shown.fixAttempt.original) : start("undo"))}
+          onJudgeHeld={() => start("judge")}
         />
       )}
     </section>

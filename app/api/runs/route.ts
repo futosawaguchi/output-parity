@@ -13,7 +13,7 @@ import { listSubjects, loadSubject, subjectIdOf, whyNoApplying } from "@/lib/sub
 import { isFromOurPage } from "@/lib/same-origin";
 import { alreadyRunning, busyWithAnother, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses";
 
-// Together with app/api/rejudge/, the only places in the app that read the API key (CLAUDE.md).
+// With the other routes that call Claude (rejudge, cause, judge), the only places in the app that read the API key (CLAUDE.md).
 // The key never leaves the server: it is not in any response, and errors are reported by type
 // with fixed wording.
 

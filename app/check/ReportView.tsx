@@ -10,7 +10,17 @@ import { CompareView } from "./CompareView";
 import { FixResult } from "./FixResult";
 
 /** The overview of one run, and below it either one case in detail or two side by side. */
-export function ReportView({ report, cause, onUndo }: { report: RunReport; cause: CauseActions; onUndo: () => void }) {
+export function ReportView({
+  report,
+  cause,
+  onUndo,
+  onJudgeHeld,
+}: {
+  report: RunReport;
+  cause: CauseActions;
+  onUndo: () => void;
+  onJudgeHeld: () => void;
+}) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
 
@@ -37,6 +47,7 @@ export function ReportView({ report, cause, onUndo }: { report: RunReport; cause
       {report.fixAttempt && (
         <FixResult attempt={report.fixAttempt} labelOf={(id) => byId(id)?.label ?? id} onUndo={onUndo} busy={cause.busy} bundled={report.origin === "bundled"} />
       )}
+      {report.judgeHeld && <HeldNotice held={report.judgeHeld} busy={cause.busy} onJudge={onJudgeHeld} />}
       <CaseTable cases={report.cases} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
       {pair ? (
         <CompareView report={report} cases={pair} />
@@ -45,6 +56,21 @@ export function ReportView({ report, cause, onUndo }: { report: RunReport; cause
       ) : (
         <p className={styles.hint}>行を押すと、その入力の PDF・差・判定の根拠が出ます。「並べる」に2つチェックすると、左右に並べて見られます。</p>
       )}
+    </div>
+  );
+}
+
+/** More cases needed Claude than may be sent without asking: say how many calls it takes, and let a person decide. */
+function HeldNotice({ held, busy, onJudge }: { held: NonNullable<RunReport["judgeHeld"]>; busy: boolean; onJudge: () => void }) {
+  return (
+    <div className={styles.notice}>
+      <p>
+        Claude に判定させる入力が {held.count} 件あります。1件ごとに Claude を1回呼び、新しい出力の全文を送ります。
+        確かめずに送るのは {held.limit} 件までなので、まだ何も送っていません（下の一覧では「未判定」）。
+      </p>
+      <button className={styles.subButton} onClick={onJudge} disabled={busy}>
+        {held.count} 件を Claude に判定させる
+      </button>
     </div>
   );
 }

@@ -567,3 +567,7 @@
   padding: 4px 8px;
   max-width: 100%;
 }
+
+.notice button {
+  margin-top: 8px;
+}
