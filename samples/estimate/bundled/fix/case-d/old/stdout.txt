@@ -1,0 +1,10 @@
+
+Deprecated: Array and string offset access syntax with curly braces is deprecated in samples/estimate/app/lib-old/vendor/tecnickcom/tcpdf/tcpdf.php on line 16900
+
+Deprecated: Array and string offset access syntax with curly braces is deprecated in samples/estimate/app/lib-old/vendor/tecnickcom/tcpdf/tcpdf.php on line 16900
+
+Deprecated: Array and string offset access syntax with curly braces is deprecated in samples/estimate/app/lib-old/vendor/tecnickcom/tcpdf/tcpdf.php on line 16903
+
+Deprecated: Array and string offset access syntax with curly braces is deprecated in samples/estimate/app/lib-old/vendor/tecnickcom/tcpdf/include/tcpdf_images.php on line 314
+
+Warning: chr() expects parameter 1 to be int, string given in samples/estimate/app/lib-old/vendor/tecnickcom/tcpdf/include/tcpdf_fonts.php on line 1671

@@ -1,7 +1,8 @@
 {
   "runId": "bundled",
+  "origin": "run",
   "configName": "見積書 estimate.php（PHP 7.4 → 8.5）",
-  "configDescription": "架空の見積書を PDF で出す小さな PHP アプリ（samples/estimate.php）を、PHP 7.4 と PHP 8.5 で同じ入力から動かして比べます。見積書は今回作った架空のもので、PDF ライブラリ（TCPDF・FPDI）は本物の公開 OSS です。",
+  "configDescription": "架空の見積書を PDF で出す小さな PHP アプリ（samples/estimate/app/estimate.php）を、PHP 7.4 と PHP 8.5 で同じ入力から動かして比べます。見積書は今回作った架空のもので、PDF ライブラリ（TCPDF・FPDI）は本物の公開 OSS です。",
   "environments": {
     "old": {
       "label": "PHP 7.4",
@@ -13,11 +14,11 @@
     }
   },
   "outputFormat": "pdf",
-  "startedAt": "2026-11-02T06:23:56.103Z",
-  "finishedAt": "2026-11-02T06:24:25.501Z",
+  "startedAt": "2026-11-02T11:20:02.435Z",
+  "finishedAt": "2026-11-02T11:20:26.266Z",
   "cases": [
     {
-      "caseId": "1-harmless",
+      "caseId": "case-a",
       "label": "入力 A",
       "description": "明細3行の見積書",
       "runs": [
@@ -28,17 +29,17 @@
           "args": [
             "estimate.php",
             "lib-new",
-            "data/1-harmless.json",
-            "1-harmless/old/output.pdf"
+            "data/case-a.json",
+            "case-a/old/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 421,
-          "outputPath": "1-harmless/old/output.pdf",
-          "stdoutPath": "1-harmless/old/stdout.txt",
-          "stderrPath": "1-harmless/old/stderr.txt"
+          "durationMs": 302,
+          "outputPath": "case-a/old/output.pdf",
+          "stdoutPath": "case-a/old/stdout.txt",
+          "stderrPath": "case-a/old/stderr.txt"
         },
         {
           "slot": "new",
@@ -47,17 +48,17 @@
           "args": [
             "estimate.php",
             "lib-new",
-            "data/1-harmless.json",
-            "1-harmless/new/output.pdf"
+            "data/case-a.json",
+            "case-a/new/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 283,
-          "outputPath": "1-harmless/new/output.pdf",
-          "stdoutPath": "1-harmless/new/stdout.txt",
-          "stderrPath": "1-harmless/new/stderr.txt"
+          "durationMs": 255,
+          "outputPath": "case-a/new/output.pdf",
+          "stdoutPath": "case-a/new/stdout.txt",
+          "stderrPath": "case-a/new/stderr.txt"
         },
         {
           "slot": "baseline",
@@ -66,25 +67,25 @@
           "args": [
             "estimate.php",
             "lib-new",
-            "data/1-harmless.json",
-            "1-harmless/baseline/output.pdf"
+            "data/case-a.json",
+            "case-a/baseline/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 460,
-          "outputPath": "1-harmless/baseline/output.pdf",
-          "stdoutPath": "1-harmless/baseline/stdout.txt",
-          "stderrPath": "1-harmless/baseline/stderr.txt"
+          "durationMs": 124,
+          "outputPath": "case-a/baseline/output.pdf",
+          "stdoutPath": "case-a/baseline/stdout.txt",
+          "stderrPath": "case-a/baseline/stderr.txt"
         }
       ],
       "comparison": {
         "kind": "compared",
         "old": {
           "lines": [
-            "meta CreationDate: D:20261102062356+00'00'",
-            "meta ModDate: D:20261102062356+00'00'",
+            "meta CreationDate: D:20261102112002+00'00'",
+            "meta ModDate: D:20261102112002+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -96,13 +97,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T06:23:56+00:00",
+            "xmp xmp:createdate: 2026-11-02T11:20:02+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T06:23:56+00:00",
-            "xmp xmp:modifydate: 2026-11-02T06:23:56+00:00",
-            "xmp xmpmm:documentid: uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137",
-            "xmp xmpmm:instanceid: uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137",
-            "id 0: dcbccde12077eb263b81e4b2e739f137",
+            "xmp xmp:metadatadate: 2026-11-02T11:20:02+00:00",
+            "xmp xmp:modifydate: 2026-11-02T11:20:02+00:00",
+            "xmp xmpmm:documentid: uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946",
+            "xmp xmpmm:instanceid: uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946",
+            "id 0: 2ef70a27fefd9bdddadf4e261e06e946",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -113,7 +114,8 @@
             "A-103 部材費 42,000",
             "A-105 値引き -5,000",
             "合計 52,000",
-            "Powered by TCPDF (www.tcpdf.org)"
+            "Powered by TCPDF (www.tcpdf.org)",
+            "layout page 1: 用紙 595.3×841.9・画像 0 個"
           ],
           "pages": [
             {
@@ -129,8 +131,8 @@
         },
         "new": {
           "lines": [
-            "meta CreationDate: D:20261102062356+00'00'",
-            "meta ModDate: D:20261102062356+00'00'",
+            "meta CreationDate: D:20261102112002+00'00'",
+            "meta ModDate: D:20261102112002+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -142,13 +144,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T06:23:56+00:00",
+            "xmp xmp:createdate: 2026-11-02T11:20:02+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T06:23:56+00:00",
-            "xmp xmp:modifydate: 2026-11-02T06:23:56+00:00",
-            "xmp xmpmm:documentid: uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c",
-            "xmp xmpmm:instanceid: uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c",
-            "id 0: 22da90454ed21344ac98bad0d96e5b7c",
+            "xmp xmp:metadatadate: 2026-11-02T11:20:02+00:00",
+            "xmp xmp:modifydate: 2026-11-02T11:20:02+00:00",
+            "xmp xmpmm:documentid: uuid:7ed2f49c-228a-f837-c09d-ef2c66cb7859",
+            "xmp xmpmm:instanceid: uuid:7ed2f49c-228a-f837-c09d-ef2c66cb7859",
+            "id 0: 7ed2f49c228af837c09def2c66cb7859",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -159,7 +161,8 @@
             "A-103 部材費 42,000",
             "A-105 値引き -5,000",
             "合計 52,000",
-            "Powered by TCPDF (www.tcpdf.org)"
+            "Powered by TCPDF (www.tcpdf.org)",
+            "layout page 1: 用紙 595.3×841.9・画像 0 個"
           ],
           "pages": [
             {
@@ -180,15 +183,15 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "xmp xmpmm:documentid: uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137",
-              "xmp xmpmm:instanceid: uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137",
-              "id 0: dcbccde12077eb263b81e4b2e739f137"
+              "xmp xmpmm:documentid: uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946",
+              "xmp xmpmm:instanceid: uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946",
+              "id 0: 2ef70a27fefd9bdddadf4e261e06e946"
             ],
             "newStart": 17,
             "newLines": [
-              "xmp xmpmm:documentid: uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c",
-              "xmp xmpmm:instanceid: uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c",
-              "id 0: 22da90454ed21344ac98bad0d96e5b7c"
+              "xmp xmpmm:documentid: uuid:7ed2f49c-228a-f837-c09d-ef2c66cb7859",
+              "xmp xmpmm:instanceid: uuid:7ed2f49c-228a-f837-c09d-ef2c66cb7859",
+              "id 0: 7ed2f49c228af837c09def2c66cb7859"
             ],
             "explainedByBaseline": true
           }
@@ -200,16 +203,16 @@
         "differingLines": 6,
         "totalLines": 160,
         "excerpt": [
-          "< ···<xmpMM:DocumentID>uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137</xmpMM:DocumentID>",
-          "< ···<xmpMM:InstanceID>uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137</xmpMM:InstanceID>",
-          "> ···<xmpMM:DocumentID>uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c</xmpMM:DocumentID>",
-          "> ···<xmpMM:InstanceID>uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c</xmpMM:InstanceID>",
-          "< << /Size 13 /Root 12 0 R /Info 10 0 R /ID [ <dcbccde12077eb263b81e4b2e739f137> <dcbccde12077eb263b…",
-          "> << /Size 13 /Root 12 0 R /Info 10 0 R /ID [ <22da90454ed21344ac98bad0d96e5b7c> <22da90454ed21344ac…"
+          "< ···<xmpMM:DocumentID>uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946</xmpMM:DocumentID>",
+          "< ···<xmpMM:InstanceID>uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946</xmpMM:InstanceID>",
+          "> ···<xmpMM:DocumentID>uuid:7ed2f49c-228a-f837-c09d-ef2c66cb7859</xmpMM:DocumentID>",
+          "> ···<xmpMM:InstanceID>uuid:7ed2f49c-228a-f837-c09d-ef2c66cb7859</xmpMM:InstanceID>",
+          "< << /Size 13 /Root 12 0 R /Info 10 0 R /ID [ <2ef70a27fefd9bdddadf4e261e06e946> <2ef70a27fefd9bddda…",
+          "> << /Size 13 /Root 12 0 R /Info 10 0 R /ID [ <7ed2f49c228af837c09def2c66cb7859> <7ed2f49c228af837c0…"
         ]
       },
       "verdict": {
-        "caseId": "1-harmless",
+        "caseId": "case-a",
         "verdict": "harmless",
         "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
         "findings": [],
@@ -219,7 +222,7 @@
       }
     },
     {
-      "caseId": "2a-harmless",
+      "caseId": "case-b",
       "label": "入力 B",
       "description": "明細5行の見積書（うち3行は金額 0）",
       "runs": [
@@ -230,17 +233,17 @@
           "args": [
             "estimate.php",
             "lib-new",
-            "data/2a-harmless.json",
-            "2a-harmless/old/output.pdf"
+            "data/case-b.json",
+            "case-b/old/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 228,
-          "outputPath": "2a-harmless/old/output.pdf",
-          "stdoutPath": "2a-harmless/old/stdout.txt",
-          "stderrPath": "2a-harmless/old/stderr.txt"
+          "durationMs": 140,
+          "outputPath": "case-b/old/output.pdf",
+          "stdoutPath": "case-b/old/stdout.txt",
+          "stderrPath": "case-b/old/stderr.txt"
         },
         {
           "slot": "new",
@@ -249,17 +252,17 @@
           "args": [
             "estimate.php",
             "lib-new",
-            "data/2a-harmless.json",
-            "2a-harmless/new/output.pdf"
+            "data/case-b.json",
+            "case-b/new/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 187,
-          "outputPath": "2a-harmless/new/output.pdf",
-          "stdoutPath": "2a-harmless/new/stdout.txt",
-          "stderrPath": "2a-harmless/new/stderr.txt"
+          "durationMs": 124,
+          "outputPath": "case-b/new/output.pdf",
+          "stdoutPath": "case-b/new/stdout.txt",
+          "stderrPath": "case-b/new/stderr.txt"
         },
         {
           "slot": "baseline",
@@ -268,25 +271,25 @@
           "args": [
             "estimate.php",
             "lib-new",
-            "data/2a-harmless.json",
-            "2a-harmless/baseline/output.pdf"
+            "data/case-b.json",
+            "case-b/baseline/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 662,
-          "outputPath": "2a-harmless/baseline/output.pdf",
-          "stdoutPath": "2a-harmless/baseline/stdout.txt",
-          "stderrPath": "2a-harmless/baseline/stderr.txt"
+          "durationMs": 144,
+          "outputPath": "case-b/baseline/output.pdf",
+          "stdoutPath": "case-b/baseline/stdout.txt",
+          "stderrPath": "case-b/baseline/stderr.txt"
         }
       ],
       "comparison": {
         "kind": "compared",
         "old": {
           "lines": [
-            "meta CreationDate: D:20261102062358+00'00'",
-            "meta ModDate: D:20261102062358+00'00'",
+            "meta CreationDate: D:20261102112004+00'00'",
+            "meta ModDate: D:20261102112004+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -298,13 +301,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T06:23:58+00:00",
+            "xmp xmp:createdate: 2026-11-02T11:20:04+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T06:23:58+00:00",
-            "xmp xmp:modifydate: 2026-11-02T06:23:58+00:00",
-            "xmp xmpmm:documentid: uuid:be2684ed-2dfd-ec50-9142-ef96071f008a",
-            "xmp xmpmm:instanceid: uuid:be2684ed-2dfd-ec50-9142-ef96071f008a",
-            "id 0: be2684ed2dfdec509142ef96071f008a",
+            "xmp xmp:metadatadate: 2026-11-02T11:20:04+00:00",
+            "xmp xmp:modifydate: 2026-11-02T11:20:04+00:00",
+            "xmp xmpmm:documentid: uuid:c1276195-f294-9273-3dd3-df2fc79f6418",
+            "xmp xmpmm:instanceid: uuid:c1276195-f294-9273-3dd3-df2fc79f6418",
+            "id 0: c1276195f29492733dd3df2fc79f6418",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -317,7 +320,8 @@
             "A-103 部材費 42,000",
             "A-104 値引き 0",
             "合計 57,000",
-            "Powered by TCPDF (www.tcpdf.org)"
+            "Powered by TCPDF (www.tcpdf.org)",
+            "layout page 1: 用紙 595.3×841.9・画像 0 個"
           ],
           "pages": [
             {
@@ -333,8 +337,8 @@
         },
         "new": {
           "lines": [
-            "meta CreationDate: D:20261102062359+00'00'",
-            "meta ModDate: D:20261102062359+00'00'",
+            "meta CreationDate: D:20261102112004+00'00'",
+            "meta ModDate: D:20261102112004+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -346,13 +350,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T06:23:59+00:00",
+            "xmp xmp:createdate: 2026-11-02T11:20:04+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T06:23:59+00:00",
-            "xmp xmp:modifydate: 2026-11-02T06:23:59+00:00",
-            "xmp xmpmm:documentid: uuid:d9707774-5526-f290-a199-9515e1121061",
-            "xmp xmpmm:instanceid: uuid:d9707774-5526-f290-a199-9515e1121061",
-            "id 0: d97077745526f290a1999515e1121061",
+            "xmp xmp:metadatadate: 2026-11-02T11:20:04+00:00",
+            "xmp xmp:modifydate: 2026-11-02T11:20:04+00:00",
+            "xmp xmpmm:documentid: uuid:82af9cd7-3840-5fe6-2eac-8725a307ceb7",
+            "xmp xmpmm:instanceid: uuid:82af9cd7-3840-5fe6-2eac-8725a307ceb7",
+            "id 0: 82af9cd738405fe62eac8725a307ceb7",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -362,7 +366,8 @@
             "A-100 基本料 15,000",
             "A-103 部材費 42,000",
             "合計 57,000",
-            "Powered by TCPDF (www.tcpdf.org)"
+            "Powered by TCPDF (www.tcpdf.org)",
+            "layout page 1: 用紙 595.3×841.9・画像 0 個"
           ],
           "pages": [
             {
@@ -381,45 +386,17 @@
         },
         "changes": [
           {
-            "oldStart": 0,
+            "oldStart": 17,
             "oldLines": [
-              "meta CreationDate: D:20261102062358+00'00'",
-              "meta ModDate: D:20261102062358+00'00'"
+              "xmp xmpmm:documentid: uuid:c1276195-f294-9273-3dd3-df2fc79f6418",
+              "xmp xmpmm:instanceid: uuid:c1276195-f294-9273-3dd3-df2fc79f6418",
+              "id 0: c1276195f29492733dd3df2fc79f6418"
             ],
-            "newStart": 0,
+            "newStart": 17,
             "newLines": [
-              "meta CreationDate: D:20261102062359+00'00'",
-              "meta ModDate: D:20261102062359+00'00'"
-            ],
-            "explainedByBaseline": true
-          },
-          {
-            "oldStart": 13,
-            "oldLines": [
-              "xmp xmp:createdate: 2026-11-02T06:23:58+00:00"
-            ],
-            "newStart": 13,
-            "newLines": [
-              "xmp xmp:createdate: 2026-11-02T06:23:59+00:00"
-            ],
-            "explainedByBaseline": true
-          },
-          {
-            "oldStart": 15,
-            "oldLines": [
-              "xmp xmp:metadatadate: 2026-11-02T06:23:58+00:00",
-              "xmp xmp:modifydate: 2026-11-02T06:23:58+00:00",
-              "xmp xmpmm:documentid: uuid:be2684ed-2dfd-ec50-9142-ef96071f008a",
-              "xmp xmpmm:instanceid: uuid:be2684ed-2dfd-ec50-9142-ef96071f008a",
-              "id 0: be2684ed2dfdec509142ef96071f008a"
-            ],
-            "newStart": 15,
-            "newLines": [
-              "xmp xmp:metadatadate: 2026-11-02T06:23:59+00:00",
-              "xmp xmp:modifydate: 2026-11-02T06:23:59+00:00",
-              "xmp xmpmm:documentid: uuid:d9707774-5526-f290-a199-9515e1121061",
-              "xmp xmpmm:instanceid: uuid:d9707774-5526-f290-a199-9515e1121061",
-              "id 0: d97077745526f290a1999515e1121061"
+              "xmp xmpmm:documentid: uuid:82af9cd7-3840-5fe6-2eac-8725a307ceb7",
+              "xmp xmpmm:instanceid: uuid:82af9cd7-3840-5fe6-2eac-8725a307ceb7",
+              "id 0: 82af9cd738405fe62eac8725a307ceb7"
             ],
             "explainedByBaseline": true
           },
@@ -447,23 +424,23 @@
       "naive": {
         "oldBytes": 8476,
         "newBytes": 8294,
-        "differingLines": 52,
+        "differingLines": 40,
         "totalLines": 164,
         "excerpt": [
-          "< << /Type /Page /Parent 1 0 R /LastModified (D:20261102062358+00'00') /Resources 2 0 R /MediaBox [0…",
-          "> << /Type /Page /Parent 1 0 R /LastModified (D:20261102062359+00'00') /Resources 2 0 R /MediaBox [0…",
           "< <</Filter /FlateDecode /Length 846>> stream",
           "< x····j·P·······.··E···~····B·:·····t··]·:·······ED···\\··q····|··\"·3w·dL·9·mB·!········I8··qc]·····…",
           "< ·····QSB·pJ········k·Rr·B···_·.·L,=98···· ········F·5···^·A···82qRH···E··$·[·······J···o·····*\\··\"…",
           "< _D·H··Y·R···O··D·",
           "< WD·H··LU·H\"OF···D····LD··@·····$p···P···\\···|bg\"···'b·H···.··O··2·····$|·Q·~·······2·····muZMv·1·/…",
-          "> <</Filter /FlateDecode /Length 664>> stream"
+          "> <</Filter /FlateDecode /Length 664>> stream",
+          "> x··V·n·1··c·# ·>·R;x·····_·*",
+          "> ······H···-········7z··8!··#G···'·······*K···W·D···o·}^······SZ····6···%·-y;··Juy····4T··n···nb·&E…"
         ]
       },
       "verdict": {
-        "caseId": "2a-harmless",
+        "caseId": "case-b",
         "verdict": "needs_review",
-        "summary": "金額0円の明細3行（出張費・夜間割増・値引き）が新で消えた。合計57,000円は残りの明細と合っており文書内の矛盾はないが、「0円で含む」が「記載なし」になり、見積の読み方が変わるおそれがある。",
+        "summary": "PHP 8.5 の見積書で金額 0 円の明細3行（出張費・夜間割増・値引き）が消えています。合計 57,000 は残った明細と整合しますが、0 円項目を省いてよいかは要確認です。",
         "findings": [
           {
             "verdict": "needs_review",
@@ -471,15 +448,18 @@
               "C1",
               "C2"
             ],
-            "what": "金額が0の明細行（A-101 出張費、A-102 夜間割増、A-104 値引き）が見積書から消えた。",
-            "why": "合計は残った明細の和と一致するので計算上の矛盾はない。ただし旧は出張費・夜間割増を「0円（込み）」と明示していたのに対し、新では記載がなく、別途請求や対象外と読まれうるため、受け手の判断が変わるかはこの出力だけでは決められない。",
+            "what": "金額が 0 の明細行「A-101 出張費」「A-102 夜間割増」「A-104 値引き」が新では出力されていません。",
+            "why": "合計は残った明細の和と一致するため、文書内の矛盾はありません。ただし「出張費・夜間割増が無料」「値引きなし」と明示した行が消えるため、受け取った人が「項目自体がない」「未記載」と読み違えるおそれがあります。0 円行を省くのが意図どおりかは、この出力だけでは決められません。",
             "evidence": [
+              "A-101 出張費 0",
+              "A-102 夜間割増 0",
+              "A-104 値引き 0",
               "A-100 基本料 15,000",
               "A-103 部材費 42,000",
               "合計 57,000"
             ],
-            "calculation": "15,000 + 42,000 = 57,000 = 合計 57,000（旧も 15,000 + 0 + 0 + 42,000 + 0 = 57,000）。0円の3行を除いた差は 0",
-            "checkHere": "page 1 の明細表（A-100〜A-104）。0円の明細を表示しないのが意図どおりかを確かめる"
+            "calculation": "15,000 + 42,000 = 57,000 = 合計 57,000（0 円行を除いても差 0）",
+            "checkHere": "page 1 の明細表（A-100〜A-104）。0 円の明細を表示する仕様かどうか"
           }
         ],
         "judgedBy": {
@@ -489,7 +469,7 @@
       }
     },
     {
-      "caseId": "2b-fatal",
+      "caseId": "case-c",
       "label": "入力 C",
       "description": "明細5行の見積書（値引きを含む）",
       "runs": [
@@ -500,17 +480,17 @@
           "args": [
             "estimate.php",
             "lib-new",
-            "data/2b-fatal.json",
-            "2b-fatal/old/output.pdf"
+            "data/case-c.json",
+            "case-c/old/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 494,
-          "outputPath": "2b-fatal/old/output.pdf",
-          "stdoutPath": "2b-fatal/old/stdout.txt",
-          "stderrPath": "2b-fatal/old/stderr.txt"
+          "durationMs": 145,
+          "outputPath": "case-c/old/output.pdf",
+          "stdoutPath": "case-c/old/stdout.txt",
+          "stderrPath": "case-c/old/stderr.txt"
         },
         {
           "slot": "new",
@@ -519,17 +499,17 @@
           "args": [
             "estimate.php",
             "lib-new",
-            "data/2b-fatal.json",
-            "2b-fatal/new/output.pdf"
+            "data/case-c.json",
+            "case-c/new/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 269,
-          "outputPath": "2b-fatal/new/output.pdf",
-          "stdoutPath": "2b-fatal/new/stdout.txt",
-          "stderrPath": "2b-fatal/new/stderr.txt"
+          "durationMs": 128,
+          "outputPath": "case-c/new/output.pdf",
+          "stdoutPath": "case-c/new/stdout.txt",
+          "stderrPath": "case-c/new/stderr.txt"
         },
         {
           "slot": "baseline",
@@ -538,25 +518,25 @@
           "args": [
             "estimate.php",
             "lib-new",
-            "data/2b-fatal.json",
-            "2b-fatal/baseline/output.pdf"
+            "data/case-c.json",
+            "case-c/baseline/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 251,
-          "outputPath": "2b-fatal/baseline/output.pdf",
-          "stdoutPath": "2b-fatal/baseline/stdout.txt",
-          "stderrPath": "2b-fatal/baseline/stderr.txt"
+          "durationMs": 128,
+          "outputPath": "case-c/baseline/output.pdf",
+          "stdoutPath": "case-c/baseline/stdout.txt",
+          "stderrPath": "case-c/baseline/stderr.txt"
         }
       ],
       "comparison": {
         "kind": "compared",
         "old": {
           "lines": [
-            "meta CreationDate: D:20261102062414+00'00'",
-            "meta ModDate: D:20261102062414+00'00'",
+            "meta CreationDate: D:20261102112017+00'00'",
+            "meta ModDate: D:20261102112017+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -568,13 +548,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T06:24:14+00:00",
+            "xmp xmp:createdate: 2026-11-02T11:20:17+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T06:24:14+00:00",
-            "xmp xmp:modifydate: 2026-11-02T06:24:14+00:00",
-            "xmp xmpmm:documentid: uuid:cde0c682-a365-e3d7-c854-b32fea310350",
-            "xmp xmpmm:instanceid: uuid:cde0c682-a365-e3d7-c854-b32fea310350",
-            "id 0: cde0c682a365e3d7c854b32fea310350",
+            "xmp xmp:metadatadate: 2026-11-02T11:20:17+00:00",
+            "xmp xmp:modifydate: 2026-11-02T11:20:17+00:00",
+            "xmp xmpmm:documentid: uuid:177d67de-e2aa-8712-32f1-021b4a5d9d6d",
+            "xmp xmpmm:instanceid: uuid:177d67de-e2aa-8712-32f1-021b4a5d9d6d",
+            "id 0: 177d67dee2aa871232f1021b4a5d9d6d",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -587,7 +567,8 @@
             "A-103 部材費 42,000",
             "A-104 値引き -5,000",
             "合計 72,000",
-            "Powered by TCPDF (www.tcpdf.org)"
+            "Powered by TCPDF (www.tcpdf.org)",
+            "layout page 1: 用紙 595.3×841.9・画像 0 個"
           ],
           "pages": [
             {
@@ -603,8 +584,8 @@
         },
         "new": {
           "lines": [
-            "meta CreationDate: D:20261102062414+00'00'",
-            "meta ModDate: D:20261102062414+00'00'",
+            "meta CreationDate: D:20261102112017+00'00'",
+            "meta ModDate: D:20261102112017+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -616,13 +597,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T06:24:14+00:00",
+            "xmp xmp:createdate: 2026-11-02T11:20:17+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T06:24:14+00:00",
-            "xmp xmp:modifydate: 2026-11-02T06:24:14+00:00",
-            "xmp xmpmm:documentid: uuid:83cbe4e9-9fe7-faad-42f3-3a76e2e1a7d2",
-            "xmp xmpmm:instanceid: uuid:83cbe4e9-9fe7-faad-42f3-3a76e2e1a7d2",
-            "id 0: 83cbe4e99fe7faad42f33a76e2e1a7d2",
+            "xmp xmp:metadatadate: 2026-11-02T11:20:17+00:00",
+            "xmp xmp:modifydate: 2026-11-02T11:20:17+00:00",
+            "xmp xmpmm:documentid: uuid:828a8350-21e1-e1dd-f72c-abf22ff8a731",
+            "xmp xmpmm:instanceid: uuid:828a8350-21e1-e1dd-f72c-abf22ff8a731",
+            "id 0: 828a835021e1e1ddf72cabf22ff8a731",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -632,7 +613,8 @@
             "A-100 基本料 15,000",
             "A-103 部材費 42,000",
             "合計 72,000",
-            "Powered by TCPDF (www.tcpdf.org)"
+            "Powered by TCPDF (www.tcpdf.org)",
+            "layout page 1: 用紙 595.3×841.9・画像 0 個"
           ],
           "pages": [
             {
@@ -653,15 +635,15 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "xmp xmpmm:documentid: uuid:cde0c682-a365-e3d7-c854-b32fea310350",
-              "xmp xmpmm:instanceid: uuid:cde0c682-a365-e3d7-c854-b32fea310350",
-              "id 0: cde0c682a365e3d7c854b32fea310350"
+              "xmp xmpmm:documentid: uuid:177d67de-e2aa-8712-32f1-021b4a5d9d6d",
+              "xmp xmpmm:instanceid: uuid:177d67de-e2aa-8712-32f1-021b4a5d9d6d",
+              "id 0: 177d67dee2aa871232f1021b4a5d9d6d"
             ],
             "newStart": 17,
             "newLines": [
-              "xmp xmpmm:documentid: uuid:83cbe4e9-9fe7-faad-42f3-3a76e2e1a7d2",
-              "xmp xmpmm:instanceid: uuid:83cbe4e9-9fe7-faad-42f3-3a76e2e1a7d2",
-              "id 0: 83cbe4e99fe7faad42f33a76e2e1a7d2"
+              "xmp xmpmm:documentid: uuid:828a8350-21e1-e1dd-f72c-abf22ff8a731",
+              "xmp xmpmm:instanceid: uuid:828a8350-21e1-e1dd-f72c-abf22ff8a731",
+              "id 0: 828a835021e1e1ddf72cabf22ff8a731"
             ],
             "explainedByBaseline": true
           },
@@ -703,9 +685,9 @@
         ]
       },
       "verdict": {
-        "caseId": "2b-fatal",
+        "caseId": "case-c",
         "verdict": "broken",
-        "summary": "新では明細3行（出張費・夜間割増・値引き）が消えたのに合計は72,000のままで、残った明細と合計が合わず見積書として壊れています。",
+        "summary": "新の見積書は明細3行（A-101・A-102・A-104）が消え、残った明細の和 57,000 と表示の合計 72,000 が合わず、文書が矛盾しています。",
         "findings": [
           {
             "verdict": "broken",
@@ -713,25 +695,51 @@
               "C1",
               "C2"
             ],
-            "what": "明細のA-101 出張費・A-102 夜間割増・A-104 値引きの3行が新の出力から消えました。",
-            "why": "新に残る明細の和は57,000円ですが、合計行は72,000円のままで、文書の中で矛盾しています。見積の内訳が読めず、金額の判断が変わります。",
+            "what": "明細行「A-101 出張費 8,000」「A-102 夜間割増 12,000」「A-104 値引き -5,000」の3行が新の出力から消えた。",
+            "why": "合計は 72,000 のままなのに、新に残る明細は 15,000 + 42,000 = 57,000 で、合計と一致しません。見積の内訳が欠け、読む人は金額の根拠を確かめられません。",
             "evidence": [
               "A-100 基本料 15,000",
               "A-103 部材費 42,000",
               "合計 72,000"
             ],
-            "calculation": "新: 15,000 + 42,000 = 57,000 ≠ 72,000（差 15,000）／旧: 15,000 + 8,000 + 12,000 + 42,000 − 5,000 = 72,000",
-            "checkHere": "page 1 の明細表（コード A-100〜A-104）と「合計 72,000」の行"
+            "calculation": "旧: 15,000 + 8,000 + 12,000 + 42,000 − 5,000 = 72,000 ／ 新: 15,000 + 42,000 = 57,000 ≠ 72,000（差 15,000）",
+            "checkHere": "page 1 の明細表（「コード 品名 金額（円）」から「合計 72,000」まで）"
           }
         ],
         "judgedBy": {
           "kind": "claude",
           "model": "claude-opus-5-5"
         }
+      },
+      "cause": {
+        "kind": "found",
+        "summary": "PHP 8 で文字列と数値の比較（==）の規則が変わったため、deleted が \"\" と \"-\" の明細が `$r['deleted'] == 0` で「削除済み」と判定され、表示されなくなりました。",
+        "candidates": [
+          {
+            "file": "estimate.php",
+            "line": 18,
+            "code": "    if ($r['deleted'] == 0) {",
+            "change": "PHP 7.4 では、数値でない文字列を 0 と == で比べると、文字列が数値 0 に変換されて true になりました。PHP 8 以降は 0 のほうが文字列 \"0\" として比べられるため、\"\" == 0 も \"-\" == 0 も false になります。",
+            "why": "data/case-c.json では A-101 と A-102 の deleted が \"\"、A-104 が \"-\" です。旧ではこの3行が「削除されていない」と判定されて表示されましたが、新では除外されました。deleted が \"0\" の A-100 と A-103 は、どちらの環境でも true なので表示が残りました。",
+            "edit": {
+              "file": "estimate.php",
+              "oldText": "if ($r['deleted'] == 0) {",
+              "newText": "if ((int)$r['deleted'] === 0) {"
+            },
+            "steps": [],
+            "lineCheck": "matches",
+            "editCheck": "once"
+          }
+        ],
+        "model": "claude-opus-5-5",
+        "reads": [
+          "estimate.php",
+          "data/case-c.json"
+        ]
       }
     },
     {
-      "caseId": "3-crash",
+      "caseId": "case-d",
       "label": "入力 D",
       "description": "明細3行の見積書を、古い版の PDF ライブラリ（TCPDF 6.2.26）で出す",
       "runs": [
@@ -742,17 +750,17 @@
           "args": [
             "estimate.php",
             "lib-old",
-            "data/3-crash.json",
-            "3-crash/old/output.pdf"
+            "data/case-d.json",
+            "case-d/old/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 951,
-          "outputPath": "3-crash/old/output.pdf",
-          "stdoutPath": "3-crash/old/stdout.txt",
-          "stderrPath": "3-crash/old/stderr.txt"
+          "durationMs": 197,
+          "outputPath": "case-d/old/output.pdf",
+          "stdoutPath": "case-d/old/stdout.txt",
+          "stderrPath": "case-d/old/stderr.txt"
         },
         {
           "slot": "new",
@@ -761,17 +769,17 @@
           "args": [
             "estimate.php",
             "lib-old",
-            "data/3-crash.json",
-            "3-crash/new/output.pdf"
+            "data/case-d.json",
+            "case-d/new/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 255
           },
-          "durationMs": 632,
+          "durationMs": 135,
           "outputPath": null,
-          "stdoutPath": "3-crash/new/stdout.txt",
-          "stderrPath": "3-crash/new/stderr.txt"
+          "stdoutPath": "case-d/new/stdout.txt",
+          "stderrPath": "case-d/new/stderr.txt"
         },
         {
           "slot": "baseline",
@@ -780,17 +788,17 @@
           "args": [
             "estimate.php",
             "lib-old",
-            "data/3-crash.json",
-            "3-crash/baseline/output.pdf"
+            "data/case-d.json",
+            "case-d/baseline/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 255
           },
-          "durationMs": 179,
+          "durationMs": 112,
           "outputPath": null,
-          "stdoutPath": "3-crash/baseline/stdout.txt",
-          "stderrPath": "3-crash/baseline/stderr.txt"
+          "stdoutPath": "case-d/baseline/stdout.txt",
+          "stderrPath": "case-d/baseline/stderr.txt"
         }
       ],
       "comparison": {
@@ -801,7 +809,7 @@
       },
       "naive": null,
       "verdict": {
-        "caseId": "3-crash",
+        "caseId": "case-d",
         "verdict": "broken",
         "summary": "PHP 8.5 では出力が出ませんでした（終了コード 255）",
         "findings": [
@@ -811,7 +819,7 @@
             "what": "PHP 8.5 では出力が出ませんでした（終了コード 255）",
             "why": "PHP 7.4 では出力が出ていたので、移行で動かなくなっています",
             "evidence": [
-              "PHP Parse error:  syntax error, unexpected token \"{\", expecting \")\" in samples/lib-old/vendor/tecnickcom/tcpdf/tcpdf.php on line 16900"
+              "PHP Parse error:  syntax error, unexpected token \"{\", expecting \")\" in samples/estimate/app/lib-old/vendor/tecnickcom/tcpdf/tcpdf.php on line 16900"
             ],
             "calculation": null,
             "checkHere": "実行の記録（stderr）"

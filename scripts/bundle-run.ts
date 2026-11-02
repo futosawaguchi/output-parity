@@ -90,7 +90,9 @@ async function runIdsNewestFirst(): Promise<string[]> {
 async function newestJudgedRun(): Promise<string | undefined> {
   for (const id of await runIdsNewestFirst()) {
     const text = await readFile(join(runsRoot, id, "report.json"), "utf8").catch(() => null);
-    if (text && (JSON.parse(text) as RunReport).cases.every((c) => c.verdict !== null)) return id;
+    const report = text ? (JSON.parse(text) as RunReport) : null;
+    // A run after an edit is judged by the machine only; it is shipped with the run it came from.
+    if (report && !report.fixAttempt && report.cases.every((c) => c.verdict !== null)) return id;
   }
   return undefined;
 }
