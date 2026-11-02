@@ -8,7 +8,7 @@ import styles from "./check.module.css";
 import { CompareView } from "./CompareView";
 
 /** The overview of one run, and below it either one case in detail or two side by side. */
-export function ReportView({ report, bundled }: { report: RunReport; bundled: boolean }) {
+export function ReportView({ report, origin }: { report: RunReport; origin: "run" | "rejudge" | "bundled" }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
 
@@ -24,9 +24,13 @@ export function ReportView({ report, bundled }: { report: RunReport; bundled: bo
   return (
     <div className={styles.report}>
       <p className={styles.reportMeta}>
-        {bundled
-          ? `同梱の結果です（${finishedAt} に作者の手元で実行し、リポジトリに入れたもの）。PHP も API キーも無しで見られます。`
-          : `${finishedAt} に実行`}
+        {
+          {
+            run: `${finishedAt} に実行`,
+            bundled: `同梱の結果です（${finishedAt} に作者の手元で実行し、リポジトリに入れたもの）。PHP も API キーも無しで見られます。`,
+            rejudge: `同梱の出力（作者の手元で PHP が出したもの）を、${finishedAt} にこの環境の Claude が判定し直した結果です。`,
+          }[origin]
+        }
       </p>
       <CaseTable cases={report.cases} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
       {pair ? (

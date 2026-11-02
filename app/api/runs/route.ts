@@ -9,18 +9,19 @@ import { currentJob, startJob } from "@/lib/jobs";
 import { runPipeline } from "@/lib/pipeline";
 import { preflight } from "@/lib/runner/preflight";
 import { isFromOurPage } from "@/lib/same-origin";
+import { alreadyRunning, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses";
 
-// The only place in the app that reads the API key (CLAUDE.md). The key never leaves the server:
-// it is not in any response, and errors are reported by type with fixed wording.
+// Together with app/api/rejudge/, the only places in the app that read the API key (CLAUDE.md).
+// The key never leaves the server: it is not in any response, and errors are reported by type
+// with fixed wording.
 
 const root = process.cwd();
 const samplesDir = join(root, "samples");
-const NO_KEY = { message: "API キーが設定されていません", nextStep: ".env の ANTHROPIC_API_KEY を設定して、npm run dev を起動し直してください" };
 
 /** Starts a run of every sample case. 202 with a job id, or 409 if one is already running. */
 export async function POST(request: Request): Promise<Response> {
   if (!isFromOurPage(request)) {
-    return Response.json({ message: "この画面以外からの実行は受け付けません", nextStep: "画面の「実行」ボタンから実行してください" }, { status: 403 });
+    return notFromOurPage();
   }
   let config, adapter;
   try {
@@ -35,22 +36,17 @@ export async function POST(request: Request): Promise<Response> {
   }
   const client = new Anthropic();
 
-  const result = startJob((onProgress) =>
+  const result = startJob("run", (onProgress) =>
     runPipeline({ config, adapter, cwd: samplesDir, runsRoot: join(root, "runs"), client, onProgress }),
   );
-  if (!result.started) {
-    return Response.json(
-      { message: "すでに実行中です", nextStep: "終わるまで待ってください", jobId: result.runningJobId },
-      { status: 409 },
-    );
-  }
+  if (!result.started) return alreadyRunning(result.runningJobId);
   return Response.json({ jobId: result.jobId }, { status: 202 });
 }
 
 /**
- * What will be checked (shown before anything runs), whether it can run here, and the job that
- * is running or finished last, so a reloaded page can pick it up again. With no job yet, the
- * bundled run is sent instead, so the page shows a report without PHP or a key (DESIGN 7-2b).
+ * What will be checked (shown before anything runs), whether it can run or rejudge here, and
+ * the job that is running or finished last, so a reloaded page can pick it up again. With no job
+ * yet, the bundled run is sent instead, so the page shows a report without PHP or a key (DESIGN 7-2b).
  * Commands are left out of the target: they are local paths.
  */
 export async function GET(): Promise<Response> {
@@ -58,6 +54,7 @@ export async function GET(): Promise<Response> {
   const job = currentJob();
   let target = null;
   let cannotRun = null;
+  const bundled = await loadBundledReport(root);
   try {
     const config = await loadConfig(join(samplesDir, "parity.config.json"));
     target = {
@@ -75,7 +72,9 @@ export async function GET(): Promise<Response> {
     job: job ? { jobId: job.jobId, status: job.status } : null,
     target,
     cannotRun,
-    bundled: job ? null : await loadBundledReport(root),
+    // Judging the bundled outputs again needs the key, not PHP.
+    cannotRejudge: bundled === null ? NO_BUNDLE : process.env.ANTHROPIC_API_KEY ? null : NO_KEY,
+    bundled: job ? null : bundled,
   });
 }
 

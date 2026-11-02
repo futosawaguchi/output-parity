@@ -41,6 +41,23 @@
   cursor: not-allowed;
 }
 
+/* The second action: judge the bundled outputs again (needs a key, not PHP). */
+.subButton {
+  padding: 11px 20px;
+  border: 1px solid var(--foreground);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.subButton:disabled {
+  border-color: #9a9a9a;
+  color: #9a9a9a;
+  cursor: not-allowed;
+}
+
 .progress {
   display: flex;
   align-items: center;
