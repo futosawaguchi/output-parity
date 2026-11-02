@@ -10,6 +10,9 @@ type Token =
   | { kind: "rel"; equal: boolean; text: string }
   | { kind: "diff" }
   | { kind: "label" }
+  /** Brackets around a note, as in "9（A-101 出張費）" or "≠ 72,000（差 15,000）". */
+  | { kind: "open" }
+  | { kind: "close" }
   | { kind: "break" }
   /** ×, ÷, % and the like: this checker only adds and subtracts, so a chain with one is left alone. */
   | { kind: "unsupported" };
@@ -47,16 +50,23 @@ function checkChain(tokens: Token[]): ArithmeticCheck[] {
     }
     i = left.end;
     for (;;) {
-      const rel = tokens[i];
+      // "57,000（合計）= 57,000": a note may also stand between a side and the relation.
+      const at = skipLabels(tokens, i);
+      const rel = tokens[at];
       if (rel?.kind !== "rel") break;
-      const right = readExpression(tokens, skipLabels(tokens, i + 1));
+      i = at;
+      // A sign is part of the right-hand side only right after the relation: "= 合計（… +0 …）" is not "= +0".
+      const from = skipLabels(tokens, i + 1);
+      if (from !== i + 1 && tokens[from]?.kind === "op") break;
+      const right = readExpression(tokens, from);
       if (!right) break;
       const holds = rel.equal ? same(left.value, right.value) : !same(left.value, right.value);
       checks.push({ text: `${left.text} ${rel.text} ${right.text}`, ok: holds });
       i = right.end;
 
       // "（差 e）" right after "≠" states the size of the gap: check it too.
-      const d = skipLabels(tokens, i);
+      let d = skipLabels(tokens, i, false);
+      if (tokens[d]?.kind === "open" && tokens[d + 1]?.kind === "diff") d++;
       if (!rel.equal && tokens[d]?.kind === "diff") {
         const gap = readExpression(tokens, skipLabels(tokens, d + 1));
         if (gap) {
@@ -88,19 +98,37 @@ function readExpression(tokens: Token[], start: number): { value: number; text: 
   let value = sign * head.value;
   parts.push(head.text);
   i++;
-  while (tokens[i]?.kind === "op" && tokens[i + 1]?.kind === "num") {
-    const op = tokens[i] as Extract<Token, { kind: "op" }>;
-    const num = tokens[i + 1] as Extract<Token, { kind: "num" }>;
+  for (;;) {
+    // A term may carry a note before the next one: "9（A-101 出張費）+ 10（A-102 夜間割増）".
+    const j = skipLabels(tokens, i);
+    if (tokens[j]?.kind !== "op" || tokens[j + 1]?.kind !== "num") break;
+    const op = tokens[j] as Extract<Token, { kind: "op" }>;
+    const num = tokens[j + 1] as Extract<Token, { kind: "num" }>;
     value += op.sign * num.value;
     parts.push(op.text, num.text);
-    i += 2;
+    i = j + 2;
   }
   return { value, text: parts.join(" "), end: i };
 }
 
-function skipLabels(tokens: Token[], i: number): number {
-  while (tokens[i]?.kind === "label") i++;
-  return i;
+/**
+ * Past words and notes in brackets, to the next thing that counts. A note is skipped whole (the
+ * numbers in it are not terms), unless it states a gap ("（差 e）"), which the caller reads;
+ * `notes` false stops at any bracket.
+ */
+function skipLabels(tokens: Token[], i: number, notes = true): number {
+  for (;;) {
+    const t = tokens[i];
+    if (t?.kind === "label" || t?.kind === "close") i++;
+    else if (notes && t?.kind === "open" && tokens[i + 1]?.kind !== "diff") {
+      let depth = 0;
+      do {
+        if (tokens[i].kind === "open") depth++;
+        else if (tokens[i].kind === "close") depth--;
+        i++;
+      } while (depth > 0 && i < tokens.length);
+    } else return i;
+  }
 }
 
 function same(a: number, b: number): boolean {
@@ -114,9 +142,10 @@ function tokenize(text: string): Token[] {
   const tokens: Token[] = [];
   // Times (06:07:02) and dates (2026-11-02) come first so their parts are not read as arithmetic.
   const re =
-    /(\s+)|(\d{1,2}(?::\d{2}){1,2}|\d{4}-\d{1,2}-\d{1,2})|((?<![\p{L}\d])\d[\d,]*(?:\.\d+)?円?(?![\p{L}\d]))|([+＋\-−－])|([=＝])|(≠)|(差)|([×*＊÷%％^]|(?<=\d\s?)[xX](?=\s?\d))|([A-Za-z][\w-]*|[\p{L}\d]+)|(.)/gu;
+    /(\s+)|(\d{1,2}(?::\d{2}){1,2}|\d{4}-\d{1,2}-\d{1,2})|((?<![A-Za-z\d.])\d[\d,]*(?:\.\d+)?円?(?![\p{L}\d]))|([+＋\-−－])|([=＝])|(≠)|(差)|([×*＊÷%％^]|(?<=\d\s?)[xX](?=\s?\d))|([（(])|([）)])|([A-Za-z][\w-]*|\p{L}+)|(.)/gu;
+  // A number may follow Japanese text directly ("2行の4.0"); one glued to Latin letters ("A101") is a name.
   for (const m of text.matchAll(re)) {
-    const [whole, space, stamp, num, op, eq, ne, diff, mul, word, other] = m;
+    const [whole, space, stamp, num, op, eq, ne, diff, mul, open, close, word, other] = m;
     if (space) continue;
     if (stamp) tokens.push({ kind: "label" });
     else if (num) tokens.push({ kind: "num", value: Number(num.replace(/[,円]/g, "")), text: num });
@@ -125,6 +154,8 @@ function tokenize(text: string): Token[] {
     else if (ne) tokens.push({ kind: "rel", equal: false, text: "≠" });
     else if (diff) tokens.push({ kind: "diff" });
     else if (mul) tokens.push({ kind: "unsupported" });
+    else if (open) tokens.push({ kind: "open" });
+    else if (close) tokens.push({ kind: "close" });
     else if (word) tokens.push({ kind: "label" });
     else if (other && BREAK.test(other)) tokens.push({ kind: "break" });
     else if (whole) tokens.push({ kind: "label" });
