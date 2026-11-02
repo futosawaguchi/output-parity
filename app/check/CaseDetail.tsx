@@ -105,6 +105,14 @@ function FindingItem({ finding }: { finding: Finding }) {
         )}
         <dt>見る場所</dt>
         <dd>{finding.checkHere}</dd>
+        {finding.machineNotes && finding.machineNotes.length > 0 && (
+          <>
+            <dt>機械の確認</dt>
+            <dd className={styles.calcWrong}>
+              {finding.machineNotes.join(" ／ ")}
+            </dd>
+          </>
+        )}
       </dl>
     </li>
   );

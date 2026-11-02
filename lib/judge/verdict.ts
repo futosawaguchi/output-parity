@@ -26,6 +26,11 @@ export type Finding = {
   /** The arithmetic behind the verdict, when numbers were involved. */
   calculation: string | null;
   checkHere: string;
+  /**
+   * What the machine found wrong with Claude's own finding (arithmetic that does not hold, a quote
+   * that is not in the output). A harmless finding with any of these is raised to needs review.
+   */
+  machineNotes?: string[];
 };
 
 /** Who reached the verdict: the machine (no judgement needed) or Claude. */

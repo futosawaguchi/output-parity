@@ -5,6 +5,7 @@ import type { Change } from "../compare/baseline";
 import type { CaseComparison } from "../compare/compare-case";
 import { describeOutcome } from "../runner/outcome";
 import type { Slot, SlotResult } from "../runner/run-case";
+import { checkArithmetic } from "./arithmetic";
 import { askClaude } from "./call-claude";
 import { buildUserMessage, changeId, SYSTEM_PROMPT, type JudgeInput } from "./prompt";
 import type { JudgeResponse } from "./schema";
@@ -71,7 +72,8 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
     };
   }
 
-  const findings = [...fromClaude(answer.response, ids), ...unanswered(answer.response, ids, kept)];
+  const quotable = [...cmp.old.lines, ...cmp.new.lines];
+  const findings = [...fromClaude(answer.response, ids).map((f) => reviewByMachine(f, quotable)), ...unanswered(answer.response, ids, kept)];
   return {
     caseId: c.caseId,
     verdict: worstOf(findings.map((f) => f.verdict)),
@@ -92,6 +94,25 @@ function fromClaude(response: JudgeResponse, ids: string[]): Finding[] {
     calculation: f.calculation,
     checkHere: f.check_here,
   }));
+}
+
+/**
+ * The machine checks what it can of Claude's finding: the arithmetic and the quotes (DESIGN 8-3).
+ * A finding Claude calls harmless but whose own grounds do not hold cannot stay harmless.
+ * Nothing is lowered: a broken finding stays broken, with the note shown.
+ */
+export function reviewByMachine(f: Finding, outputLines: string[]): Finding {
+  const notes: string[] = [];
+  const wrong = f.calculation ? checkArithmetic(f.calculation).filter((c) => !c.ok) : [];
+  if (wrong.length > 0) notes.push(`計算が合いません: ${wrong.map((c) => c.text).join("、")}`);
+  // Spacing differs between how a line was grouped and how it was quoted, so it is ignored.
+  const squash = (t: string) => t.replace(/\s+/g, "");
+  const lines = outputLines.map(squash);
+  const missing = f.evidence.filter((e) => squash(e) !== "" && !lines.some((l) => l.includes(squash(e))));
+  if (missing.length > 0) notes.push(`根拠の引用が出力に見つかりません: ${missing.map((e) => `「${e}」`).join("")}`);
+  if (notes.length === 0) return f;
+  if (f.verdict !== "harmless") return { ...f, machineNotes: notes };
+  return { ...f, verdict: "needs_review", machineNotes: [...notes, "Claude は無害としていましたが、要確認に上げました"] };
 }
 
 /** Changes Claude did not mention are not dropped silently (CLAUDE.md, DESIGN 8-5 G2). */

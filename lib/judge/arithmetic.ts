@@ -10,14 +10,32 @@ type Token =
   | { kind: "rel"; equal: boolean; text: string }
   | { kind: "diff" }
   | { kind: "label" }
-  | { kind: "break" };
+  | { kind: "break" }
+  /** ×, ÷, % and the like: this checker only adds and subtracts, so a chain with one is left alone. */
+  | { kind: "unsupported" };
 
 /**
  * Finds chains like "a + b = c ≠ d（差 e）" and checks each relation in them.
  * Returns nothing for text it cannot read; a missing check is not a failed check.
  */
 export function checkArithmetic(calculation: string): ArithmeticCheck[] {
-  const tokens = tokenize(calculation);
+  // Each chain (between separators such as "／") is checked on its own; one with a
+  // multiplication in it is skipped whole, rather than half-read and wrongly called false.
+  return chains(tokenize(calculation))
+    .filter((chain) => !chain.some((t) => t.kind === "unsupported"))
+    .flatMap(checkChain);
+}
+
+function chains(tokens: Token[]): Token[][] {
+  const out: Token[][] = [[]];
+  for (const t of tokens) {
+    if (t.kind === "break") out.push([]);
+    else out[out.length - 1].push(t);
+  }
+  return out;
+}
+
+function checkChain(tokens: Token[]): ArithmeticCheck[] {
   const checks: ArithmeticCheck[] = [];
 
   let i = 0;
@@ -93,9 +111,9 @@ function tokenize(text: string): Token[] {
   const tokens: Token[] = [];
   // Times (06:07:02) and dates (2026-11-02) come first so their parts are not read as arithmetic.
   const re =
-    /(\s+)|(\d{1,2}(?::\d{2}){1,2}|\d{4}-\d{1,2}-\d{1,2})|((?<![\p{L}\d])\d[\d,]*(?:\.\d+)?円?(?![\p{L}\d]))|([+＋\-−－])|([=＝])|(≠)|(差)|([A-Za-z][\w-]*|[\p{L}\d]+)|(.)/gu;
+    /(\s+)|(\d{1,2}(?::\d{2}){1,2}|\d{4}-\d{1,2}-\d{1,2})|((?<![\p{L}\d])\d[\d,]*(?:\.\d+)?円?(?![\p{L}\d]))|([+＋\-−－])|([=＝])|(≠)|(差)|([×*＊÷%％^]|(?<=\d\s?)[xX](?=\s?\d))|([A-Za-z][\w-]*|[\p{L}\d]+)|(.)/gu;
   for (const m of text.matchAll(re)) {
-    const [whole, space, stamp, num, op, eq, ne, diff, word, other] = m;
+    const [whole, space, stamp, num, op, eq, ne, diff, mul, word, other] = m;
     if (space) continue;
     if (stamp) tokens.push({ kind: "label" });
     else if (num) tokens.push({ kind: "num", value: Number(num.replace(/[,円]/g, "")), text: num });
@@ -103,6 +121,7 @@ function tokenize(text: string): Token[] {
     else if (eq) tokens.push({ kind: "rel", equal: true, text: "=" });
     else if (ne) tokens.push({ kind: "rel", equal: false, text: "≠" });
     else if (diff) tokens.push({ kind: "diff" });
+    else if (mul) tokens.push({ kind: "unsupported" });
     else if (word) tokens.push({ kind: "label" });
     else if (other && BREAK.test(other)) tokens.push({ kind: "break" });
     else if (whole) tokens.push({ kind: "label" });
