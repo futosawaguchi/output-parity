@@ -54,6 +54,8 @@ export type PipelineOptions = {
   /** Copy this directory into `cwd` first, for a fresh start. Left out when re-running after an edit. */
   prepareFrom?: string;
   runsRoot: string;
+  /** Old runs to reuse instead of running the old side again, by case id (after an edit). */
+  keepOld?: Map<string, SlotResult>;
   /** Pass a client to judge; null to stop after comparing. The client is created by the caller. */
   client: Anthropic | null;
   onProgress?: (event: ProgressEvent) => void;
@@ -75,8 +77,13 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
   const cases: CaseReport[] = [];
   for (const testCase of config.cases) {
     const caseId = testCase.id;
-    report(`${config.environments.old.label} で1回、${config.environments.new.label} で2回実行しています`, caseId);
-    const result = await runCase(config, testCase, opts.cwd, join(run.path, caseId));
+    report(
+      opts.keepOld?.has(caseId)
+        ? `${config.environments.new.label} で2回実行しています（${config.environments.old.label} は当てる前の出力と比べます）`
+        : `${config.environments.old.label} で1回、${config.environments.new.label} で2回実行しています`,
+      caseId,
+    );
+    const result = await runCase(config, testCase, opts.cwd, join(run.path, caseId), opts.keepOld?.get(caseId));
     cases.push(await checkCase(result, testCase, { adapter, client, environments: config.environments, onProgress: opts.onProgress }));
   }
 

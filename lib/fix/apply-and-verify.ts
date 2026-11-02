@@ -15,9 +15,11 @@ export type ApplyOptions = {
 };
 
 /**
- * Writes one proposed edit into work/ and runs every case again (DESIGN 7-4): an edit counts as a
- * fix only when the outputs say so. Comparing is enough to decide that, so Claude is not called.
- * A refused edit is reported on the report it was taken from, with nothing run.
+ * Writes one proposed edit into work/ and runs the new side of every case again (DESIGN 7-4): an
+ * edit counts as a fix only when the outputs say so. Comparing is enough, so Claude is not called.
+ * The old side is not run again: the edit would change it too, and a careless edit (dropping a
+ * condition, say) would then make old and new agree while both are wrong. The old output from
+ * the original code stays the reference. A refused edit is reported with nothing run.
  */
 export async function applyAndVerify(base: RunReport, caseId: string, candidate: number, opts: ApplyOptions): Promise<RunReport> {
   const cause = base.cases.find((c) => c.caseId === caseId)?.cause;
@@ -42,6 +44,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
     adapter: opts.adapter,
     cwd: opts.workDir,
     runsRoot: opts.runsRoot,
+    keepOld: new Map(original.cases.flatMap((c) => c.runs.filter((r) => r.slot === "old").map((r) => [c.caseId, r] as const))),
     client: null,
     onProgress: opts.onProgress,
   });

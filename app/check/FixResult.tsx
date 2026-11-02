@@ -33,7 +33,7 @@ export function FixResult({ attempt, labelOf, onUndo, busy }: Props) {
         <code className={styles.location}>
           {applied.file}:{applied.line}
         </code>{" "}
-        に当てて、全部の入力をもう一度流して比べました（判定は呼んでいません。直ったかは差の有無で決まります）
+        に当てて、新の環境で全部の入力を流し直し、<strong>当てる前の旧の出力</strong>（元のコード）と比べました。直ったかは差の有無で決まります（判定は呼んでいません）。言えるのは、この {verification.deltas.length} 件の入力についてだけです
       </p>
       <pre className={styles.code}>
         {[...edit.oldText.split("\n").map((l) => `- ${l}`), ...edit.newText.split("\n").map((l) => `+ ${l}`)].join("\n")}

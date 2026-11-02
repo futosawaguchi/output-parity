@@ -1,5 +1,5 @@
 import { copyFile, mkdir, stat, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { OUTPUT_PLACEHOLDER, type Case, type EnvironmentName, type ParityConfig } from "../config";
 import { execOnce, type ExecOutcome } from "./exec";
 
@@ -34,16 +34,25 @@ export type CaseResult = { caseId: string; slots: SlotResult[] };
 const MAX_STDOUT_BYTES = 100 * 1024 * 1024;
 const MAX_STDERR_BYTES = 1024 * 1024;
 
-/** Runs one case three times, writing everything under `caseDir`. Runs sequentially. */
+/**
+ * Runs one case three times, writing everything under `caseDir`. Runs sequentially.
+ * `keepOld` is an old run made earlier: it is copied in instead of running the old side again
+ * (after an edit, the old output from the original code is what "fixed" is measured against).
+ */
 export async function runCase(
   config: ParityConfig,
   testCase: Case,
   cwd: string,
   caseDir: string,
+  keepOld?: SlotResult,
 ): Promise<CaseResult> {
   const slots: SlotResult[] = [];
   let newFinishedAt = 0;
   for (const { slot, env } of SLOTS) {
+    if (slot === "old" && keepOld) {
+      slots.push(await copySlot(keepOld, join(caseDir, slot)));
+      continue;
+    }
     // Timestamps are commonly written with 1-second resolution. If the baseline wrote the same
     // second as the new run, a timestamp would look stable and later show up as a false
     // difference between old and new. A program stamps its output at some point before it
@@ -57,6 +66,24 @@ export async function runCase(
 }
 
 const MIN_BASELINE_GAP_MS = 1100;
+
+/** A run made earlier, copied into this run's directory so that every run directory stands alone. */
+async function copySlot(from: SlotResult, slotDir: string): Promise<SlotResult> {
+  await mkdir(slotDir, { recursive: true });
+  const copy = async (path: string) => {
+    const to = join(slotDir, basename(path));
+    await copyFile(path, to);
+    return to;
+  };
+  const copied: SlotResult = {
+    ...from,
+    outputPath: from.outputPath && (await copy(from.outputPath)),
+    stdoutPath: await copy(from.stdoutPath),
+    stderrPath: await copy(from.stderrPath),
+  };
+  await writeFile(join(slotDir, "result.json"), JSON.stringify(copied, null, 2) + "\n");
+  return copied;
+}
 
 function sleep(ms: number): Promise<void> {
   return ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve();
