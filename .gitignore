@@ -21,6 +21,8 @@ runs/
 secrets/
 
 # Node / Next.js
+# Node のバージョンは手元の指定にとどめ、使う人には package.json の engines で下限だけ示す
+.node-version
 node_modules/
 .next/
 out/
