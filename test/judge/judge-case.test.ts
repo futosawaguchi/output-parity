@@ -98,3 +98,28 @@ test("without Claude, a difference that needs judgement is left unjudged, not gu
   assert.equal(await judgeByMachine(compared([removed]), { oldLabel: "旧", newLabel: "新" }), null);
   assert.equal((await judgeByMachine(compared([]), { oldLabel: "旧", newLabel: "新" }))?.verdict, "harmless");
 });
+
+test("what is sent is masked first, and kept exactly as sent", async () => {
+  const leaking = { ...removed, oldLines: ["DB_PASSWORD=hunter2"] } as Change;
+  let seen = "";
+  const client = {
+    beta: {
+      messages: {
+        parse: async (req: { messages: { content: string }[] }) => {
+          seen = req.messages[0].content;
+          return { stop_reason: "end_turn", parsed_output: { summary: "s", findings: [] }, model: "stand-in" };
+        },
+      },
+    },
+  } as unknown as Anthropic;
+  const kept: { text: string; masked: number }[] = [];
+  const record = async (r: { caseId: string; purpose: "judge" | "cause"; text: string; masked: number; maskedKinds: string[] }) => {
+    kept.push(r);
+    return { purpose: r.purpose, at: "", file: "f.txt", chars: r.text.length, masked: r.masked, maskedKinds: r.maskedKinds };
+  };
+  const v = await judgeCase(compared([leaking]), { ...ctx(client), record });
+  assert.ok(!seen.includes("hunter2") && seen.includes("DB_PASSWORD=***"));
+  assert.ok(kept[0].text.endsWith(seen));
+  assert.equal(kept[0].masked, 1);
+  assert.equal(v.sent?.file, "f.txt");
+});
