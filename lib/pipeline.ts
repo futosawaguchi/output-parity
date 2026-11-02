@@ -7,6 +7,7 @@ import { naiveDiff, type NaiveDiff } from "./compare/naive";
 import type { ParityConfig } from "./config";
 import { judgeCase } from "./judge/judge-case";
 import type { CauseReport } from "./fix/locate-cause";
+import type { FixAttempt } from "./fix/verify";
 import type { CaseVerdict } from "./judge/verdict";
 import { preflight } from "./runner/preflight";
 import { runCase, type CaseResult, type SlotResult } from "./runner/run-case";
@@ -41,6 +42,8 @@ export type RunReport = {
   startedAt: string;
   finishedAt: string;
   cases: CaseReport[];
+  /** Set when this report is the run after applying an edit, or the refusal to apply it. */
+  fixAttempt?: FixAttempt;
 };
 
 export type PipelineOptions = {

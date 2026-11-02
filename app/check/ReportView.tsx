@@ -7,6 +7,7 @@ import { CaseTable } from "./CaseTable";
 import styles from "./check.module.css";
 import type { CauseActions } from "./CauseView";
 import { CompareView } from "./CompareView";
+import { FixResult } from "./FixResult";
 
 /** The overview of one run, and below it either one case in detail or two side by side. */
 export function ReportView({ report, cause }: { report: RunReport; cause: CauseActions }) {
@@ -33,6 +34,9 @@ export function ReportView({ report, cause }: { report: RunReport; cause: CauseA
           }[report.origin]
         }
       </p>
+      {report.fixAttempt && (
+        <FixResult attempt={report.fixAttempt} labelOf={(id) => byId(id)?.label ?? id} />
+      )}
       <CaseTable cases={report.cases} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
       {pair ? (
         <CompareView report={report} cases={pair} />

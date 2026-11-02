@@ -55,6 +55,7 @@ export async function GET(): Promise<Response> {
   const job = currentJob();
   let target = null;
   let cannotRun = null;
+  let cannotApply = null;
   const bundled = await loadBundledReport(root);
   try {
     const config = await loadConfig(join(samplesDir, "parity.config.json"));
@@ -64,15 +65,18 @@ export async function GET(): Promise<Response> {
       environments: { old: config.environments.old.label, new: config.environments.new.label },
       cases: config.cases.map((c) => ({ id: c.id, label: c.label, description: c.description })),
     };
-    cannotRun = await whyCannotRun(config);
+    cannotApply = await whyCannotExecute(config);
+    cannotRun = cannotApply ?? (process.env.ANTHROPIC_API_KEY ? null : NO_KEY);
   } catch (e) {
     if (!(e instanceof SetupError)) throw e;
-    cannotRun = { message: e.message, nextStep: e.nextStep };
+    cannotRun = cannotApply = { message: e.message, nextStep: e.nextStep };
   }
   return Response.json({
     job: job ? { jobId: job.jobId, status: job.status } : null,
     target,
     cannotRun,
+    // Applying an edit runs the programs again (PHP needed) but asks no one (no key needed).
+    cannotApply,
     // Judging the bundled outputs again needs the key, not PHP.
     cannotRejudge: bundled === null ? NO_BUNDLE : process.env.ANTHROPIC_API_KEY ? null : NO_KEY,
     // Looking for a cause needs the key and the source, not PHP.
@@ -81,13 +85,13 @@ export async function GET(): Promise<Response> {
   });
 }
 
-/** The same checks a run starts with, made up front so the page can say so before the click. */
-async function whyCannotRun(config: ParityConfig): Promise<{ message: string; nextStep: string } | null> {
+/** The check a run starts with (the programs can be executed), made up front for the page. */
+async function whyCannotExecute(config: ParityConfig): Promise<{ message: string; nextStep: string } | null> {
   try {
     await preflight(config, samplesDir);
   } catch (e) {
     if (e instanceof SetupError) return { message: e.message, nextStep: e.nextStep };
     throw e;
   }
-  return process.env.ANTHROPIC_API_KEY ? null : NO_KEY;
+  return null;
 }

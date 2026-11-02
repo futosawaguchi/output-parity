@@ -7,9 +7,10 @@ import type { ProgressEvent, RunReport } from "./pipeline";
 
 /**
  * run: executes the programs / rejudge: judges the bundled outputs again without running them /
- * cause: looks for the cause of one case in the source. Each one ends in a report.
+ * cause: looks for the cause of one case in the source / verify: applies an edit to work/ and
+ * runs everything again. Each one ends in a report.
  */
-export type JobKind = "run" | "rejudge" | "cause";
+export type JobKind = "run" | "rejudge" | "cause" | "verify";
 
 type JobBase = { jobId: string; kind: JobKind; progress: ProgressEvent[] };
 

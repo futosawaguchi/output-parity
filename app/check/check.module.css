@@ -500,3 +500,36 @@
 .steps {
   padding-left: 1.4em;
 }
+
+.applyRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* Fix result: neutral colours; red only when it did not work (DESIGN 5: colour carries meaning). */
+
+.fixOk,
+.fixNotYet {
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  border-left: 4px solid var(--harmless-fg);
+  background: var(--surface);
+}
+
+.fixNotYet {
+  border-left-color: var(--broken-fg);
+}
+
+.fixHeadline {
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.deltas {
+  list-style: none;
+  margin: 8px 0;
+}

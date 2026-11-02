@@ -21,7 +21,7 @@ type Target = {
 const POLL_MS = 1000;
 
 /** Where each kind of job is started (lib/jobs.ts says what each one does). */
-const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge", cause: "/api/cause" };
+const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge", cause: "/api/cause", verify: "/api/apply" };
 
 /** The run button, the progress while running, and the report once done. */
 export function RunPanel() {
@@ -39,6 +39,8 @@ export function RunPanel() {
   const [cannotRejudge, setCannotRejudge] = useState<Problem | null>(null);
   // Why Claude cannot be asked for a cause here (no key).
   const [cannotAskClaude, setCannotAskClaude] = useState<Problem | null>(null);
+  // Why an edit cannot be applied and run again here (no PHP).
+  const [cannotApply, setCannotApply] = useState<Problem | null>(null);
   // The case whose cause was asked for from this page (after a reload, the job's progress says).
   const [askedCause, setAskedCause] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -76,6 +78,7 @@ export function RunPanel() {
         if (body.bundled) setReport(body.bundled);
         setCannotRejudge(body.cannotRejudge);
         setCannotAskClaude(body.cannotAskClaude);
+        setCannotApply(body.cannotApply);
         if (body.job) poll(body.job.jobId);
       })
       .catch(() => {});
@@ -106,8 +109,8 @@ export function RunPanel() {
   // Disabled by state, not by a timer (DESIGN 5): from the click until the run has finished.
   const busy = starting ?? (job?.status === "running" ? job.kind : null);
   const running = busy !== null;
-  // A new run or rejudge replaces the report, so the old one is hidden until it is done.
-  const replacing = busy === "run" || busy === "rejudge" || (job?.status === "failed" && job.kind !== "cause");
+  // A new run, rejudge or verification replaces the report, so the old one is hidden until it is done.
+  const replacing = (busy !== null && busy !== "cause") || (job?.status === "failed" && job.kind !== "cause");
   const shown = replacing ? null : report;
   const causeActions: CauseActions = {
     busy: running,
@@ -116,6 +119,8 @@ export function RunPanel() {
       setAskedCause(caseId);
       start("cause", { caseId });
     },
+    cannotApply,
+    apply: (caseId, candidate) => start("verify", { caseId, candidate }),
     // The case being looked into, and what Claude is reading right now.
     working:
       busy === "cause"

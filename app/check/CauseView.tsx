@@ -1,5 +1,6 @@
 import type { EditCheck, LineCheck } from "@/lib/fix/check-cause";
 import type { CauseCandidate, CauseReport } from "@/lib/fix/locate-cause";
+import { remainingOf } from "@/lib/fix/verify";
 import type { CaseReport } from "@/lib/pipeline";
 import styles from "./check.module.css";
 
@@ -11,13 +12,19 @@ export type CauseActions = {
   /** Why Claude cannot be asked here (no key). */
   cannot: Problem | null;
   find: (caseId: string) => void;
+  /** Why an edit cannot be applied and run again here (no PHP). */
+  cannotApply: Problem | null;
+  apply: (caseId: string, candidate: number) => void;
   /** A cause being looked for: which case (null until the server has answered) and the latest step. */
   working: { caseId: string | null; message: string } | null;
 };
 
 /** Where in the source a broken or doubtful case comes from (DESIGN 7-4). Asked for by a button. */
 export function CauseSection({ c, actions }: { c: CaseReport; actions: CauseActions }) {
-  if (!c.verdict || c.verdict.verdict === "harmless") return null;
+  // Judged cases that are not harmless; unjudged ones (the run after an edit) while a difference is left.
+  const left = remainingOf(c.comparison);
+  const worthAsking = c.verdict ? c.verdict.verdict !== "harmless" : !(left.kind === "lines" && left.count === 0);
+  if (!worthAsking) return null;
   const working = actions.working !== null && (actions.working.caseId === c.caseId || actions.working.caseId === null);
   return (
     <section className={styles.cause}>
@@ -38,7 +45,7 @@ export function CauseSection({ c, actions }: { c: CaseReport; actions: CauseActi
           {actions.working?.message || "Claude が原因を探し始めました"}
         </p>
       ) : c.cause ? (
-        <CauseResult cause={c.cause} />
+        <CauseResult cause={c.cause} onApply={(i) => actions.apply(c.caseId, i)} busy={actions.busy} cannotApply={actions.cannotApply} />
       ) : (
         <p className={styles.muted}>
           Claude がプログラムのソースと入力データを読んで、どの行が原因かを探します（PHP は要りません）。
@@ -49,7 +56,9 @@ export function CauseSection({ c, actions }: { c: CaseReport; actions: CauseActi
   );
 }
 
-function CauseResult({ cause }: { cause: CauseReport }) {
+type ApplyProps = { onApply: (candidate: number) => void; busy: boolean; cannotApply: Problem | null };
+
+function CauseResult({ cause, ...apply }: { cause: CauseReport } & ApplyProps) {
   if (cause.kind === "failed") {
     return (
       <div className={styles.problem} role="alert">
@@ -67,14 +76,14 @@ function CauseResult({ cause }: { cause: CauseReport }) {
       </p>
       <ul className={styles.findings}>
         {cause.candidates.map((k, i) => (
-          <Candidate key={i} k={k} />
+          <Candidate key={i} k={k} {...apply} onApply={() => apply.onApply(i)} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Candidate({ k }: { k: CauseCandidate }) {
+function Candidate({ k, onApply, busy, cannotApply }: { k: CauseCandidate; onApply: () => void; busy: boolean; cannotApply: Problem | null }) {
   return (
     <li className={styles.finding}>
       <p className={styles.findingWhat}>
@@ -97,6 +106,18 @@ function Candidate({ k }: { k: CauseCandidate }) {
                 {[...k.edit.oldText.split("\n").map((l) => `- ${l}`), ...k.edit.newText.split("\n").map((l) => `+ ${l}`)].join("\n")}
               </pre>
               <p className={k.editCheck === "once" ? styles.calcOk : styles.calcWrong}>{EDIT_CHECK[k.editCheck ?? "missing"](k.edit.file)}</p>
+              {k.editCheck === "once" && (
+                <div className={styles.applyRow}>
+                  <button className={styles.subButton} onClick={onApply} disabled={busy || cannotApply !== null}>
+                    work/ に当てて、もう一度流して確かめる
+                  </button>
+                  <span className={styles.muted}>
+                    {cannotApply
+                      ? `いまは押せません: ${cannotApply.message} → ${cannotApply.nextStep}`
+                      : "原本の samples/ は書き換えません。当てるのは写しの work/ です"}
+                  </span>
+                </div>
+              )}
             </>
           ) : (
             <>

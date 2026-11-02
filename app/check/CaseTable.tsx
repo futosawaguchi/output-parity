@@ -1,3 +1,4 @@
+import { describeRemaining, remainingOf } from "@/lib/fix/verify";
 import type { CaseReport } from "@/lib/pipeline";
 import { Badge } from "./Badge";
 import styles from "./check.module.css";
@@ -40,7 +41,7 @@ export function CaseTable({ cases, openId, onOpen, picked, onPick }: Props) {
               <span className={styles.caseDescription}>{c.description}</span>
             </td>
             <td>{c.verdict ? <Badge verdict={c.verdict.verdict} /> : <span className={styles.muted}>未判定</span>}</td>
-            <td className={styles.rowSummary}>{c.verdict?.summary}</td>
+            <td className={styles.rowSummary}>{c.verdict ? c.verdict.summary : describeRemaining(remainingOf(c.comparison))}</td>
           </tr>
         ))}
       </tbody>
