@@ -1,0 +1,826 @@
+{
+  "runId": "bundled",
+  "configName": "見積書 estimate.php（PHP 7.4 → 8.5）",
+  "configDescription": "架空の見積書を PDF で出す小さな PHP アプリ（samples/estimate.php）を、PHP 7.4 と PHP 8.5 で同じ入力から動かして比べます。見積書は今回作った架空のもので、PDF ライブラリ（TCPDF・FPDI）は本物の公開 OSS です。",
+  "environments": {
+    "old": {
+      "label": "PHP 7.4",
+      "command": "/opt/homebrew/opt/php@7.4/bin/php"
+    },
+    "new": {
+      "label": "PHP 8.5",
+      "command": "/opt/homebrew/bin/php"
+    }
+  },
+  "outputFormat": "pdf",
+  "startedAt": "2026-11-02T06:23:56.103Z",
+  "finishedAt": "2026-11-02T06:24:25.501Z",
+  "cases": [
+    {
+      "caseId": "1-harmless",
+      "label": "入力 A",
+      "description": "明細3行の見積書",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-new",
+            "data/1-harmless.json",
+            "1-harmless/old/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 421,
+          "outputPath": "1-harmless/old/output.pdf",
+          "stdoutPath": "1-harmless/old/stdout.txt",
+          "stderrPath": "1-harmless/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-new",
+            "data/1-harmless.json",
+            "1-harmless/new/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 283,
+          "outputPath": "1-harmless/new/output.pdf",
+          "stdoutPath": "1-harmless/new/stdout.txt",
+          "stderrPath": "1-harmless/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-new",
+            "data/1-harmless.json",
+            "1-harmless/baseline/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 460,
+          "outputPath": "1-harmless/baseline/output.pdf",
+          "stdoutPath": "1-harmless/baseline/stdout.txt",
+          "stderrPath": "1-harmless/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "meta CreationDate: D:20261102062356+00'00'",
+            "meta ModDate: D:20261102062356+00'00'",
+            "meta PDFFormatVersion: 1.7",
+            "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "meta Trapped: False",
+            "xmp dc:creator: ",
+            "xmp dc:description: ",
+            "xmp dc:format: application/pdf",
+            "xmp dc:subject: ",
+            "xmp dc:title: ",
+            "xmp pdf:keywords: ",
+            "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
+            "xmp xmp:createdate: 2026-11-02T06:23:56+00:00",
+            "xmp xmp:creatortool: ",
+            "xmp xmp:metadatadate: 2026-11-02T06:23:56+00:00",
+            "xmp xmp:modifydate: 2026-11-02T06:23:56+00:00",
+            "xmp xmpmm:documentid: uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137",
+            "xmp xmpmm:instanceid: uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137",
+            "id 0: dcbccde12077eb263b81e4b2e739f137",
+            "--- page 1 ---",
+            "見積書",
+            "見積番号: Q-0001",
+            "発行日: 2026-11-02",
+            "件名: 会議室 空調設備の点検",
+            "コード 品名 金額（円）",
+            "A-100 基本料 15,000",
+            "A-103 部材費 42,000",
+            "A-105 値引き -5,000",
+            "合計 52,000",
+            "Powered by TCPDF (www.tcpdf.org)"
+          ],
+          "pages": [
+            {
+              "page": 1,
+              "width": 595.3,
+              "height": 841.9,
+              "charCount": 130,
+              "textRight": 564.1,
+              "textBottom": 840.7
+            }
+          ],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "meta CreationDate: D:20261102062356+00'00'",
+            "meta ModDate: D:20261102062356+00'00'",
+            "meta PDFFormatVersion: 1.7",
+            "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "meta Trapped: False",
+            "xmp dc:creator: ",
+            "xmp dc:description: ",
+            "xmp dc:format: application/pdf",
+            "xmp dc:subject: ",
+            "xmp dc:title: ",
+            "xmp pdf:keywords: ",
+            "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
+            "xmp xmp:createdate: 2026-11-02T06:23:56+00:00",
+            "xmp xmp:creatortool: ",
+            "xmp xmp:metadatadate: 2026-11-02T06:23:56+00:00",
+            "xmp xmp:modifydate: 2026-11-02T06:23:56+00:00",
+            "xmp xmpmm:documentid: uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c",
+            "xmp xmpmm:instanceid: uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c",
+            "id 0: 22da90454ed21344ac98bad0d96e5b7c",
+            "--- page 1 ---",
+            "見積書",
+            "見積番号: Q-0001",
+            "発行日: 2026-11-02",
+            "件名: 会議室 空調設備の点検",
+            "コード 品名 金額（円）",
+            "A-100 基本料 15,000",
+            "A-103 部材費 42,000",
+            "A-105 値引き -5,000",
+            "合計 52,000",
+            "Powered by TCPDF (www.tcpdf.org)"
+          ],
+          "pages": [
+            {
+              "page": 1,
+              "width": 595.3,
+              "height": 841.9,
+              "charCount": 130,
+              "textRight": 564.1,
+              "textBottom": 840.7
+            }
+          ],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "xmp xmpmm:documentid: uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137",
+              "xmp xmpmm:instanceid: uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137",
+              "id 0: dcbccde12077eb263b81e4b2e739f137"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "xmp xmpmm:documentid: uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c",
+              "xmp xmpmm:instanceid: uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c",
+              "id 0: 22da90454ed21344ac98bad0d96e5b7c"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 8360,
+        "newBytes": 8360,
+        "differingLines": 6,
+        "totalLines": 160,
+        "excerpt": [
+          "< ···<xmpMM:DocumentID>uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137</xmpMM:DocumentID>",
+          "< ···<xmpMM:InstanceID>uuid:dcbccde1-2077-eb26-3b81-e4b2e739f137</xmpMM:InstanceID>",
+          "> ···<xmpMM:DocumentID>uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c</xmpMM:DocumentID>",
+          "> ···<xmpMM:InstanceID>uuid:22da9045-4ed2-1344-ac98-bad0d96e5b7c</xmpMM:InstanceID>",
+          "< << /Size 13 /Root 12 0 R /Info 10 0 R /ID [ <dcbccde12077eb263b81e4b2e739f137> <dcbccde12077eb263b…",
+          "> << /Size 13 /Root 12 0 R /Info 10 0 R /ID [ <22da90454ed21344ac98bad0d96e5b7c> <22da90454ed21344ac…"
+        ]
+      },
+      "verdict": {
+        "caseId": "1-harmless",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "2a-harmless",
+      "label": "入力 B",
+      "description": "明細5行の見積書（うち3行は金額 0）",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-new",
+            "data/2a-harmless.json",
+            "2a-harmless/old/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 228,
+          "outputPath": "2a-harmless/old/output.pdf",
+          "stdoutPath": "2a-harmless/old/stdout.txt",
+          "stderrPath": "2a-harmless/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-new",
+            "data/2a-harmless.json",
+            "2a-harmless/new/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 187,
+          "outputPath": "2a-harmless/new/output.pdf",
+          "stdoutPath": "2a-harmless/new/stdout.txt",
+          "stderrPath": "2a-harmless/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-new",
+            "data/2a-harmless.json",
+            "2a-harmless/baseline/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 662,
+          "outputPath": "2a-harmless/baseline/output.pdf",
+          "stdoutPath": "2a-harmless/baseline/stdout.txt",
+          "stderrPath": "2a-harmless/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "meta CreationDate: D:20261102062358+00'00'",
+            "meta ModDate: D:20261102062358+00'00'",
+            "meta PDFFormatVersion: 1.7",
+            "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "meta Trapped: False",
+            "xmp dc:creator: ",
+            "xmp dc:description: ",
+            "xmp dc:format: application/pdf",
+            "xmp dc:subject: ",
+            "xmp dc:title: ",
+            "xmp pdf:keywords: ",
+            "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
+            "xmp xmp:createdate: 2026-11-02T06:23:58+00:00",
+            "xmp xmp:creatortool: ",
+            "xmp xmp:metadatadate: 2026-11-02T06:23:58+00:00",
+            "xmp xmp:modifydate: 2026-11-02T06:23:58+00:00",
+            "xmp xmpmm:documentid: uuid:be2684ed-2dfd-ec50-9142-ef96071f008a",
+            "xmp xmpmm:instanceid: uuid:be2684ed-2dfd-ec50-9142-ef96071f008a",
+            "id 0: be2684ed2dfdec509142ef96071f008a",
+            "--- page 1 ---",
+            "見積書",
+            "見積番号: Q-0001",
+            "発行日: 2026-11-02",
+            "件名: 会議室 空調設備の点検",
+            "コード 品名 金額（円）",
+            "A-100 基本料 15,000",
+            "A-101 出張費 0",
+            "A-102 夜間割増 0",
+            "A-103 部材費 42,000",
+            "A-104 値引き 0",
+            "合計 57,000",
+            "Powered by TCPDF (www.tcpdf.org)"
+          ],
+          "pages": [
+            {
+              "page": 1,
+              "width": 595.3,
+              "height": 841.9,
+              "charCount": 144,
+              "textRight": 564.1,
+              "textBottom": 840.7
+            }
+          ],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "meta CreationDate: D:20261102062359+00'00'",
+            "meta ModDate: D:20261102062359+00'00'",
+            "meta PDFFormatVersion: 1.7",
+            "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "meta Trapped: False",
+            "xmp dc:creator: ",
+            "xmp dc:description: ",
+            "xmp dc:format: application/pdf",
+            "xmp dc:subject: ",
+            "xmp dc:title: ",
+            "xmp pdf:keywords: ",
+            "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
+            "xmp xmp:createdate: 2026-11-02T06:23:59+00:00",
+            "xmp xmp:creatortool: ",
+            "xmp xmp:metadatadate: 2026-11-02T06:23:59+00:00",
+            "xmp xmp:modifydate: 2026-11-02T06:23:59+00:00",
+            "xmp xmpmm:documentid: uuid:d9707774-5526-f290-a199-9515e1121061",
+            "xmp xmpmm:instanceid: uuid:d9707774-5526-f290-a199-9515e1121061",
+            "id 0: d97077745526f290a1999515e1121061",
+            "--- page 1 ---",
+            "見積書",
+            "見積番号: Q-0001",
+            "発行日: 2026-11-02",
+            "件名: 会議室 空調設備の点検",
+            "コード 品名 金額（円）",
+            "A-100 基本料 15,000",
+            "A-103 部材費 42,000",
+            "合計 57,000",
+            "Powered by TCPDF (www.tcpdf.org)"
+          ],
+          "pages": [
+            {
+              "page": 1,
+              "width": 595.3,
+              "height": 841.9,
+              "charCount": 116,
+              "textRight": 564.1,
+              "textBottom": 840.7
+            }
+          ],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 0,
+            "oldLines": [
+              "meta CreationDate: D:20261102062358+00'00'",
+              "meta ModDate: D:20261102062358+00'00'"
+            ],
+            "newStart": 0,
+            "newLines": [
+              "meta CreationDate: D:20261102062359+00'00'",
+              "meta ModDate: D:20261102062359+00'00'"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 13,
+            "oldLines": [
+              "xmp xmp:createdate: 2026-11-02T06:23:58+00:00"
+            ],
+            "newStart": 13,
+            "newLines": [
+              "xmp xmp:createdate: 2026-11-02T06:23:59+00:00"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 15,
+            "oldLines": [
+              "xmp xmp:metadatadate: 2026-11-02T06:23:58+00:00",
+              "xmp xmp:modifydate: 2026-11-02T06:23:58+00:00",
+              "xmp xmpmm:documentid: uuid:be2684ed-2dfd-ec50-9142-ef96071f008a",
+              "xmp xmpmm:instanceid: uuid:be2684ed-2dfd-ec50-9142-ef96071f008a",
+              "id 0: be2684ed2dfdec509142ef96071f008a"
+            ],
+            "newStart": 15,
+            "newLines": [
+              "xmp xmp:metadatadate: 2026-11-02T06:23:59+00:00",
+              "xmp xmp:modifydate: 2026-11-02T06:23:59+00:00",
+              "xmp xmpmm:documentid: uuid:d9707774-5526-f290-a199-9515e1121061",
+              "xmp xmpmm:instanceid: uuid:d9707774-5526-f290-a199-9515e1121061",
+              "id 0: d97077745526f290a1999515e1121061"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 27,
+            "oldLines": [
+              "A-101 出張費 0",
+              "A-102 夜間割増 0"
+            ],
+            "newStart": 27,
+            "newLines": [],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 30,
+            "oldLines": [
+              "A-104 値引き 0"
+            ],
+            "newStart": 28,
+            "newLines": [],
+            "explainedByBaseline": false
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 8476,
+        "newBytes": 8294,
+        "differingLines": 52,
+        "totalLines": 164,
+        "excerpt": [
+          "< << /Type /Page /Parent 1 0 R /LastModified (D:20261102062358+00'00') /Resources 2 0 R /MediaBox [0…",
+          "> << /Type /Page /Parent 1 0 R /LastModified (D:20261102062359+00'00') /Resources 2 0 R /MediaBox [0…",
+          "< <</Filter /FlateDecode /Length 846>> stream",
+          "< x····j·P·······.··E···~····B·:·····t··]·:·······ED···\\··q····|··\"·3w·dL·9·mB·!········I8··qc]·····…",
+          "< ·····QSB·pJ········k·Rr·B···_·.·L,=98···· ········F·5···^·A···82qRH···E··$·[·······J···o·····*\\··\"…",
+          "< _D·H··Y·R···O··D·",
+          "< WD·H··LU·H\"OF···D····LD··@·····$p···P···\\···|bg\"···'b·H···.··O··2·····$|·Q·~·······2·····muZMv·1·/…",
+          "> <</Filter /FlateDecode /Length 664>> stream"
+        ]
+      },
+      "verdict": {
+        "caseId": "2a-harmless",
+        "verdict": "needs_review",
+        "summary": "金額0円の明細3行（出張費・夜間割増・値引き）が新で消えた。合計57,000円は残りの明細と合っており文書内の矛盾はないが、「0円で含む」が「記載なし」になり、見積の読み方が変わるおそれがある。",
+        "findings": [
+          {
+            "verdict": "needs_review",
+            "changeIds": [
+              "C1",
+              "C2"
+            ],
+            "what": "金額が0の明細行（A-101 出張費、A-102 夜間割増、A-104 値引き）が見積書から消えた。",
+            "why": "合計は残った明細の和と一致するので計算上の矛盾はない。ただし旧は出張費・夜間割増を「0円（込み）」と明示していたのに対し、新では記載がなく、別途請求や対象外と読まれうるため、受け手の判断が変わるかはこの出力だけでは決められない。",
+            "evidence": [
+              "A-100 基本料 15,000",
+              "A-103 部材費 42,000",
+              "合計 57,000"
+            ],
+            "calculation": "15,000 + 42,000 = 57,000 = 合計 57,000（旧も 15,000 + 0 + 0 + 42,000 + 0 = 57,000）。0円の3行を除いた差は 0",
+            "checkHere": "page 1 の明細表（A-100〜A-104）。0円の明細を表示しないのが意図どおりかを確かめる"
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        }
+      }
+    },
+    {
+      "caseId": "2b-fatal",
+      "label": "入力 C",
+      "description": "明細5行の見積書（値引きを含む）",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-new",
+            "data/2b-fatal.json",
+            "2b-fatal/old/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 494,
+          "outputPath": "2b-fatal/old/output.pdf",
+          "stdoutPath": "2b-fatal/old/stdout.txt",
+          "stderrPath": "2b-fatal/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-new",
+            "data/2b-fatal.json",
+            "2b-fatal/new/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 269,
+          "outputPath": "2b-fatal/new/output.pdf",
+          "stdoutPath": "2b-fatal/new/stdout.txt",
+          "stderrPath": "2b-fatal/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-new",
+            "data/2b-fatal.json",
+            "2b-fatal/baseline/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 251,
+          "outputPath": "2b-fatal/baseline/output.pdf",
+          "stdoutPath": "2b-fatal/baseline/stdout.txt",
+          "stderrPath": "2b-fatal/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "meta CreationDate: D:20261102062414+00'00'",
+            "meta ModDate: D:20261102062414+00'00'",
+            "meta PDFFormatVersion: 1.7",
+            "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "meta Trapped: False",
+            "xmp dc:creator: ",
+            "xmp dc:description: ",
+            "xmp dc:format: application/pdf",
+            "xmp dc:subject: ",
+            "xmp dc:title: ",
+            "xmp pdf:keywords: ",
+            "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
+            "xmp xmp:createdate: 2026-11-02T06:24:14+00:00",
+            "xmp xmp:creatortool: ",
+            "xmp xmp:metadatadate: 2026-11-02T06:24:14+00:00",
+            "xmp xmp:modifydate: 2026-11-02T06:24:14+00:00",
+            "xmp xmpmm:documentid: uuid:cde0c682-a365-e3d7-c854-b32fea310350",
+            "xmp xmpmm:instanceid: uuid:cde0c682-a365-e3d7-c854-b32fea310350",
+            "id 0: cde0c682a365e3d7c854b32fea310350",
+            "--- page 1 ---",
+            "見積書",
+            "見積番号: Q-0001",
+            "発行日: 2026-11-02",
+            "件名: 会議室 空調設備の点検",
+            "コード 品名 金額（円）",
+            "A-100 基本料 15,000",
+            "A-101 出張費 8,000",
+            "A-102 夜間割増 12,000",
+            "A-103 部材費 42,000",
+            "A-104 値引き -5,000",
+            "合計 72,000",
+            "Powered by TCPDF (www.tcpdf.org)"
+          ],
+          "pages": [
+            {
+              "page": 1,
+              "width": 595.3,
+              "height": 841.9,
+              "charCount": 158,
+              "textRight": 564.1,
+              "textBottom": 840.7
+            }
+          ],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "meta CreationDate: D:20261102062414+00'00'",
+            "meta ModDate: D:20261102062414+00'00'",
+            "meta PDFFormatVersion: 1.7",
+            "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "meta Trapped: False",
+            "xmp dc:creator: ",
+            "xmp dc:description: ",
+            "xmp dc:format: application/pdf",
+            "xmp dc:subject: ",
+            "xmp dc:title: ",
+            "xmp pdf:keywords: ",
+            "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
+            "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
+            "xmp xmp:createdate: 2026-11-02T06:24:14+00:00",
+            "xmp xmp:creatortool: ",
+            "xmp xmp:metadatadate: 2026-11-02T06:24:14+00:00",
+            "xmp xmp:modifydate: 2026-11-02T06:24:14+00:00",
+            "xmp xmpmm:documentid: uuid:83cbe4e9-9fe7-faad-42f3-3a76e2e1a7d2",
+            "xmp xmpmm:instanceid: uuid:83cbe4e9-9fe7-faad-42f3-3a76e2e1a7d2",
+            "id 0: 83cbe4e99fe7faad42f33a76e2e1a7d2",
+            "--- page 1 ---",
+            "見積書",
+            "見積番号: Q-0001",
+            "発行日: 2026-11-02",
+            "件名: 会議室 空調設備の点検",
+            "コード 品名 金額（円）",
+            "A-100 基本料 15,000",
+            "A-103 部材費 42,000",
+            "合計 72,000",
+            "Powered by TCPDF (www.tcpdf.org)"
+          ],
+          "pages": [
+            {
+              "page": 1,
+              "width": 595.3,
+              "height": 841.9,
+              "charCount": 116,
+              "textRight": 564.1,
+              "textBottom": 840.7
+            }
+          ],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "xmp xmpmm:documentid: uuid:cde0c682-a365-e3d7-c854-b32fea310350",
+              "xmp xmpmm:instanceid: uuid:cde0c682-a365-e3d7-c854-b32fea310350",
+              "id 0: cde0c682a365e3d7c854b32fea310350"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "xmp xmpmm:documentid: uuid:83cbe4e9-9fe7-faad-42f3-3a76e2e1a7d2",
+              "xmp xmpmm:instanceid: uuid:83cbe4e9-9fe7-faad-42f3-3a76e2e1a7d2",
+              "id 0: 83cbe4e99fe7faad42f33a76e2e1a7d2"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 27,
+            "oldLines": [
+              "A-101 出張費 8,000",
+              "A-102 夜間割増 12,000"
+            ],
+            "newStart": 27,
+            "newLines": [],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 30,
+            "oldLines": [
+              "A-104 値引き -5,000"
+            ],
+            "newStart": 28,
+            "newLines": [],
+            "explainedByBaseline": false
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 8484,
+        "newBytes": 8291,
+        "differingLines": 36,
+        "totalLines": 162,
+        "excerpt": [
+          "< <</Filter /FlateDecode /Length 854>> stream",
+          "< x····j·Q··gY·w#]········~···B····J[",
+          "< ·4···A···D[···v·········!··*E·'7%·'M9·t·!a8·9·3·w·····K·D[H1O··X^··:·W·hN^··ssJ(··6Q[·Wj···0·F····…",
+          "< ·5`$··[··(··o#T····R·>O·4P·····F······B·3·e··R·F·BG··v·b·)e·x··m·········R·8P······&···N·C·9P:··<·…",
+          "< ·,·];-·J···b·····4D·N&··········]··}·]··`9·-V·p·<·T!·······p··&v&J·#····K····\"2··H····S·k·>···Bj·]…",
+          "> <</Filter /FlateDecode /Length 661>> stream",
+          "> x··V·nSA····' ·)·)·vf·t····p·+Q·i··E",
+          "> ·,·············@··|··_··!··:·#;F·········sv·····+····k······4··%o{·Z··W··Q·····,·T··4····z···QbW·@…"
+        ]
+      },
+      "verdict": {
+        "caseId": "2b-fatal",
+        "verdict": "broken",
+        "summary": "新では明細3行（出張費・夜間割増・値引き）が消えたのに合計は72,000のままで、残った明細と合計が合わず見積書として壊れています。",
+        "findings": [
+          {
+            "verdict": "broken",
+            "changeIds": [
+              "C1",
+              "C2"
+            ],
+            "what": "明細のA-101 出張費・A-102 夜間割増・A-104 値引きの3行が新の出力から消えました。",
+            "why": "新に残る明細の和は57,000円ですが、合計行は72,000円のままで、文書の中で矛盾しています。見積の内訳が読めず、金額の判断が変わります。",
+            "evidence": [
+              "A-100 基本料 15,000",
+              "A-103 部材費 42,000",
+              "合計 72,000"
+            ],
+            "calculation": "新: 15,000 + 42,000 = 57,000 ≠ 72,000（差 15,000）／旧: 15,000 + 8,000 + 12,000 + 42,000 − 5,000 = 72,000",
+            "checkHere": "page 1 の明細表（コード A-100〜A-104）と「合計 72,000」の行"
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        }
+      }
+    },
+    {
+      "caseId": "3-crash",
+      "label": "入力 D",
+      "description": "明細3行の見積書を、古い版の PDF ライブラリ（TCPDF 6.2.26）で出す",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-old",
+            "data/3-crash.json",
+            "3-crash/old/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 951,
+          "outputPath": "3-crash/old/output.pdf",
+          "stdoutPath": "3-crash/old/stdout.txt",
+          "stderrPath": "3-crash/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-old",
+            "data/3-crash.json",
+            "3-crash/new/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 255
+          },
+          "durationMs": 632,
+          "outputPath": null,
+          "stdoutPath": "3-crash/new/stdout.txt",
+          "stderrPath": "3-crash/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "estimate.php",
+            "lib-old",
+            "data/3-crash.json",
+            "3-crash/baseline/output.pdf"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 255
+          },
+          "durationMs": 179,
+          "outputPath": null,
+          "stdoutPath": "3-crash/baseline/stdout.txt",
+          "stderrPath": "3-crash/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "missingOutput",
+        "missing": [
+          "new"
+        ]
+      },
+      "naive": null,
+      "verdict": {
+        "caseId": "3-crash",
+        "verdict": "broken",
+        "summary": "PHP 8.5 では出力が出ませんでした（終了コード 255）",
+        "findings": [
+          {
+            "verdict": "broken",
+            "changeIds": [],
+            "what": "PHP 8.5 では出力が出ませんでした（終了コード 255）",
+            "why": "PHP 7.4 では出力が出ていたので、移行で動かなくなっています",
+            "evidence": [
+              "PHP Parse error:  syntax error, unexpected token \"{\", expecting \")\" in samples/lib-old/vendor/tecnickcom/tcpdf/tcpdf.php on line 16900"
+            ],
+            "calculation": null,
+            "checkHere": "実行の記録（stderr）"
+          }
+        ],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    }
+  ]
+}
