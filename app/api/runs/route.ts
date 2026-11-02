@@ -8,7 +8,7 @@ import { SetupError } from "@/lib/errors";
 import { currentJob, startJob } from "@/lib/jobs";
 import { runPipeline } from "@/lib/pipeline";
 import { preflight } from "@/lib/runner/preflight";
-import { loadSubject } from "@/lib/subject";
+import { loadSubject, whyNoApplying } from "@/lib/subject";
 import { isFromOurPage } from "@/lib/same-origin";
 import { alreadyRunning, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses";
 
@@ -38,7 +38,7 @@ export async function POST(request: Request): Promise<Response> {
   const { config, runRoot } = subject;
 
   const result = startJob("run", (onProgress) =>
-    runPipeline({ config, adapter, root: runRoot, prepare: true, runsRoot: join(root, "runs"), client, onProgress }),
+    runPipeline({ config, adapter, root: runRoot, prepare: subject.workDir !== null, runsRoot: join(root, "runs"), client, onProgress }),
   );
   if (!result.started) return alreadyRunning(result.runningJobId);
   return Response.json({ jobId: result.jobId }, { status: 202 });
@@ -58,15 +58,17 @@ export async function GET(): Promise<Response> {
   let cannotApply = null;
   const bundled = await loadBundledReport(root);
   try {
-    const { config } = await loadSubject(root);
+    const subject = await loadSubject(root);
+    const { config } = subject;
     target = {
       name: config.name,
       description: config.description,
       environments: { old: config.run.environments.old.label, new: config.run.environments.new.label },
       cases: config.cases.map((c) => ({ id: c.id, label: c.label, description: c.description })),
     };
-    cannotApply = await whyCannotExecute(config);
-    cannotRun = cannotApply ?? (process.env.ANTHROPIC_API_KEY ? null : NO_KEY);
+    const cannotExecute = await whyCannotExecute(config);
+    cannotApply = whyNoApplying(subject) ?? cannotExecute;
+    cannotRun = cannotExecute ?? (process.env.ANTHROPIC_API_KEY ? null : NO_KEY);
   } catch (e) {
     if (!(e instanceof SetupError)) throw e;
     cannotRun = cannotApply = { message: e.message, nextStep: e.nextStep };

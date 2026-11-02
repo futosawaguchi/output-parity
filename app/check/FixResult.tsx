@@ -56,7 +56,7 @@ function UndoRow({ onUndo, busy }: { onUndo: () => void; busy: boolean }) {
       <button className={styles.subButton} onClick={onUndo} disabled={busy}>
         元に戻す
       </button>
-      <span className={styles.muted}>work/ を samples/ から作り直し、当てる前の結果に戻します（PHP も Claude も動かしません）</span>
+      <span className={styles.muted}>work/ を原本から作り直し、当てる前の結果に戻します（PHP も Claude も動かしません）</span>
     </div>
   );
 }

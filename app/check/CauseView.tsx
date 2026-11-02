@@ -114,7 +114,7 @@ function Candidate({ k, onApply, busy, cannotApply }: { k: CauseCandidate; onApp
                   <span className={styles.muted}>
                     {cannotApply
                       ? `いまは押せません: ${cannotApply.message} → ${cannotApply.nextStep}`
-                      : "原本の samples/ は書き換えません。当てるのは写しの work/ です"}
+                      : "原本は書き換えません。当てるのは写しの work/ です"}
                   </span>
                 </div>
               )}

@@ -7,7 +7,7 @@ import { applyAndVerify } from "@/lib/fix/apply-and-verify";
 import { currentJob, startJob } from "@/lib/jobs";
 import { preflight } from "@/lib/runner/preflight";
 import { isFromOurPage } from "@/lib/same-origin";
-import { loadSubject } from "@/lib/subject";
+import { loadSubject, whyNoApplying } from "@/lib/subject";
 import { alreadyRunning, notFromOurPage } from "../responses";
 
 // No API key here: whether an edit worked is decided by comparing outputs, not by Claude.
@@ -40,12 +40,14 @@ export async function POST(request: Request): Promise<Response> {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;
   }
+  const { config, workDir } = subject;
+  if (!workDir) return Response.json(whyNoApplying(subject), { status: 400 });
 
   const result = startJob("verify", (onProgress) =>
     applyAndVerify(base, caseId as string, candidate, {
-      config: subject.config,
+      config,
       adapter,
-      workDir: subject.workDir,
+      workDir,
       runsRoot: join(root, "runs"),
       onProgress,
     }),

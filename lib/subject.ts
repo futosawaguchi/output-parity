@@ -17,10 +17,10 @@ const PLACES = ["samples", "targets"] as const;
 export type Subject = {
   id: string;
   config: ParityConfig;
-  /** The program's root for a run: the copy in work/<id>/. run.cwd is inside it. */
+  /** The program's root for a run: the copy in work/<id>/, or the source itself when fixes is suggest-only. run.cwd is inside it. */
   runRoot: string;
-  /** work/<id>/, the only place the tool writes the program to. */
-  workDir: string;
+  /** work/<id>/, the only place the tool writes the program to. null when fixes is suggest-only: nothing is copied or written. */
+  workDir: string | null;
   /** A finished run shipped with the subject; it may not exist. */
   bundledDir: string;
 };
@@ -51,7 +51,17 @@ export async function loadSubject(root: string, id: string = DEFAULT_SUBJECT): P
   const workDir = join(root, "work", id);
   const bundledDir = join(dir, "bundled");
   await checkPlaces(config.source, join(root, "work"), bundledDir);
+  if (config.fixes === "suggest-only") return { id, config, runRoot: config.source, workDir: null, bundledDir };
   return { id, config, runRoot: workDir, workDir, bundledDir };
+}
+
+/** Why an edit cannot be applied to this subject, or null when it can. */
+export function whyNoApplying(subject: Subject): { message: string; nextStep: string } | null {
+  if (subject.workDir) return null;
+  return {
+    message: "この題材は、直し方を提案するところまでの設定です（fixes が suggest-only。写しを作らず、何も書き換えません）",
+    nextStep: "当てて確かめるには、設定の fixes を apply にしてください（work/ に写しを作り、そこに当てます）",
+  };
 }
 
 /**

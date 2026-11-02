@@ -2,7 +2,7 @@ import { SetupError } from "@/lib/errors";
 import { undoFixes } from "@/lib/fix/undo";
 import { currentJob, startJob } from "@/lib/jobs";
 import { isFromOurPage } from "@/lib/same-origin";
-import { loadSubject } from "@/lib/subject";
+import { loadSubject, whyNoApplying } from "@/lib/subject";
 import { alreadyRunning, notFromOurPage } from "../responses";
 
 const root = process.cwd();
@@ -23,7 +23,9 @@ export async function POST(request: Request): Promise<Response> {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;
   }
-  const result = startJob("undo", () => undoFixes(report, subject.config, subject.workDir));
+  const { config, workDir } = subject;
+  if (!workDir) return Response.json(whyNoApplying(subject), { status: 400 });
+  const result = startJob("undo", () => undoFixes(report, config, workDir));
   if (!result.started) return alreadyRunning(result.runningJobId);
   return Response.json({ jobId: result.jobId }, { status: 202 });
 }

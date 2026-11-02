@@ -21,10 +21,10 @@ const subjectArg = process.argv.indexOf("--subject");
 const subjectId = subjectArg === -1 ? undefined : process.argv[subjectArg + 1];
 
 async function main(): Promise<void> {
-  const { config, runRoot } = await loadSubject(root, subjectId);
+  const { config, runRoot, workDir } = await loadSubject(root, subjectId);
   const adapter = adapterFor(config.output.format);
   const client = withJudge ? createClient() : null;
-  const report = await runPipeline({ config, adapter, root: runRoot, prepare: true, runsRoot, client });
+  const report = await runPipeline({ config, adapter, root: runRoot, prepare: workDir !== null, runsRoot, client });
 
   console.log(`${report.configName}`);
   console.log(`記録: ${join(runsRoot, report.runId)}\n`);
