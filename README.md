@@ -79,15 +79,32 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 | `workspace.link` | | work/ に写さずリンクするフォルダ名（既定 `vendor`・`node_modules`） |
 | `claude.send` | ⭕ | Claude に送る範囲。既定はありません → [Claude に送るもの](#claude-に送るもの) |
 | `claude.neverRead` | | 原因探しで読ませないパス（`.gitignore` と同じ書き方） |
-| `run.type` | ⭕ | `command`（いまはこれだけ） |
-| `run.cwd` / `run.timeoutMs` | | 動かす場所（source の中。既定 `.`）／打ち切るまでの時間（既定 30000） |
-| `run.environments.old` / `.new` | ⭕ | `label`・`command`（フルパス）・`args`（全入力の前に付ける引数）・`env`（その側だけの環境変数） |
+| `run.type` | ⭕ | `command`（道具が旧と新のプログラムを動かす）か `files`（出力がもう手元にある。下の「ファイル型」） |
+| `run.cwd` / `run.timeoutMs` | | command のとき。動かす場所（source の中。既定 `.`）／打ち切るまでの時間（既定 30000） |
+| `run.environments.old` / `.new` | ⭕ | command のとき。`label`・`command`（フルパス）・`args`（全入力の前に付ける引数）・`env`（その側だけの環境変数） |
 | `output.format` / `output.from` | ⭕ | `pdf`・`text`（ログ・CSV・標準出力など）・`html`（画面に見える文字とフォームの値）／`file`（プログラムが `{output}` に書く）か `stdout` |
 | `output.encoding` | | テキストと HTML の文字コード（既定 `utf-8`。`shift_jis`・`euc-jp` など）。HTML が `<meta charset>` で宣言していれば、そちらを使います |
 | `cases[]` | ※ | `id`・`label`・`description`・`args`。`args` の `{output}` は出力ファイルのパスに置き換わります |
 | `caseGroups[]` | ※ | まとめ書き。`each.file`（例 `"example_*.php"`）に当てはまる `run.cwd` のファイルごとに入力を1つ作ります。`id`・`label`・`description`・`args` の `{file}` はファイル名、`{name}` は拡張子を除いた名前に置き換わります（既定は id `{name}`・label `{file}`） |
 
-※ `cases` と `caseGroups` のどちらかに、入力が1つ以上要ります。
+※ `cases` と `caseGroups` のどちらかに、入力が1つ以上要ります（ファイル型では、書かなければフォルダのファイルが全部入力になります）。
+
+### ファイル型（出力がもう手元にあるとき）
+
+旧の環境の出力が残っていて、新の環境の出力も作れるなら、プログラムを道具から動かさずに比べられます。
+
+```jsonc
+"run": {
+  "type": "files",
+  "old": { "label": "PHP 5.5（残っていた出力）", "dir": "outputs/old" },
+  "new": { "label": "PHP 8.5", "dir": "outputs/new" },
+  "baseline": { "dir": "outputs/new2" }  // 任意。新の環境でもう一度出した出力（毎回変わる値を見分ける）
+}
+```
+
+- 同じ入力の出力は、それぞれのフォルダに同じ名前で置きます。片方にしか無いファイルは「出力なし」として結果に出ます
+- 比べたファイルは実行の記録（`runs/`）に写して残します
+- プログラムを動かさないので、「当てて確かめる」は使えません（理由つきで止まります）。`source` にソースを指せば、原因探しは使えます
 
 - ⚠️ `id`・`label`・`description` は画面に出て、Claude にも渡ります。期待する判定が分かる名前にしないでください
 - ⚠️ 設定ファイルと同梱の結果は `source` の外に置きます（原因探しで Claude に答えを読ませないため）
