@@ -36,6 +36,11 @@ export type CommandRun = {
   cwd: string;
   timeoutMs: number;
   environments: Record<EnvironmentName, Environment>;
+  /**
+   * Paths (relative to the source) that must exist before anything runs: dependencies that are
+   * fetched, not committed (composer's vendor/). Without them every case would fail the same way.
+   */
+  needs: string[];
 };
 
 /**
@@ -262,6 +267,10 @@ function parseRun(run: unknown, base: string, fail: (what: string) => never): Ru
   if (run.timeoutMs !== undefined && (typeof run.timeoutMs !== "number" || run.timeoutMs <= 0)) {
     fail("run.timeoutMs が正の数ではありません");
   }
+  const needs = (run.needs as unknown) ?? [];
+  if (!isStringArray(needs) || needs.some((p) => p === "" || isAbsolute(p) || normalize(p).split(sep)[0] === "..")) {
+    fail("run.needs は source の中を指す相対パスの配列にしてください");
+  }
 
   if (!isObject(run.environments)) return fail("run.environments がありません");
   const environments = {} as Record<EnvironmentName, Environment>;
@@ -284,7 +293,7 @@ function parseRun(run: unknown, base: string, fail: (what: string) => never): Ru
     };
   }
 
-  return { type: "command", cwd: cwd as string, timeoutMs: (run.timeoutMs as number | undefined) ?? DEFAULT_TIMEOUT_MS, environments };
+  return { type: "command", cwd: cwd as string, timeoutMs: (run.timeoutMs as number | undefined) ?? DEFAULT_TIMEOUT_MS, environments, needs: needs as string[] };
 }
 
 function parseFilesRun(run: Record<string, unknown>, base: string, fail: (what: string) => never): FilesRun {

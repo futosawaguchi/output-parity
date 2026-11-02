@@ -34,4 +34,13 @@ export async function preflight(config: ParityConfig, root: string): Promise<voi
       );
     }
   }
+  // After the interpreters: without PHP, that is the first thing to fix, not composer.
+  for (const need of run.needs) {
+    if (!(await stat(join(root, need)).catch(() => null))) {
+      throw new ConfigError(
+        `実行に要るものがありません: ${join(root, need)}（設定の run.needs）`,
+        "依存を取得してから実行してください（composer install など。README の「全部動かす」）",
+      );
+    }
+  }
 }

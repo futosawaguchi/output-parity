@@ -16,6 +16,8 @@
   "run": {
     "type": "command",
     "timeoutMs": 30000,
+    // TCPDF は composer で取得する（LGPL のため同梱しない）。無いと全部の入力が「出力なし」になるので、先に確かめる
+    "needs": ["lib-old/vendor", "lib-new/vendor"],
     "environments": {
       "old": { "label": "PHP 7.4", "command": "/opt/homebrew/opt/php@7.4/bin/php" },
       "new": { "label": "PHP 8.5", "command": "/opt/homebrew/bin/php" }
