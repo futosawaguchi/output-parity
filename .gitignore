@@ -2,15 +2,15 @@
 CLAUDE.md
 docs/
 
-# 作業用コピー。samples/ から毎回作り直す
-work/
+# 作業用コピー。samples/ から毎回作り直す（先頭の / で直下だけ。app/api/ などの同名フォルダを巻き込まない）
+/work/
 
 # TCPDF は LGPL-3.0。MIT のこのリポジトリに実体を入れず、composer で取得する
 vendor/
 samples/*/vendor/
 
-# 実行ごとの出力。再生成できる
-runs/
+# 実行ごとの出力。再生成できる（先頭の / で直下だけ。app/api/runs/ を巻き込まない）
+/runs/
 
 # 鍵
 .env
