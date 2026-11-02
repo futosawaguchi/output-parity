@@ -1,0 +1,37 @@
+// 本物の OSS の題材。PDF ライブラリ TCPDF 6.3.0 に付属する公式の例 65 本を、PHP 7.4 と 8.5 で同じように動かして比べる。
+// 書き方は README の「設定ファイル」。パスはこのファイルからの相対で書く。
+// ⚠️ TCPDF は composer で取得する（composer install -d samples/tcpdf-examples/app）。LGPL-3.0 なので vendor/ はコミットしない
+{
+  "version": 1,
+  "name": "TCPDF の公式の例 65 本（PHP 7.4 → 8.5）",
+  "description": "PDF ライブラリ TCPDF 6.3.0 に付属する公式の例（example_001〜065.php）を、PHP 7.4 と PHP 8.5 で動かして比べます。TCPDF は公開 OSS の本物で、書き換えません（原因と直し方の提案まで）。",
+
+  // composer のプロジェクト。例は vendor/ の中にあり、その場で動かす（TCPDF を写さない・書き換えない）
+  "source": "app",
+  "fixes": "suggest-only",
+  // 判定は差が残った例だけ（差なし・出力なしは機械が決める）。原因探しは押した例だけ、TCPDF のソースを読む
+  "claude": { "send": "output-and-source" },
+
+  "run": {
+    "type": "command",
+    "cwd": "vendor/tecnickcom/tcpdf/examples",
+    "timeoutMs": 30000,
+    "environments": {
+      // display_errors を切る: PHP の CLI は警告を標準出力に混ぜるので、PDF の先頭に入って開けなくなる
+      "old": { "label": "PHP 7.4", "command": "/opt/homebrew/opt/php@7.4/bin/php", "args": ["-d", "display_errors=0"] },
+      "new": { "label": "PHP 8.5", "command": "/opt/homebrew/bin/php", "args": ["-d", "display_errors=0"] }
+    }
+  },
+
+  // 例は PDF を標準出力に書く
+  "output": { "format": "pdf", "from": "stdout" },
+
+  "caseGroups": [
+    {
+      "each": { "file": "example_*.php" },
+      "id": "{name}",
+      "label": "{file}",
+      "args": ["{file}"]
+    }
+  ]
+}

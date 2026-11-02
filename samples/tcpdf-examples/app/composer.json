@@ -1,0 +1,15 @@
+{
+    "require": {
+        "tecnickcom/tcpdf": "6.3.0"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        },
+        "policy": {
+            "advisories": {
+                "ignore": ["tecnickcom/tcpdf"]
+            }
+        }
+    }
+}
