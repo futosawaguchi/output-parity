@@ -1,4 +1,4 @@
-// Runs every case in samples/parity.config.json, compares the outputs and prints what happened.
+// Runs every case in samples/parity.config.jsonc, compares the outputs and prints what happened.
 // Usage: npm run samples            run and compare (no API calls)
 //        npm run samples -- --judge also ask Claude to judge (uses ANTHROPIC_API_KEY from .env)
 
@@ -20,17 +20,17 @@ const runsRoot = join(root, "runs");
 const withJudge = process.argv.includes("--judge");
 
 async function main(): Promise<void> {
-  const config = await loadConfig(join(samplesDir, "parity.config.json"));
+  const config = await loadConfig(join(samplesDir, "parity.config.jsonc"));
   const adapter = adapterFor(config.output.format);
   const client = withJudge ? createClient() : null;
-  const report = await runPipeline({ config, adapter, cwd: workDir, prepareFrom: samplesDir, runsRoot, client });
+  const report = await runPipeline({ config, adapter, root: workDir, prepare: true, runsRoot, client });
 
   console.log(`${report.configName}`);
   console.log(`記録: ${join(runsRoot, report.runId)}\n`);
   for (const c of report.cases) {
     console.log(c.caseId);
     for (const s of c.runs) {
-      const label = config.environments[s.env].label;
+      const label = config.run.environments[s.env].label;
       const output = s.outputPath ? "出力あり" : "出力なし";
       console.log(`  ${s.slot.padEnd(8)} ${label.padEnd(8)} ${describeOutcome(s.outcome)}・${output}（${s.durationMs} ms）`);
     }

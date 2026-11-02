@@ -3,24 +3,24 @@ import { join, sep } from "node:path";
 import { insideRoot } from "./safe-path";
 
 // work/: the copy of the program that the tool runs and may change (DESIGN 7-4). The original
-// under samples/ is never written to, so a demo can be repeated by copying it again.
+// source is never written to, so a demo can be repeated by copying it again.
 
-/** Dependencies are linked, not copied: they are large and the tool never changes them. */
-const DEPENDENCY_DIRS = new Set(["vendor", "node_modules"]);
-
-/** Replaces `work` with a fresh copy of `source`. */
-export async function prepareWorkspace(source: string, work: string): Promise<void> {
+/**
+ * Replaces `work` with a fresh copy of `source`. Directories named in `link` (dependencies such
+ * as vendor/) are linked, not copied: they are large and the tool never changes them.
+ */
+export async function prepareWorkspace(source: string, work: string, link: readonly string[]): Promise<void> {
   await rm(work, { recursive: true, force: true });
-  await copyTree(source, work);
+  await copyTree(source, work, new Set(link));
 }
 
-async function copyTree(from: string, to: string): Promise<void> {
+async function copyTree(from: string, to: string, link: ReadonlySet<string>): Promise<void> {
   await mkdir(to, { recursive: true });
   for (const entry of await readdir(from, { withFileTypes: true })) {
     const src = join(from, entry.name);
     const dest = join(to, entry.name);
-    if (entry.isDirectory() && DEPENDENCY_DIRS.has(entry.name)) await symlink(src, dest, "dir");
-    else if (entry.isDirectory()) await copyTree(src, dest);
+    if (entry.isDirectory() && link.has(entry.name)) await symlink(src, dest, "dir");
+    else if (entry.isDirectory()) await copyTree(src, dest, link);
     else if (entry.isFile()) await copyFile(src, dest);
   }
 }

@@ -8,7 +8,6 @@ import { assessFix, type FixAttempt } from "./verify";
 export type ApplyOptions = {
   config: ParityConfig;
   adapter: Adapter;
-  samplesDir: string;
   workDir: string;
   runsRoot: string;
   onProgress?: (event: ProgressEvent) => void;
@@ -32,7 +31,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
   // in work/; for the bundled outputs it is the original, so work/ starts from a fresh copy.
   if (base.origin !== "run") {
     say("work/ を作っています");
-    await prepareWorkspace(opts.samplesDir, opts.workDir);
+    await prepareWorkspace(opts.config.source, opts.workDir, opts.config.workspace.link);
   }
   say("直し方を work/ に当てています");
   const applied = await applyEdit(opts.workDir, edit);
@@ -42,7 +41,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
   const after = await runPipeline({
     config: opts.config,
     adapter: opts.adapter,
-    cwd: opts.workDir,
+    root: opts.workDir,
     runsRoot: opts.runsRoot,
     keepOld: new Map(original.cases.flatMap((c) => c.runs.filter((r) => r.slot === "old").map((r) => [c.caseId, r] as const))),
     client: null,

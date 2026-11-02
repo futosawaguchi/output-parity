@@ -4,7 +4,7 @@ import { join } from "node:path";
 import type { Adapter } from "./compare/adapters";
 import { compareCase, type Comparison } from "./compare/compare-case";
 import { naiveDiff, type NaiveDiff } from "./compare/naive";
-import type { ParityConfig } from "./config";
+import { summarizeEnvironments, type EnvironmentSummaries, type ParityConfig } from "./config";
 import { judgeByMachine, judgeCase } from "./judge/judge-case";
 import type { CauseReport } from "./fix/locate-cause";
 import type { FixAttempt } from "./fix/verify";
@@ -37,7 +37,7 @@ export type RunReport = {
   origin: "run" | "rejudge" | "bundled";
   configName: string;
   configDescription: string;
-  environments: ParityConfig["environments"];
+  environments: EnvironmentSummaries;
   outputFormat: string;
   startedAt: string;
   finishedAt: string;
@@ -49,10 +49,10 @@ export type RunReport = {
 export type PipelineOptions = {
   config: ParityConfig;
   adapter: Adapter;
-  /** Directory the programs run in: work/, never the original (DESIGN 7-4). */
-  cwd: string;
-  /** Copy this directory into `cwd` first, for a fresh start. Left out when re-running after an edit. */
-  prepareFrom?: string;
+  /** The program's root for this run: work/ (DESIGN 7-4), or the source itself when fixes is suggest-only. run.cwd is inside it. */
+  root: string;
+  /** Copy the source into `root` first, for a fresh start. Left out when re-running after an edit. */
+  prepare?: boolean;
   runsRoot: string;
   /** Old runs to reuse instead of running the old side again, by case id (after an edit). */
   keepOld?: Map<string, SlotResult>;
@@ -66,25 +66,27 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
   const { config, adapter, client } = opts;
   const report = (message: string, caseId = "") => opts.onProgress?.({ caseId, message });
 
-  if (opts.prepareFrom) {
+  if (opts.prepare) {
     report("work/ を作り直しています");
-    await prepareWorkspace(opts.prepareFrom, opts.cwd);
+    await prepareWorkspace(config.source, opts.root, config.workspace.link);
   }
-  await preflight(config, opts.cwd);
+  const cwd = join(opts.root, config.run.cwd);
+  await preflight(config, cwd);
   const startedAt = new Date();
   const run = await createRunDir(opts.runsRoot, startedAt);
 
   const cases: CaseReport[] = [];
+  const environments = summarizeEnvironments(config.run.environments);
   for (const testCase of config.cases) {
     const caseId = testCase.id;
     report(
       opts.keepOld?.has(caseId)
-        ? `${config.environments.new.label} で2回実行しています（${config.environments.old.label} は当てる前の出力と比べます）`
-        : `${config.environments.old.label} で1回、${config.environments.new.label} で2回実行しています`,
+        ? `${environments.new.label} で2回実行しています（${environments.old.label} は当てる前の出力と比べます）`
+        : `${environments.old.label} で1回、${environments.new.label} で2回実行しています`,
       caseId,
     );
-    const result = await runCase(config, testCase, opts.cwd, join(run.path, caseId), opts.keepOld?.get(caseId));
-    cases.push(await checkCase(result, testCase, { adapter, client, environments: config.environments, onProgress: opts.onProgress }));
+    const result = await runCase(config, testCase, cwd, join(run.path, caseId), opts.keepOld?.get(caseId));
+    cases.push(await checkCase(result, testCase, { adapter, client, environments, onProgress: opts.onProgress }));
   }
 
   const runReport: RunReport = {
@@ -92,7 +94,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
     origin: "run",
     configName: config.name,
     configDescription: config.description,
-    environments: config.environments,
+    environments,
     outputFormat: config.output.format,
     startedAt: startedAt.toISOString(),
     finishedAt: new Date().toISOString(),
@@ -106,7 +108,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
 export type CheckOptions = {
   adapter: Adapter;
   client: Anthropic | null;
-  environments: ParityConfig["environments"];
+  environments: EnvironmentSummaries;
   onProgress?: (event: ProgressEvent) => void;
 };
 

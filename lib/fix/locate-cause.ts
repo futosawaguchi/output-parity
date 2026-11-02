@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat, betaZodTool } from "@anthropic-ai/sdk/helpers/beta/zod";
 import type { BetaMessage } from "@anthropic-ai/sdk/resources/beta";
 import { z } from "zod";
-import type { ParityConfig } from "../config";
+import type { EnvironmentSummaries } from "../config";
 import { classifyApiError } from "../judge/api-failure";
 import { JUDGE_MODEL } from "../judge/call-claude";
 import type { CaseReport, ProgressEvent } from "../pipeline";
@@ -33,7 +33,7 @@ export type CauseReport =
 export type CauseOptions = {
   /** Where the program's source is: work/ after a run, samples/ for the bundled run. */
   root: string;
-  environments: ParityConfig["environments"];
+  environments: EnvironmentSummaries;
   onProgress?: (event: ProgressEvent) => void;
 };
 

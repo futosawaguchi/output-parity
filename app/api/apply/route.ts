@@ -32,10 +32,10 @@ export async function POST(request: Request): Promise<Response> {
 
   let config, adapter;
   try {
-    config = await loadConfig(join(samplesDir, "parity.config.json"));
+    config = await loadConfig(join(samplesDir, "parity.config.jsonc"));
     adapter = adapterFor(config.output.format);
     // Running again needs the interpreters; say so now rather than after writing to work/.
-    await preflight(config, samplesDir);
+    await preflight(config, join(config.source, config.run.cwd));
   } catch (e) {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;
@@ -45,7 +45,6 @@ export async function POST(request: Request): Promise<Response> {
     applyAndVerify(base, caseId as string, candidate, {
       config,
       adapter,
-      samplesDir,
       workDir: join(root, "work"),
       runsRoot: join(root, "runs"),
       onProgress,

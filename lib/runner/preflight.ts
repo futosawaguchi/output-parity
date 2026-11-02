@@ -11,13 +11,13 @@ export async function preflight(config: ParityConfig, cwd: string): Promise<void
   if (!dir?.isDirectory()) {
     throw new ConfigError(`実行するディレクトリがありません: ${cwd}`, "パスを確認してください");
   }
-  for (const env of Object.values(config.environments)) {
+  for (const env of Object.values(config.run.environments)) {
     try {
       await access(env.command, constants.X_OK);
     } catch {
       throw new CommandNotFoundError(
         `設定された実行コマンドが見つからないか、実行できません: ${env.command}（${env.label}）`,
-        "設定ファイルの environments の command を確認してください",
+        "設定ファイルの run.environments の command を確認してください",
       );
     }
   }

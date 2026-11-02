@@ -26,7 +26,7 @@ export async function POST(request: Request): Promise<Response> {
   }
   let config, adapter;
   try {
-    config = await loadConfig(join(samplesDir, "parity.config.json"));
+    config = await loadConfig(join(samplesDir, "parity.config.jsonc"));
     adapter = adapterFor(config.output.format);
   } catch (e) {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
@@ -38,7 +38,7 @@ export async function POST(request: Request): Promise<Response> {
   const client = new Anthropic();
 
   const result = startJob("run", (onProgress) =>
-    runPipeline({ config, adapter, cwd: workDir, prepareFrom: samplesDir, runsRoot: join(root, "runs"), client, onProgress }),
+    runPipeline({ config, adapter, root: workDir, prepare: true, runsRoot: join(root, "runs"), client, onProgress }),
   );
   if (!result.started) return alreadyRunning(result.runningJobId);
   return Response.json({ jobId: result.jobId }, { status: 202 });
@@ -58,11 +58,11 @@ export async function GET(): Promise<Response> {
   let cannotApply = null;
   const bundled = await loadBundledReport(root);
   try {
-    const config = await loadConfig(join(samplesDir, "parity.config.json"));
+    const config = await loadConfig(join(samplesDir, "parity.config.jsonc"));
     target = {
       name: config.name,
       description: config.description,
-      environments: { old: config.environments.old.label, new: config.environments.new.label },
+      environments: { old: config.run.environments.old.label, new: config.run.environments.new.label },
       cases: config.cases.map((c) => ({ id: c.id, label: c.label, description: c.description })),
     };
     cannotApply = await whyCannotExecute(config);
@@ -88,7 +88,7 @@ export async function GET(): Promise<Response> {
 /** The check a run starts with (the programs can be executed), made up front for the page. */
 async function whyCannotExecute(config: ParityConfig): Promise<{ message: string; nextStep: string } | null> {
   try {
-    await preflight(config, samplesDir);
+    await preflight(config, join(config.source, config.run.cwd));
   } catch (e) {
     if (e instanceof SetupError) return { message: e.message, nextStep: e.nextStep };
     throw e;

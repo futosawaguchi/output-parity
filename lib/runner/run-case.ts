@@ -99,8 +99,9 @@ async function runSlot(
 ): Promise<SlotResult> {
   await mkdir(slotDir, { recursive: true });
   const outputPath = join(slotDir, `output.${config.output.format}`);
-  const command = config.environments[env].command;
-  const args = testCase.args.map((a) => (a === OUTPUT_PLACEHOLDER ? outputPath : a));
+  const environment = config.run.environments[env];
+  const command = environment.command;
+  const args = [...environment.args, ...testCase.args.map((a) => (a === OUTPUT_PLACEHOLDER ? outputPath : a))];
 
   const stdoutPath = join(slotDir, "stdout.txt");
   const stderrPath = join(slotDir, "stderr.txt");
@@ -108,15 +109,16 @@ async function runSlot(
     command,
     args,
     cwd,
-    timeoutMs: config.timeoutMs,
+    timeoutMs: config.run.timeoutMs,
     stdoutPath,
     stderrPath,
     maxStdoutBytes: MAX_STDOUT_BYTES,
     maxStderrBytes: MAX_STDERR_BYTES,
+    env: environment.env,
   });
   // Byte for byte: stdout can be binary (a PDF written to stdout). Nothing on stdout is no
   // output, not an empty one: a program that crashed before printing produced nothing.
-  if (config.output.source === "stdout" && result.outcome.kind !== "outputTooLarge" && (await stat(stdoutPath)).size > 0) {
+  if (config.output.from === "stdout" && result.outcome.kind !== "outputTooLarge" && (await stat(stdoutPath)).size > 0) {
     await copyFile(stdoutPath, outputPath);
   }
 

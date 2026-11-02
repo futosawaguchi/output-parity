@@ -1,5 +1,11 @@
 import { readFile } from "node:fs/promises";
+import { dirname, isAbsolute, normalize, resolve, sep } from "node:path";
 import { ConfigError } from "./errors";
+import { parseJsonc } from "./jsonc";
+
+// The one file that connects a system to the tool (DESIGN 7-4c). What differs from system to
+// system is how the old and new outputs are produced and what format they are in; everything
+// else is the tool's. Written by people, so it may hold comments (JSONC).
 
 /** Placeholder in case args that the runner replaces with the output file path. */
 export const OUTPUT_PLACEHOLDER = "{output}";
@@ -10,14 +16,37 @@ export type Environment = {
   label: string;
   /** Absolute path of the interpreter or binary to run. */
   command: string;
+  /** Put before every case's own arguments (an interpreter's options, for example). */
+  args: string[];
+  /** Set for this side only, on top of the few variables always passed (runner/child-env.ts). */
+  env: Record<string, string>;
+};
+
+/** What a report keeps about an environment: never `env`, which may hold a password. */
+export type EnvironmentSummary = Pick<Environment, "label" | "command">;
+export type EnvironmentSummaries = Record<EnvironmentName, EnvironmentSummary>;
+
+export type RunSpec = {
+  /** How the outputs are produced. Only "command" for now (DESIGN 7-4c: files and web come later). */
+  type: "command";
+  /** Where the programs run, relative to the source. */
+  cwd: string;
+  timeoutMs: number;
+  environments: Record<EnvironmentName, Environment>;
 };
 
 export type OutputSpec = {
   /** Selects the adapter that turns the output into text (only "pdf" for now). */
   format: string;
   /** "file": the program writes to {output}. "stdout": the runner saves stdout. */
-  source: "file" | "stdout";
+  from: "file" | "stdout";
 };
+
+/**
+ * apply: the programs run in a copy (work/), where a proposed edit can be applied and checked.
+ * suggest-only: no copy is made; the programs run where they are and the tool writes nothing to them.
+ */
+export type FixMode = "apply" | "suggest-only";
 
 export type Case = {
   id: string;
@@ -30,17 +59,25 @@ export type Case = {
 };
 
 export type ParityConfig = {
+  version: 1;
   name: string;
   /** What is being checked, in a sentence or two. Shown above the results. */
   description: string;
-  environments: Record<EnvironmentName, Environment>;
+  /** Absolute path of the program's source (written relative to the settings file). */
+  source: string;
+  /** Directories linked into work/ instead of copied: large, and never edited. */
+  workspace: { link: string[] };
+  fixes: FixMode;
+  run: RunSpec;
   output: OutputSpec;
-  timeoutMs: number;
   cases: Case[];
 };
 
+export const CONFIG_VERSION = 1;
 const DEFAULT_TIMEOUT_MS = 30_000;
+const DEFAULT_LINKED = ["vendor", "node_modules"];
 export const CASE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
+const ENV_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 export async function loadConfig(path: string): Promise<ParityConfig> {
   let raw: string;
@@ -51,16 +88,17 @@ export async function loadConfig(path: string): Promise<ParityConfig> {
   }
   let json: unknown;
   try {
-    json = JSON.parse(raw);
+    json = parseJsonc(raw);
   } catch (e) {
     throw new ConfigError(
       `設定ファイルが JSON として読めません: ${path}（${(e as Error).message}）`,
-      "JSON の書式を確認してください",
+      "JSON の書式を確認してください（// と /* */ のコメント、末尾のカンマは書けます）",
     );
   }
   return parseConfig(json, path);
 }
 
+/** Checks the settings and fills in the defaults. `path` is the settings file: relative paths start there. */
 export function parseConfig(json: unknown, path: string): ParityConfig {
   // A function declaration (not an arrow) so TypeScript narrows types after calls to it.
   function fail(what: string): never {
@@ -68,29 +106,32 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   }
 
   if (!isObject(json)) return fail("中身がオブジェクトではありません");
-  const { name, description, environments, output, timeoutMs, cases } = json;
+  const { version, name, description, source, workspace, fixes, run, output, cases } = json;
 
+  if (version === undefined) fail(`version がありません（"version": ${CONFIG_VERSION} を書いてください）`);
+  if (version !== CONFIG_VERSION) fail(`version ${JSON.stringify(version)} には対応していません（対応しているのは ${CONFIG_VERSION}）`);
   if (typeof name !== "string") fail("name が文字列ではありません");
   if (description !== undefined && typeof description !== "string") fail("description が文字列ではありません");
-  if (!isObject(environments)) return fail("environments がありません");
-  const envs = {} as Record<EnvironmentName, Environment>;
-  for (const key of ["old", "new"] as const) {
-    const env = environments[key];
-    if (!isObject(env) || typeof env.label !== "string" || typeof env.command !== "string") {
-      fail(`environments.${key} に label と command がありません`);
+  if (typeof source !== "string" || source === "") return fail("source（プログラムのソースの場所）がありません");
+
+  let link = DEFAULT_LINKED;
+  if (workspace !== undefined) {
+    if (!isObject(workspace)) return fail("workspace がオブジェクトではありません");
+    if (workspace.link !== undefined) {
+      if (!isStringArray(workspace.link) || workspace.link.some((d) => d === "" || /[\\/]/.test(d))) {
+        fail("workspace.link はフォルダ名（/ を含まない）の配列にしてください");
+      }
+      link = workspace.link as string[];
     }
-    envs[key] = { label: env.label as string, command: env.command as string };
   }
+
+  if (fixes !== undefined && fixes !== "apply" && fixes !== "suggest-only") fail('fixes は "apply" か "suggest-only" にしてください');
+
+  const runSpec = parseRun(run, fail);
 
   if (!isObject(output) || typeof output.format !== "string") return fail("output.format がありません");
-  if (output.source !== "file" && output.source !== "stdout") {
-    fail('output.source は "file" か "stdout" にしてください');
-  }
-  const source = output.source as OutputSpec["source"];
-
-  if (timeoutMs !== undefined && (typeof timeoutMs !== "number" || timeoutMs <= 0)) {
-    fail("timeoutMs が正の数ではありません");
-  }
+  if (output.from !== "file" && output.from !== "stdout") fail('output.from は "file" か "stdout" にしてください');
+  const from = output.from as OutputSpec["from"];
 
   if (!Array.isArray(cases) || cases.length === 0) return fail("cases が空です");
   const seen = new Set<string>();
@@ -100,12 +141,10 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     }
     if (seen.has(c.id)) fail(`cases の id「${c.id}」が重複しています`);
     seen.add(c.id);
-    if (!Array.isArray(c.args) || !c.args.every((a) => typeof a === "string")) {
-      fail(`cases[${i}].args が文字列の配列ではありません`);
-    }
+    if (!isStringArray(c.args)) fail(`cases[${i}].args が文字列の配列ではありません`);
     const args = c.args as string[];
-    if (source === "file" && !args.includes(OUTPUT_PLACEHOLDER)) {
-      fail(`cases[${i}].args に ${OUTPUT_PLACEHOLDER} がありません（output.source が "file" のとき必要）`);
+    if (from === "file" && !args.includes(OUTPUT_PLACEHOLDER)) {
+      fail(`cases[${i}].args に ${OUTPUT_PLACEHOLDER} がありません（output.from が "file" のとき必要）`);
     }
     if ((c.label !== undefined && typeof c.label !== "string") || (c.description !== undefined && typeof c.description !== "string")) {
       fail(`cases[${i}] の label と description は文字列にしてください`);
@@ -114,15 +153,66 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   });
 
   return {
+    version: CONFIG_VERSION,
     name: name as string,
     description: (description as string | undefined) ?? "",
-    environments: envs,
-    output: { format: output.format, source },
-    timeoutMs: (timeoutMs as number | undefined) ?? DEFAULT_TIMEOUT_MS,
+    source: resolve(dirname(path), source),
+    workspace: { link },
+    fixes: (fixes as FixMode | undefined) ?? "apply",
+    run: runSpec,
+    output: { format: output.format, from },
     cases: parsedCases,
+  };
+}
+
+function parseRun(run: unknown, fail: (what: string) => never): RunSpec {
+  if (!isObject(run)) return fail("run がありません");
+  if (run.type !== "command") return fail(`run.type は "command" にしてください（ほかの型は未対応）`);
+
+  const cwd = run.cwd ?? ".";
+  if (typeof cwd !== "string" || isAbsolute(cwd) || normalize(cwd).split(sep)[0] === "..") {
+    fail("run.cwd は source の中を指す相対パスにしてください");
+  }
+  if (run.timeoutMs !== undefined && (typeof run.timeoutMs !== "number" || run.timeoutMs <= 0)) {
+    fail("run.timeoutMs が正の数ではありません");
+  }
+
+  if (!isObject(run.environments)) return fail("run.environments がありません");
+  const environments = {} as Record<EnvironmentName, Environment>;
+  for (const key of ["old", "new"] as const) {
+    const env = run.environments[key];
+    const at = `run.environments.${key}`;
+    if (!isObject(env) || typeof env.label !== "string" || typeof env.command !== "string") return fail(`${at} に label と command がありません`);
+    if (env.args !== undefined && !isStringArray(env.args)) fail(`${at}.args が文字列の配列ではありません`);
+    if (env.env !== undefined) {
+      if (!isObject(env.env)) fail(`${at}.env がオブジェクトではありません`);
+      for (const [k, v] of Object.entries(env.env as Record<string, unknown>)) {
+        if (!ENV_NAME_PATTERN.test(k) || typeof v !== "string") fail(`${at}.env の「${k}」は、英数字と _ の名前に文字列の値にしてください`);
+      }
+    }
+    environments[key] = {
+      label: env.label,
+      command: env.command,
+      args: (env.args as string[] | undefined) ?? [],
+      env: (env.env as Record<string, string> | undefined) ?? {},
+    };
+  }
+
+  return { type: "command", cwd: cwd as string, timeoutMs: (run.timeoutMs as number | undefined) ?? DEFAULT_TIMEOUT_MS, environments };
+}
+
+/** The part of the environments a report keeps. */
+export function summarizeEnvironments(envs: Record<EnvironmentName, Environment>): EnvironmentSummaries {
+  return {
+    old: { label: envs.old.label, command: envs.old.command },
+    new: { label: envs.new.label, command: envs.new.command },
   };
 }
 
 function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
+function isStringArray(v: unknown): v is string[] {
+  return Array.isArray(v) && v.every((a) => typeof a === "string");
 }

@@ -15,7 +15,7 @@ async function setUp() {
   await writeFile(join(source, "data", "input.json"), "{}\n");
   await writeFile(join(source, "lib", "vendor", "dep.php"), "<?php\n");
   const work = join(dir, "work");
-  await prepareWorkspace(source, work);
+  await prepareWorkspace(source, work, ["vendor"]);
   return { source, work };
 }
 
@@ -29,7 +29,7 @@ test("the program and its input are copied; dependencies are linked", async () =
 test("preparing again throws away what was changed in work/", async () => {
   const { source, work } = await setUp();
   await writeFile(join(work, "app.php"), "changed\n");
-  await prepareWorkspace(source, work);
+  await prepareWorkspace(source, work, ["vendor"]);
   assert.equal(await readFile(join(work, "app.php"), "utf8"), "<?php echo 1;\n");
 });
 

@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { basename, dirname, relative, sep } from "node:path";
-import type { ParityConfig } from "../config";
+import type { EnvironmentSummaries } from "../config";
 import type { CaseReport } from "../pipeline";
 import { describeOutcome } from "../runner/outcome";
 
@@ -28,7 +28,7 @@ export const CAUSE_SYSTEM_PROMPT = `あなたは、プログラムの実行環�
 文章は日本語で、短く書いてください。人が数秒で確かめられることを目指してください。`;
 
 /** What the judge found for one case, plus how the programs were run, for Claude to start from. */
-export async function buildCauseMessage(c: CaseReport, environments: ParityConfig["environments"], root: string): Promise<string> {
+export async function buildCauseMessage(c: CaseReport, environments: EnvironmentSummaries, root: string): Promise<string> {
   // Paths in error messages are made relative to the source directory, the way Claude reads files.
   const prefixes = [root + sep, relative(process.cwd(), root) + sep];
   const fromRoot = (text: string) => prefixes.reduce((t, p) => t.split(p).join(""), text);

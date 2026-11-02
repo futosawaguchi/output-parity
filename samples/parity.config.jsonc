@@ -1,0 +1,52 @@
+// 見積書の題材。架空の見積書を PDF で出す小さな PHP アプリを、PHP 7.4 と 8.5 で同じ入力から動かして比べる。
+// 書き方は README の「設定ファイル」。パスはこのファイルからの相対で書く。
+{
+  "version": 1,
+  "name": "見積書 estimate.php（PHP 7.4 → 8.5）",
+  "description": "架空の見積書を PDF で出す小さな PHP アプリ（samples/estimate.php）を、PHP 7.4 と PHP 8.5 で同じ入力から動かして比べます。見積書は今回作った架空のもので、PDF ライブラリ（TCPDF・FPDI）は本物の公開 OSS です。",
+
+  // プログラムのソース。実行のたびに work/ に写して、そこで動かす（原本は書き換えない）
+  "source": ".",
+  // 直し方を work/ に当てて、流し直して確かめる
+  "fixes": "apply",
+
+  "run": {
+    "type": "command",
+    "timeoutMs": 30000,
+    "environments": {
+      "old": { "label": "PHP 7.4", "command": "/opt/homebrew/opt/php@7.4/bin/php" },
+      "new": { "label": "PHP 8.5", "command": "/opt/homebrew/bin/php" }
+    }
+  },
+
+  // プログラムが {output} に PDF を書く
+  "output": { "format": "pdf", "from": "file" },
+
+  // label と description は画面に出る。期待する判定が分からない書き方にする
+  "cases": [
+    {
+      "id": "1-harmless",
+      "label": "入力 A",
+      "description": "明細3行の見積書",
+      "args": ["estimate.php", "lib-new", "data/1-harmless.json", "{output}"]
+    },
+    {
+      "id": "2a-harmless",
+      "label": "入力 B",
+      "description": "明細5行の見積書（うち3行は金額 0）",
+      "args": ["estimate.php", "lib-new", "data/2a-harmless.json", "{output}"]
+    },
+    {
+      "id": "2b-fatal",
+      "label": "入力 C",
+      "description": "明細5行の見積書（値引きを含む）",
+      "args": ["estimate.php", "lib-new", "data/2b-fatal.json", "{output}"]
+    },
+    {
+      "id": "3-crash",
+      "label": "入力 D",
+      "description": "明細3行の見積書を、古い版の PDF ライブラリ（TCPDF 6.2.26）で出す",
+      "args": ["estimate.php", "lib-old", "data/3-crash.json", "{output}"]
+    }
+  ]
+}
