@@ -1,3 +1,5 @@
+import type { Comparison } from "@/lib/compare/compare-case";
+import { checkArithmetic } from "@/lib/judge/arithmetic";
 import { VERDICT_LABEL, type CaseVerdict, type Finding, type Verdict } from "@/lib/judge/verdict";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
 import { describeOutcome } from "@/lib/runner/outcome";
@@ -50,6 +52,7 @@ function CaseCard({ report, c }: { report: RunReport; c: CaseReport }) {
       </div>
       <NaiveDiffView naive={c.naive} />
       {c.verdict ? <VerdictBlock verdict={c.verdict} /> : <p className={styles.muted}>判定していません</p>}
+      <DroppedLines comparison={c.comparison} />
     </article>
   );
 }
@@ -109,6 +112,7 @@ function FindingItem({ finding }: { finding: Finding }) {
             <dt>計算</dt>
             <dd>
               <code className={styles.calc}>{finding.calculation}</code>
+              <CalcCheck calculation={finding.calculation} />
             </dd>
           </>
         )}
@@ -121,4 +125,36 @@ function FindingItem({ finding }: { finding: Finding }) {
 
 function Badge({ verdict, small = false }: { verdict: Verdict; small?: boolean }) {
   return <span className={`${styles.badge} ${VERDICT_CLASS[verdict]} ${small ? styles.badgeSmall : ""}`}>{VERDICT_LABEL[verdict]}</span>;
+}
+
+/** DESIGN 8-3: the machine re-does Claude's arithmetic. Silent when there is nothing it can read. */
+function CalcCheck({ calculation }: { calculation: string }) {
+  const checks = checkArithmetic(calculation);
+  if (checks.length === 0) return null;
+  const wrong = checks.filter((c) => !c.ok);
+  if (wrong.length === 0) return <p className={styles.calcOk}>機械の検算: 合っています（{checks.length} か所）</p>;
+  return (
+    <p className={styles.calcWrong}>
+      機械の検算: 合わない式があります — {wrong.map((c) => c.text).join("、")}
+    </p>
+  );
+}
+
+/** DESIGN 4-2: what the baseline threw away is shown, never hidden. */
+function DroppedLines({ comparison }: { comparison: Comparison }) {
+  if (comparison.kind !== "compared") return null;
+  const dropped = comparison.changes.filter((c) => c.explainedByBaseline);
+  if (comparison.baseline.kind === "unavailable") {
+    return <p className={styles.muted}>ベースラインが使えなかったので、何も除外していません（{comparison.baseline.reason}）</p>;
+  }
+  if (dropped.length === 0) return null;
+  const lines = dropped.flatMap((c) => c.newLines);
+  return (
+    <details className={styles.dropped}>
+      <summary>
+        毎回変わる値として除外した {lines.length} 行（同じ環境で2回動かして違った行。判定の対象外）
+      </summary>
+      <pre className={styles.droppedLines}>{lines.join("\n")}</pre>
+    </details>
+  );
 }

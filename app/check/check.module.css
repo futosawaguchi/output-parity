@@ -274,3 +274,38 @@
   white-space: pre;
   overflow-x: auto;
 }
+
+/* Arithmetic check and the lines the baseline dropped */
+
+.calcOk,
+.calcWrong {
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+.calcOk {
+  color: var(--muted);
+}
+
+.calcWrong {
+  color: var(--broken-fg);
+  font-weight: 600;
+}
+
+.dropped {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.dropped summary {
+  cursor: pointer;
+}
+
+.droppedLines {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
