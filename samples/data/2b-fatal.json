@@ -1,0 +1,13 @@
+{
+  "number": "Q-0001",
+  "issued": "2026-11-02",
+  "subject": "会議室 空調設備の点検",
+  "total": "72000",
+  "rows": [
+    { "code": "A-100", "name": "基本料",   "deleted": "0", "amount": "15000" },
+    { "code": "A-101", "name": "出張費",   "deleted": "",  "amount": "8000" },
+    { "code": "A-102", "name": "夜間割増", "deleted": "",  "amount": "12000" },
+    { "code": "A-103", "name": "部材費",   "deleted": "0", "amount": "42000" },
+    { "code": "A-104", "name": "値引き",   "deleted": "-", "amount": "-5000" }
+  ]
+}
