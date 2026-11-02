@@ -1,5 +1,5 @@
 import type { CaseResult, Slot, SlotResult } from "../runner/run-case";
-import { applyBaseline, unstableLines, type Change } from "./baseline";
+import { applyBaseline, unstableLines, type Change, type Unstable } from "./baseline";
 import { ExtractionError, type ExtractedDocument, type Extractor } from "./document";
 import { diffLines } from "./line-diff";
 
@@ -40,7 +40,7 @@ export async function compareCase(result: CaseResult, extract: Extractor): Promi
     return done(unreadable("new", e));
   }
 
-  let unstable = new Set<number>();
+  let unstable = new Map<number, Unstable>();
   let baseline: Extract<Comparison, { kind: "compared" }>["baseline"] = { kind: "used" };
   const baselinePath = bySlot.baseline.outputPath;
   if (baselinePath === null) {
