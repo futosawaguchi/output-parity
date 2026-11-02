@@ -40,14 +40,16 @@ export async function runCase(
   caseDir: string,
 ): Promise<CaseResult> {
   const slots: SlotResult[] = [];
-  let newStartedAt = 0;
+  let newFinishedAt = 0;
   for (const { slot, env } of SLOTS) {
-    // Timestamps are commonly written with 1-second resolution. If the baseline ran within
-    // the same second as the new run, a timestamp would look stable and later show up as a
-    // false difference between old and new. Keeping them apart makes such values visible.
-    if (slot === "baseline") await sleep(newStartedAt + MIN_BASELINE_GAP_MS - Date.now());
-    if (slot === "new") newStartedAt = Date.now();
+    // Timestamps are commonly written with 1-second resolution. If the baseline wrote the same
+    // second as the new run, a timestamp would look stable and later show up as a false
+    // difference between old and new. A program stamps its output at some point before it
+    // exits, so starting the baseline more than a second after the new run *finished*
+    // guarantees a different second.
+    if (slot === "baseline") await sleep(newFinishedAt + MIN_BASELINE_GAP_MS - Date.now());
     slots.push(await runSlot(config, testCase, cwd, join(caseDir, slot), slot, env));
+    if (slot === "new") newFinishedAt = Date.now();
   }
   return { caseId: testCase.id, slots };
 }
