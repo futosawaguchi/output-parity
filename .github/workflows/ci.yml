@@ -1,0 +1,41 @@
+# 型・lint・テスト。php と TCPDF は使わない（テストは php なしで通る。古い PHP を CI に入れない）
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22.16"
+          cache: npm
+
+      - run: npm ci
+
+      # 鍵の文字列がリポジトリに無いこと（検索語を分けて書き、このファイル自身に当たらないようにしている）
+      - name: No API key in the repository
+        run: |
+          if git grep -n -i -e "sk-""ant"; then
+            echo "API キーの文字列が見つかりました。キーを失効させ、ファイルから消してください" >&2
+            exit 1
+          fi
+
+      # RouteContext などの型は next typegen が作る。無いと tsc が落ちる
+      - run: npx next typegen
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm test
