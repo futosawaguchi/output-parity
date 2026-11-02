@@ -43,7 +43,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 ## 全部動かす
 
 1. PHP 7.4 と PHP 8.5 を入れます。`samples/estimate/parity.config.jsonc` の `run.environments` に、それぞれのフルパスを書きます（いまは手元の Homebrew のパスが入っています）。作業日報の題材（`samples/worklog/`）は Python 3.10 と 3.12 です
-2. TCPDF を composer で取ってきます。⚠️ **これをしないと、php があっても全部「出力なし」になります**
+2. TCPDF を composer で取ってきます（無いと、実行の前に「実行に要るものがありません」と止まります）
    ```sh
    composer install -d samples/estimate/app/lib-old   # TCPDF 6.2.26
    composer install -d samples/estimate/app/lib-new   # TCPDF 6.3.0
@@ -81,6 +81,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 | `claude.neverRead` | | 原因探しで読ませないパス（`.gitignore` と同じ書き方） |
 | `run.type` | ⭕ | `command`（道具が旧と新のプログラムを動かす）か `files`（出力がもう手元にある。下の「ファイル型」） |
 | `run.cwd` / `run.timeoutMs` | | command のとき。動かす場所（source の中。既定 `.`）／打ち切るまでの時間（既定 30000） |
+| `run.needs` | | command のとき。動かす前にあるはずのもの（source からの相対。例 `["lib-old/vendor"]`）。無ければ実行せず、依存の取り方を出します |
 | `run.environments.old` / `.new` | ⭕ | command のとき。`label`・`command`（フルパス）・`args`（全入力の前に付ける引数）・`env`（その側だけの環境変数） |
 | `output.format` / `output.from` | ⭕ | `pdf`・`text`（ログ・CSV・標準出力など）・`html`（画面に見える文字とフォームの値）／`file`（プログラムが `{output}` に書く）か `stdout` |
 | `output.encoding` | | テキストと HTML の文字コード（既定 `utf-8`。`shift_jis`・`euc-jp` など）。HTML が `<meta charset>` で宣言していれば、そちらを使います |
