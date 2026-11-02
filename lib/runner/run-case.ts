@@ -40,10 +40,22 @@ export async function runCase(
   caseDir: string,
 ): Promise<CaseResult> {
   const slots: SlotResult[] = [];
+  let newStartedAt = 0;
   for (const { slot, env } of SLOTS) {
+    // Timestamps are commonly written with 1-second resolution. If the baseline ran within
+    // the same second as the new run, a timestamp would look stable and later show up as a
+    // false difference between old and new. Keeping them apart makes such values visible.
+    if (slot === "baseline") await sleep(newStartedAt + MIN_BASELINE_GAP_MS - Date.now());
+    if (slot === "new") newStartedAt = Date.now();
     slots.push(await runSlot(config, testCase, cwd, join(caseDir, slot), slot, env));
   }
   return { caseId: testCase.id, slots };
+}
+
+const MIN_BASELINE_GAP_MS = 1100;
+
+function sleep(ms: number): Promise<void> {
+  return ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve();
 }
 
 async function runSlot(
