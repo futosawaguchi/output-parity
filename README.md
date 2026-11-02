@@ -1,6 +1,6 @@
 # output-parity
 
-PHP などの版を上げる前と後で、同じ入力から出した出力（いまは PDF）を比べる道具です。
+PHP や Python などの版を上げる前と後で、同じ入力から出した出力（PDF・テキスト・HTML）を比べる道具です。
 違いが **無害 / 要確認 / 壊れている** のどれかを、人がその場で確かめられる根拠つきで返します。
 壊れていれば、ソースを読んで原因の行を指し、直し方を作業用のコピーに当て、流し直して直ったかを確かめます。
 
@@ -42,7 +42,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 
 ## 全部動かす
 
-1. PHP 7.4 と PHP 8.5 を入れます。`samples/estimate/parity.config.jsonc` の `run.environments` に、それぞれのフルパスを書きます（いまは手元の Homebrew のパスが入っています）
+1. PHP 7.4 と PHP 8.5 を入れます。`samples/estimate/parity.config.jsonc` の `run.environments` に、それぞれのフルパスを書きます（いまは手元の Homebrew のパスが入っています）。作業日報の題材（`samples/worklog/`）は Python 3.10 と 3.12 です
 2. TCPDF を composer で取ってきます。⚠️ **これをしないと、php があっても全部「出力なし」になります**
    ```sh
    composer install -d samples/estimate/app/lib-old   # TCPDF 6.2.26
@@ -55,6 +55,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
    npm run samples              # 実行と比較だけ（Claude を呼ばない）
    npm run samples -- --judge   # 判定まで（Claude を呼ぶ）
    npm run samples -- --subject tcpdf-examples   # TCPDF の公式の例 65 本
+   npm run samples -- --subject worklog          # Python 3.10 → 3.12 の作業日報（CSV・Shift_JIS）
    ```
 
 ## 自分のシステムで試す
@@ -81,7 +82,8 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 | `run.type` | ⭕ | `command`（いまはこれだけ） |
 | `run.cwd` / `run.timeoutMs` | | 動かす場所（source の中。既定 `.`）／打ち切るまでの時間（既定 30000） |
 | `run.environments.old` / `.new` | ⭕ | `label`・`command`（フルパス）・`args`（全入力の前に付ける引数）・`env`（その側だけの環境変数） |
-| `output.format` / `output.from` | ⭕ | `pdf`／`file`（プログラムが `{output}` に書く）か `stdout` |
+| `output.format` / `output.from` | ⭕ | `pdf`・`text`（ログ・CSV・標準出力など）・`html`（画面に見える文字とフォームの値）／`file`（プログラムが `{output}` に書く）か `stdout` |
+| `output.encoding` | | テキストと HTML の文字コード（既定 `utf-8`。`shift_jis`・`euc-jp` など）。HTML が `<meta charset>` で宣言していれば、そちらを使います |
 | `cases[]` | ※ | `id`・`label`・`description`・`args`。`args` の `{output}` は出力ファイルのパスに置き換わります |
 | `caseGroups[]` | ※ | まとめ書き。`each.file`（例 `"example_*.php"`）に当てはまる `run.cwd` のファイルごとに入力を1つ作ります。`id`・`label`・`description`・`args` の `{file}` はファイル名、`{name}` は拡張子を除いた名前に置き換わります（既定は id `{name}`・label `{file}`） |
 
@@ -112,6 +114,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 
 - **読ませない範囲**: `.env`・鍵・証明書・`.git` などは、設定にかかわらず読ませません。`claude.neverRead` で足せます（減らせません）。リンクは実体の場所で判断します
 - **判定の件数の守り**: Claude を呼ぶのは、機械で決まらなかった入力だけです（差なし・出力なし・読めないは機械が決めます）。1件につき1回呼び、新しい出力の全文を送ります。それが **10 件を超えるときは1件も送らずに止め**、件数を見せて、押されてから送ります（コマンドでは `--judge-all`）
+- **長い出力**: 判定には新しい出力の全文を送ります。ただし 10 万字を超えるときは、変わった行の前後 30 行ずつだけを送り、そのことをプロンプトと画面に書きます
 - **伏せ字**: 送る前に、パスワード・キー・トークンらしい値を `***` にします。⚠️ **これは網であって保証ではありません。** 名前も決まった形も無いパスワードは通ります
 - **送った全文を残します**: `runs/sent/` に、伏せ字のあとの全文を残します。画面の各結果からも開けます
 - **試すプログラムに渡す環境変数**: `PATH`・`HOME`・ロケールなど起動に要るものと、設定の `env` だけです。API キーは渡しません
@@ -124,7 +127,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 
 ```
 実行     旧の環境で1回・新の環境で2回、同じ入力から流す       機械
-変換     出力をテキストにする（PDF は pdfjs）               機械  ← 形式に依存するのはここだけ
+変換     出力をテキストの行にする（PDF は pdfjs・HTML は見える文字とフォームの値・テキストはそのまま）  機械  ← 形式に依存するのはここだけ
 揺れ     新の2回で毎回変わる部分（日時・ID）を学んで伏せる    機械
 比較     残った差を行で取る                                機械
 判定     無害 / 要確認 / 壊れている と根拠                  Claude（差なし・落ちた・読めない は機械）
@@ -158,13 +161,15 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 
 <!-- 11/6 に仕上げる -->
 
-- 形式に依存するのは「変換」の1か所だけです。比較・揺れ・判定・原因は、テキストの行しか見ません
+- 形式に依存するのは「変換」の1か所だけです。比較・揺れ・判定・原因は、テキストの行しか見ません。形式を足すのは `lib/compare/` にファイルを1つ足すことです（PDF・テキスト・HTML）
+- 言語にも依存しません。設定ファイルの `command` を変えるだけで、PHP の題材と Python の題材が同じ道具で動きます（`samples/worklog/`）
 - 判定と原因探しのプロンプトに、見積書や PHP に固有の語は書いていません
 
 ## サンプルについて
 
 - 同梱の見積書と入力データは、**この作品のために作った架空のもの**です。実在の取引先・案件・金額は含みません
 - PDF ライブラリは本物の公開 OSS です（TCPDF 6.2.26 / 6.3.0、FPDI 1.6.2）。アプリ（`samples/estimate/app/estimate.php`）は自分で書きました
+- 作業日報の題材（`samples/worklog/`）も架空です。Python 3.11 で `datetime.fromisoformat` が受け付ける日付の形が広がったため、3.10 では読めずに飛ばされていた行が、3.12 では集計に入ります。落ちず、警告も出ず、合計だけが変わります
 - もう1つの題材は、TCPDF 6.3.0 に付属する公式の例 65 本そのものです（書き換えずに動かします）。手元の測定では 64 本が差なし、`example_050`（2次元バーコード PDF417）だけが PHP 8.5 で構文エラーになり、PDF が出ません。この題材は同梱していません（composer で取得します）
 - TCPDF は LGPL-3.0 です。MIT のこのリポジトリに実体を入れないよう、`vendor/` は同梱せず composer で取得します。古い版を使うので、composer の脆弱性の勧告はパッケージ名で無視しています
 
