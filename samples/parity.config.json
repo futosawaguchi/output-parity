@@ -1,0 +1,15 @@
+{
+  "name": "見積書 estimate.php（PHP 7.4 → 8.5）",
+  "environments": {
+    "old": { "label": "PHP 7.4", "command": "/opt/homebrew/opt/php@7.4/bin/php" },
+    "new": { "label": "PHP 8.5", "command": "/opt/homebrew/bin/php" }
+  },
+  "output": { "format": "pdf", "source": "file" },
+  "timeoutMs": 30000,
+  "cases": [
+    { "id": "1-harmless", "args": ["estimate.php", "lib-new", "data/1-harmless.json", "{output}"] },
+    { "id": "2a-harmless", "args": ["estimate.php", "lib-new", "data/2a-harmless.json", "{output}"] },
+    { "id": "2b-fatal", "args": ["estimate.php", "lib-new", "data/2b-fatal.json", "{output}"] },
+    { "id": "3-crash", "args": ["estimate.php", "lib-old", "data/3-crash.json", "{output}"] }
+  ]
+}
