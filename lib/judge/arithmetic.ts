@@ -62,6 +62,9 @@ function checkChain(tokens: Token[]): ArithmeticCheck[] {
         if (gap) {
           checks.push({ text: `|${left.text} − ${right.text}| = ${gap.text}`, ok: same(Math.abs(left.value - right.value), gap.value) });
           i = gap.end;
+          // "（差 e = a + b）" goes on about the gap, not about the right-hand side.
+          left = gap;
+          continue;
         }
       }
       left = right;
