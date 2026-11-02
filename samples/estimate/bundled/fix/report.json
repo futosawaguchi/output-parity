@@ -14,8 +14,8 @@
     }
   },
   "outputFormat": "pdf",
-  "startedAt": "2026-11-02T11:20:56.819Z",
-  "finishedAt": "2026-11-02T11:21:02.708Z",
+  "startedAt": "2026-11-02T12:02:33.285Z",
+  "finishedAt": "2026-11-02T12:02:39.320Z",
   "cases": [
     {
       "caseId": "case-a",
@@ -30,13 +30,13 @@
             "estimate.php",
             "lib-new",
             "data/case-a.json",
-            "runs/2026-11-02_20-20-02-83cc/case-a/old/output.pdf"
+            "runs/2026-11-02_21-01-46-08aa/case-a/old/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 302,
+          "durationMs": 265,
           "outputPath": "case-a/old/output.pdf",
           "stdoutPath": "case-a/old/stdout.txt",
           "stderrPath": "case-a/old/stderr.txt"
@@ -55,7 +55,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 231,
+          "durationMs": 269,
           "outputPath": "case-a/new/output.pdf",
           "stdoutPath": "case-a/new/stdout.txt",
           "stderrPath": "case-a/new/stderr.txt"
@@ -74,7 +74,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 124,
+          "durationMs": 123,
           "outputPath": "case-a/baseline/output.pdf",
           "stdoutPath": "case-a/baseline/stdout.txt",
           "stderrPath": "case-a/baseline/stderr.txt"
@@ -84,8 +84,8 @@
         "kind": "compared",
         "old": {
           "lines": [
-            "meta CreationDate: D:20261102112002+00'00'",
-            "meta ModDate: D:20261102112002+00'00'",
+            "meta CreationDate: D:20261102120146+00'00'",
+            "meta ModDate: D:20261102120146+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -97,13 +97,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T11:20:02+00:00",
+            "xmp xmp:createdate: 2026-11-02T12:01:46+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T11:20:02+00:00",
-            "xmp xmp:modifydate: 2026-11-02T11:20:02+00:00",
-            "xmp xmpmm:documentid: uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946",
-            "xmp xmpmm:instanceid: uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946",
-            "id 0: 2ef70a27fefd9bdddadf4e261e06e946",
+            "xmp xmp:metadatadate: 2026-11-02T12:01:46+00:00",
+            "xmp xmp:modifydate: 2026-11-02T12:01:46+00:00",
+            "xmp xmpmm:documentid: uuid:48dd3d4d-0af3-8943-efe6-94975e7eba5a",
+            "xmp xmpmm:instanceid: uuid:48dd3d4d-0af3-8943-efe6-94975e7eba5a",
+            "id 0: 48dd3d4d0af38943efe694975e7eba5a",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -131,8 +131,8 @@
         },
         "new": {
           "lines": [
-            "meta CreationDate: D:20261102112057+00'00'",
-            "meta ModDate: D:20261102112057+00'00'",
+            "meta CreationDate: D:20261102120233+00'00'",
+            "meta ModDate: D:20261102120233+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -144,13 +144,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T11:20:57+00:00",
+            "xmp xmp:createdate: 2026-11-02T12:02:33+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T11:20:57+00:00",
-            "xmp xmp:modifydate: 2026-11-02T11:20:57+00:00",
-            "xmp xmpmm:documentid: uuid:2eaad5bb-a1bf-c1b7-948f-aad0b8b0b652",
-            "xmp xmpmm:instanceid: uuid:2eaad5bb-a1bf-c1b7-948f-aad0b8b0b652",
-            "id 0: 2eaad5bba1bfc1b7948faad0b8b0b652",
+            "xmp xmp:metadatadate: 2026-11-02T12:02:33+00:00",
+            "xmp xmp:modifydate: 2026-11-02T12:02:33+00:00",
+            "xmp xmpmm:documentid: uuid:68ffd082-0678-f7dc-261a-bc80a4f7472c",
+            "xmp xmpmm:instanceid: uuid:68ffd082-0678-f7dc-261a-bc80a4f7472c",
+            "id 0: 68ffd0820678f7dc261abc80a4f7472c",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -183,43 +183,43 @@
           {
             "oldStart": 0,
             "oldLines": [
-              "meta CreationDate: D:20261102112002+00'00'",
-              "meta ModDate: D:20261102112002+00'00'"
+              "meta CreationDate: D:20261102120146+00'00'",
+              "meta ModDate: D:20261102120146+00'00'"
             ],
             "newStart": 0,
             "newLines": [
-              "meta CreationDate: D:20261102112057+00'00'",
-              "meta ModDate: D:20261102112057+00'00'"
+              "meta CreationDate: D:20261102120233+00'00'",
+              "meta ModDate: D:20261102120233+00'00'"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 13,
             "oldLines": [
-              "xmp xmp:createdate: 2026-11-02T11:20:02+00:00"
+              "xmp xmp:createdate: 2026-11-02T12:01:46+00:00"
             ],
             "newStart": 13,
             "newLines": [
-              "xmp xmp:createdate: 2026-11-02T11:20:57+00:00"
+              "xmp xmp:createdate: 2026-11-02T12:02:33+00:00"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 15,
             "oldLines": [
-              "xmp xmp:metadatadate: 2026-11-02T11:20:02+00:00",
-              "xmp xmp:modifydate: 2026-11-02T11:20:02+00:00",
-              "xmp xmpmm:documentid: uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946",
-              "xmp xmpmm:instanceid: uuid:2ef70a27-fefd-9bdd-dadf-4e261e06e946",
-              "id 0: 2ef70a27fefd9bdddadf4e261e06e946"
+              "xmp xmp:metadatadate: 2026-11-02T12:01:46+00:00",
+              "xmp xmp:modifydate: 2026-11-02T12:01:46+00:00",
+              "xmp xmpmm:documentid: uuid:48dd3d4d-0af3-8943-efe6-94975e7eba5a",
+              "xmp xmpmm:instanceid: uuid:48dd3d4d-0af3-8943-efe6-94975e7eba5a",
+              "id 0: 48dd3d4d0af38943efe694975e7eba5a"
             ],
             "newStart": 15,
             "newLines": [
-              "xmp xmp:metadatadate: 2026-11-02T11:20:57+00:00",
-              "xmp xmp:modifydate: 2026-11-02T11:20:57+00:00",
-              "xmp xmpmm:documentid: uuid:2eaad5bb-a1bf-c1b7-948f-aad0b8b0b652",
-              "xmp xmpmm:instanceid: uuid:2eaad5bb-a1bf-c1b7-948f-aad0b8b0b652",
-              "id 0: 2eaad5bba1bfc1b7948faad0b8b0b652"
+              "xmp xmp:metadatadate: 2026-11-02T12:02:33+00:00",
+              "xmp xmp:modifydate: 2026-11-02T12:02:33+00:00",
+              "xmp xmpmm:documentid: uuid:68ffd082-0678-f7dc-261a-bc80a4f7472c",
+              "xmp xmpmm:instanceid: uuid:68ffd082-0678-f7dc-261a-bc80a4f7472c",
+              "id 0: 68ffd0820678f7dc261abc80a4f7472c"
             ],
             "explainedByBaseline": true
           }
@@ -231,14 +231,14 @@
         "differingLines": 18,
         "totalLines": 160,
         "excerpt": [
-          "< << /Type /Page /Parent 1 0 R /LastModified (D:20261102112002+00'00') /Resources 2 0 R /MediaBox [0…",
-          "> << /Type /Page /Parent 1 0 R /LastModified (D:20261102112057+00'00') /Resources 2 0 R /MediaBox [0…",
+          "< << /Type /Page /Parent 1 0 R /LastModified (D:20261102120146+00'00') /Resources 2 0 R /MediaBox [0…",
+          "> << /Type /Page /Parent 1 0 R /LastModified (D:20261102120233+00'00') /Resources 2 0 R /MediaBox [0…",
           "< <</Type /Annot /Subtype /Link /Rect [2.835000 1.000000 19.005000 2.156000] /P 6 0 R /NM (0001-0000…",
           "> <</Type /Annot /Subtype /Link /Rect [2.835000 1.000000 19.005000 2.156000] /P 6 0 R /NM (0001-0000…",
           "< << /Producer (···T·C·P·D·F· ·6·.·2·.·2·6· ·\\(·h·t·t·p·:·/·/·w·w·w·.·t·c·p·d·f·.·o·r·g·\\)) /Creatio…",
           "> << /Producer (···T·C·P·D·F· ·6·.·2·.·2·6· ·\\(·h·t·t·p·:·/·/·w·w·w·.·t·c·p·d·f·.·o·r·g·\\)) /Creatio…",
-          "< ···<xmp:CreateDate>2026-11-02T11:20:02+00:00</xmp:CreateDate>",
-          "> ···<xmp:CreateDate>2026-11-02T11:20:57+00:00</xmp:CreateDate>"
+          "< ···<xmp:CreateDate>2026-11-02T12:01:46+00:00</xmp:CreateDate>",
+          "> ···<xmp:CreateDate>2026-11-02T12:02:33+00:00</xmp:CreateDate>"
         ]
       },
       "verdict": {
@@ -264,13 +264,13 @@
             "estimate.php",
             "lib-new",
             "data/case-b.json",
-            "runs/2026-11-02_20-20-02-83cc/case-b/old/output.pdf"
+            "runs/2026-11-02_21-01-46-08aa/case-b/old/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 140,
+          "durationMs": 280,
           "outputPath": "case-b/old/output.pdf",
           "stdoutPath": "case-b/old/stdout.txt",
           "stderrPath": "case-b/old/stderr.txt"
@@ -289,7 +289,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 118,
+          "durationMs": 138,
           "outputPath": "case-b/new/output.pdf",
           "stdoutPath": "case-b/new/stdout.txt",
           "stderrPath": "case-b/new/stderr.txt"
@@ -308,7 +308,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 116,
+          "durationMs": 164,
           "outputPath": "case-b/baseline/output.pdf",
           "stdoutPath": "case-b/baseline/stdout.txt",
           "stderrPath": "case-b/baseline/stderr.txt"
@@ -318,8 +318,8 @@
         "kind": "compared",
         "old": {
           "lines": [
-            "meta CreationDate: D:20261102112004+00'00'",
-            "meta ModDate: D:20261102112004+00'00'",
+            "meta CreationDate: D:20261102120149+00'00'",
+            "meta ModDate: D:20261102120149+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -331,13 +331,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T11:20:04+00:00",
+            "xmp xmp:createdate: 2026-11-02T12:01:49+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T11:20:04+00:00",
-            "xmp xmp:modifydate: 2026-11-02T11:20:04+00:00",
-            "xmp xmpmm:documentid: uuid:c1276195-f294-9273-3dd3-df2fc79f6418",
-            "xmp xmpmm:instanceid: uuid:c1276195-f294-9273-3dd3-df2fc79f6418",
-            "id 0: c1276195f29492733dd3df2fc79f6418",
+            "xmp xmp:metadatadate: 2026-11-02T12:01:49+00:00",
+            "xmp xmp:modifydate: 2026-11-02T12:01:49+00:00",
+            "xmp xmpmm:documentid: uuid:d12c8bc5-1241-2f5e-9d78-ef7cd5681b1e",
+            "xmp xmpmm:instanceid: uuid:d12c8bc5-1241-2f5e-9d78-ef7cd5681b1e",
+            "id 0: d12c8bc512412f5e9d78ef7cd5681b1e",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -367,8 +367,8 @@
         },
         "new": {
           "lines": [
-            "meta CreationDate: D:20261102112058+00'00'",
-            "meta ModDate: D:20261102112058+00'00'",
+            "meta CreationDate: D:20261102120235+00'00'",
+            "meta ModDate: D:20261102120235+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -380,13 +380,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T11:20:58+00:00",
+            "xmp xmp:createdate: 2026-11-02T12:02:35+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T11:20:58+00:00",
-            "xmp xmp:modifydate: 2026-11-02T11:20:58+00:00",
-            "xmp xmpmm:documentid: uuid:bdabec5e-498e-81cf-f69d-17c21f9c1f2f",
-            "xmp xmpmm:instanceid: uuid:bdabec5e-498e-81cf-f69d-17c21f9c1f2f",
-            "id 0: bdabec5e498e81cff69d17c21f9c1f2f",
+            "xmp xmp:metadatadate: 2026-11-02T12:02:35+00:00",
+            "xmp xmp:modifydate: 2026-11-02T12:02:35+00:00",
+            "xmp xmpmm:documentid: uuid:92f938ac-f7c5-8a71-1f1a-4b49a850946e",
+            "xmp xmpmm:instanceid: uuid:92f938ac-f7c5-8a71-1f1a-4b49a850946e",
+            "id 0: 92f938acf7c58a711f1a4b49a850946e",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -421,43 +421,43 @@
           {
             "oldStart": 0,
             "oldLines": [
-              "meta CreationDate: D:20261102112004+00'00'",
-              "meta ModDate: D:20261102112004+00'00'"
+              "meta CreationDate: D:20261102120149+00'00'",
+              "meta ModDate: D:20261102120149+00'00'"
             ],
             "newStart": 0,
             "newLines": [
-              "meta CreationDate: D:20261102112058+00'00'",
-              "meta ModDate: D:20261102112058+00'00'"
+              "meta CreationDate: D:20261102120235+00'00'",
+              "meta ModDate: D:20261102120235+00'00'"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 13,
             "oldLines": [
-              "xmp xmp:createdate: 2026-11-02T11:20:04+00:00"
+              "xmp xmp:createdate: 2026-11-02T12:01:49+00:00"
             ],
             "newStart": 13,
             "newLines": [
-              "xmp xmp:createdate: 2026-11-02T11:20:58+00:00"
+              "xmp xmp:createdate: 2026-11-02T12:02:35+00:00"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 15,
             "oldLines": [
-              "xmp xmp:metadatadate: 2026-11-02T11:20:04+00:00",
-              "xmp xmp:modifydate: 2026-11-02T11:20:04+00:00",
-              "xmp xmpmm:documentid: uuid:c1276195-f294-9273-3dd3-df2fc79f6418",
-              "xmp xmpmm:instanceid: uuid:c1276195-f294-9273-3dd3-df2fc79f6418",
-              "id 0: c1276195f29492733dd3df2fc79f6418"
+              "xmp xmp:metadatadate: 2026-11-02T12:01:49+00:00",
+              "xmp xmp:modifydate: 2026-11-02T12:01:49+00:00",
+              "xmp xmpmm:documentid: uuid:d12c8bc5-1241-2f5e-9d78-ef7cd5681b1e",
+              "xmp xmpmm:instanceid: uuid:d12c8bc5-1241-2f5e-9d78-ef7cd5681b1e",
+              "id 0: d12c8bc512412f5e9d78ef7cd5681b1e"
             ],
             "newStart": 15,
             "newLines": [
-              "xmp xmp:metadatadate: 2026-11-02T11:20:58+00:00",
-              "xmp xmp:modifydate: 2026-11-02T11:20:58+00:00",
-              "xmp xmpmm:documentid: uuid:bdabec5e-498e-81cf-f69d-17c21f9c1f2f",
-              "xmp xmpmm:instanceid: uuid:bdabec5e-498e-81cf-f69d-17c21f9c1f2f",
-              "id 0: bdabec5e498e81cff69d17c21f9c1f2f"
+              "xmp xmp:metadatadate: 2026-11-02T12:02:35+00:00",
+              "xmp xmp:modifydate: 2026-11-02T12:02:35+00:00",
+              "xmp xmpmm:documentid: uuid:92f938ac-f7c5-8a71-1f1a-4b49a850946e",
+              "xmp xmpmm:instanceid: uuid:92f938ac-f7c5-8a71-1f1a-4b49a850946e",
+              "id 0: 92f938acf7c58a711f1a4b49a850946e"
             ],
             "explainedByBaseline": true
           }
@@ -469,14 +469,14 @@
         "differingLines": 18,
         "totalLines": 162,
         "excerpt": [
-          "< << /Type /Page /Parent 1 0 R /LastModified (D:20261102112004+00'00') /Resources 2 0 R /MediaBox [0…",
-          "> << /Type /Page /Parent 1 0 R /LastModified (D:20261102112058+00'00') /Resources 2 0 R /MediaBox [0…",
+          "< << /Type /Page /Parent 1 0 R /LastModified (D:20261102120149+00'00') /Resources 2 0 R /MediaBox [0…",
+          "> << /Type /Page /Parent 1 0 R /LastModified (D:20261102120235+00'00') /Resources 2 0 R /MediaBox [0…",
           "< <</Type /Annot /Subtype /Link /Rect [2.835000 1.000000 19.005000 2.156000] /P 6 0 R /NM (0001-0000…",
           "> <</Type /Annot /Subtype /Link /Rect [2.835000 1.000000 19.005000 2.156000] /P 6 0 R /NM (0001-0000…",
           "< << /Producer (···T·C·P·D·F· ·6·.·2·.·2·6· ·\\(·h·t·t·p·:·/·/·w·w·w·.·t·c·p·d·f·.·o·r·g·\\)) /Creatio…",
           "> << /Producer (···T·C·P·D·F· ·6·.·2·.·2·6· ·\\(·h·t·t·p·:·/·/·w·w·w·.·t·c·p·d·f·.·o·r·g·\\)) /Creatio…",
-          "< ···<xmp:CreateDate>2026-11-02T11:20:04+00:00</xmp:CreateDate>",
-          "> ···<xmp:CreateDate>2026-11-02T11:20:58+00:00</xmp:CreateDate>"
+          "< ···<xmp:CreateDate>2026-11-02T12:01:49+00:00</xmp:CreateDate>",
+          "> ···<xmp:CreateDate>2026-11-02T12:02:35+00:00</xmp:CreateDate>"
         ]
       },
       "verdict": {
@@ -502,13 +502,13 @@
             "estimate.php",
             "lib-new",
             "data/case-c.json",
-            "runs/2026-11-02_20-20-02-83cc/case-c/old/output.pdf"
+            "runs/2026-11-02_21-01-46-08aa/case-c/old/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 145,
+          "durationMs": 144,
           "outputPath": "case-c/old/output.pdf",
           "stdoutPath": "case-c/old/stdout.txt",
           "stderrPath": "case-c/old/stderr.txt"
@@ -527,7 +527,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 154,
+          "durationMs": 234,
           "outputPath": "case-c/new/output.pdf",
           "stdoutPath": "case-c/new/stdout.txt",
           "stderrPath": "case-c/new/stderr.txt"
@@ -546,7 +546,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 138,
+          "durationMs": 134,
           "outputPath": "case-c/baseline/output.pdf",
           "stdoutPath": "case-c/baseline/stdout.txt",
           "stderrPath": "case-c/baseline/stderr.txt"
@@ -556,8 +556,8 @@
         "kind": "compared",
         "old": {
           "lines": [
-            "meta CreationDate: D:20261102112017+00'00'",
-            "meta ModDate: D:20261102112017+00'00'",
+            "meta CreationDate: D:20261102120202+00'00'",
+            "meta ModDate: D:20261102120202+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -569,13 +569,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T11:20:17+00:00",
+            "xmp xmp:createdate: 2026-11-02T12:02:02+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T11:20:17+00:00",
-            "xmp xmp:modifydate: 2026-11-02T11:20:17+00:00",
-            "xmp xmpmm:documentid: uuid:177d67de-e2aa-8712-32f1-021b4a5d9d6d",
-            "xmp xmpmm:instanceid: uuid:177d67de-e2aa-8712-32f1-021b4a5d9d6d",
-            "id 0: 177d67dee2aa871232f1021b4a5d9d6d",
+            "xmp xmp:metadatadate: 2026-11-02T12:02:02+00:00",
+            "xmp xmp:modifydate: 2026-11-02T12:02:02+00:00",
+            "xmp xmpmm:documentid: uuid:510871ee-9b69-8e5c-cc40-55052e7a397e",
+            "xmp xmpmm:instanceid: uuid:510871ee-9b69-8e5c-cc40-55052e7a397e",
+            "id 0: 510871ee9b698e5ccc4055052e7a397e",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -605,8 +605,8 @@
         },
         "new": {
           "lines": [
-            "meta CreationDate: D:20261102112059+00'00'",
-            "meta ModDate: D:20261102112059+00'00'",
+            "meta CreationDate: D:20261102120236+00'00'",
+            "meta ModDate: D:20261102120236+00'00'",
             "meta PDFFormatVersion: 1.7",
             "meta Producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "meta Trapped: False",
@@ -618,13 +618,13 @@
             "xmp pdf:keywords: ",
             "xmp pdf:producer: TCPDF 6.2.26 (http://www.tcpdf.org)",
             "xmp pdfaextension:schemas: http://ns.adobe.com/pdf/1.3/pdfAdobe PDF Schemahttp://ns.adobe.com/xap/1.0/mm/xmpMMXMP Media Management SchemainternalUUID based identifier for specific incarnation of a documentInstanceIDURIhttp://www.aiim.org/pdfa/ns/id/pdfaidPDF/A ID SchemainternalPart of PDF/A standardpartIntegerinternalAmendment of PDF/A standardamdTextinternalConformance level of PDF/A standardconformanceText",
-            "xmp xmp:createdate: 2026-11-02T11:20:59+00:00",
+            "xmp xmp:createdate: 2026-11-02T12:02:36+00:00",
             "xmp xmp:creatortool: ",
-            "xmp xmp:metadatadate: 2026-11-02T11:20:59+00:00",
-            "xmp xmp:modifydate: 2026-11-02T11:20:59+00:00",
-            "xmp xmpmm:documentid: uuid:a02474d4-763c-6020-1b62-c28060bda806",
-            "xmp xmpmm:instanceid: uuid:a02474d4-763c-6020-1b62-c28060bda806",
-            "id 0: a02474d4763c60201b62c28060bda806",
+            "xmp xmp:metadatadate: 2026-11-02T12:02:36+00:00",
+            "xmp xmp:modifydate: 2026-11-02T12:02:36+00:00",
+            "xmp xmpmm:documentid: uuid:b44238ff-579f-6482-b608-19accf615fa9",
+            "xmp xmpmm:instanceid: uuid:b44238ff-579f-6482-b608-19accf615fa9",
+            "id 0: b44238ff579f6482b60819accf615fa9",
             "--- page 1 ---",
             "見積書",
             "見積番号: Q-0001",
@@ -659,43 +659,43 @@
           {
             "oldStart": 0,
             "oldLines": [
-              "meta CreationDate: D:20261102112017+00'00'",
-              "meta ModDate: D:20261102112017+00'00'"
+              "meta CreationDate: D:20261102120202+00'00'",
+              "meta ModDate: D:20261102120202+00'00'"
             ],
             "newStart": 0,
             "newLines": [
-              "meta CreationDate: D:20261102112059+00'00'",
-              "meta ModDate: D:20261102112059+00'00'"
+              "meta CreationDate: D:20261102120236+00'00'",
+              "meta ModDate: D:20261102120236+00'00'"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 13,
             "oldLines": [
-              "xmp xmp:createdate: 2026-11-02T11:20:17+00:00"
+              "xmp xmp:createdate: 2026-11-02T12:02:02+00:00"
             ],
             "newStart": 13,
             "newLines": [
-              "xmp xmp:createdate: 2026-11-02T11:20:59+00:00"
+              "xmp xmp:createdate: 2026-11-02T12:02:36+00:00"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 15,
             "oldLines": [
-              "xmp xmp:metadatadate: 2026-11-02T11:20:17+00:00",
-              "xmp xmp:modifydate: 2026-11-02T11:20:17+00:00",
-              "xmp xmpmm:documentid: uuid:177d67de-e2aa-8712-32f1-021b4a5d9d6d",
-              "xmp xmpmm:instanceid: uuid:177d67de-e2aa-8712-32f1-021b4a5d9d6d",
-              "id 0: 177d67dee2aa871232f1021b4a5d9d6d"
+              "xmp xmp:metadatadate: 2026-11-02T12:02:02+00:00",
+              "xmp xmp:modifydate: 2026-11-02T12:02:02+00:00",
+              "xmp xmpmm:documentid: uuid:510871ee-9b69-8e5c-cc40-55052e7a397e",
+              "xmp xmpmm:instanceid: uuid:510871ee-9b69-8e5c-cc40-55052e7a397e",
+              "id 0: 510871ee9b698e5ccc4055052e7a397e"
             ],
             "newStart": 15,
             "newLines": [
-              "xmp xmp:metadatadate: 2026-11-02T11:20:59+00:00",
-              "xmp xmp:modifydate: 2026-11-02T11:20:59+00:00",
-              "xmp xmpmm:documentid: uuid:a02474d4-763c-6020-1b62-c28060bda806",
-              "xmp xmpmm:instanceid: uuid:a02474d4-763c-6020-1b62-c28060bda806",
-              "id 0: a02474d4763c60201b62c28060bda806"
+              "xmp xmp:metadatadate: 2026-11-02T12:02:36+00:00",
+              "xmp xmp:modifydate: 2026-11-02T12:02:36+00:00",
+              "xmp xmpmm:documentid: uuid:b44238ff-579f-6482-b608-19accf615fa9",
+              "xmp xmpmm:instanceid: uuid:b44238ff-579f-6482-b608-19accf615fa9",
+              "id 0: b44238ff579f6482b60819accf615fa9"
             ],
             "explainedByBaseline": true
           }
@@ -707,14 +707,14 @@
         "differingLines": 18,
         "totalLines": 162,
         "excerpt": [
-          "< << /Type /Page /Parent 1 0 R /LastModified (D:20261102112017+00'00') /Resources 2 0 R /MediaBox [0…",
-          "> << /Type /Page /Parent 1 0 R /LastModified (D:20261102112059+00'00') /Resources 2 0 R /MediaBox [0…",
+          "< << /Type /Page /Parent 1 0 R /LastModified (D:20261102120202+00'00') /Resources 2 0 R /MediaBox [0…",
+          "> << /Type /Page /Parent 1 0 R /LastModified (D:20261102120236+00'00') /Resources 2 0 R /MediaBox [0…",
           "< <</Type /Annot /Subtype /Link /Rect [2.835000 1.000000 19.005000 2.156000] /P 6 0 R /NM (0001-0000…",
           "> <</Type /Annot /Subtype /Link /Rect [2.835000 1.000000 19.005000 2.156000] /P 6 0 R /NM (0001-0000…",
           "< << /Producer (···T·C·P·D·F· ·6·.·2·.·2·6· ·\\(·h·t·t·p·:·/·/·w·w·w·.·t·c·p·d·f·.·o·r·g·\\)) /Creatio…",
           "> << /Producer (···T·C·P·D·F· ·6·.·2·.·2·6· ·\\(·h·t·t·p·:·/·/·w·w·w·.·t·c·p·d·f·.·o·r·g·\\)) /Creatio…",
-          "< ···<xmp:CreateDate>2026-11-02T11:20:17+00:00</xmp:CreateDate>",
-          "> ···<xmp:CreateDate>2026-11-02T11:20:59+00:00</xmp:CreateDate>"
+          "< ···<xmp:CreateDate>2026-11-02T12:02:02+00:00</xmp:CreateDate>",
+          "> ···<xmp:CreateDate>2026-11-02T12:02:36+00:00</xmp:CreateDate>"
         ]
       },
       "verdict": {
@@ -740,13 +740,13 @@
             "estimate.php",
             "lib-old",
             "data/case-d.json",
-            "runs/2026-11-02_20-20-02-83cc/case-d/old/output.pdf"
+            "runs/2026-11-02_21-01-46-08aa/case-d/old/output.pdf"
           ],
           "outcome": {
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 197,
+          "durationMs": 151,
           "outputPath": "case-d/old/output.pdf",
           "stdoutPath": "case-d/old/stdout.txt",
           "stderrPath": "case-d/old/stderr.txt"
@@ -765,7 +765,7 @@
             "kind": "exited",
             "exitCode": 255
           },
-          "durationMs": 183,
+          "durationMs": 98,
           "outputPath": null,
           "stdoutPath": "case-d/new/stdout.txt",
           "stderrPath": "case-d/new/stderr.txt"
@@ -784,7 +784,7 @@
             "kind": "exited",
             "exitCode": 255
           },
-          "durationMs": 120,
+          "durationMs": 98,
           "outputPath": null,
           "stdoutPath": "case-d/baseline/stdout.txt",
           "stderrPath": "case-d/baseline/stderr.txt"
@@ -825,7 +825,7 @@
     "edit": {
       "file": "estimate.php",
       "oldText": "if ($r['deleted'] == 0) {",
-      "newText": "if ((int)$r['deleted'] === 0) {"
+      "newText": "if ((int)$r['deleted'] == 0) {"
     },
     "applied": {
       "kind": "applied",
