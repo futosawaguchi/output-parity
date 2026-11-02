@@ -63,3 +63,18 @@ test("a command that does not exist is reported, not thrown", async () => {
   });
   assert.equal(r.outcome.kind, "spawnFailed");
 });
+
+test("the program under test does not see the API key or anything else of the tool's", async () => {
+  process.env.ANTHROPIC_API_KEY = "test-not-a-real-key";
+  process.env.OUTPUT_PARITY_SECRET = "x";
+  try {
+    const r = await run("process.stdout.write(JSON.stringify(Object.keys(process.env)))");
+    const names: string[] = JSON.parse(r.stdout.toString());
+    assert.ok(!names.includes("ANTHROPIC_API_KEY"));
+    assert.ok(!names.includes("OUTPUT_PARITY_SECRET"));
+    assert.ok(names.includes("PATH"));
+  } finally {
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.OUTPUT_PARITY_SECRET;
+  }
+});

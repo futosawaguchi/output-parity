@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { createWriteStream, type WriteStream } from "node:fs";
+import { childEnv } from "./child-env";
 import type { ExecOutcome } from "./outcome";
 
 export type { ExecOutcome } from "./outcome";
@@ -16,6 +17,8 @@ export type ExecRequest = {
   maxStdoutBytes: number;
   /** stderr is only evidence: beyond this it is cut, and the program keeps running. */
   maxStderrBytes: number;
+  /** Environment variables to set, on top of the few passed through (child-env.ts). */
+  env?: Record<string, string>;
 };
 
 export type ExecResult = {
@@ -43,7 +46,13 @@ export function execOnce(req: ExecRequest): Promise<ExecResult> {
     let spawnError: NodeJS.ErrnoException | null = null;
     let finished = false;
 
-    const child = spawn(req.command, req.args, { cwd: req.cwd, shell: false, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(req.command, req.args, {
+      cwd: req.cwd,
+      shell: false,
+      stdio: ["ignore", "pipe", "pipe"],
+      // Next.js types ProcessEnv with a required NODE_ENV; a child needs no such thing.
+      env: childEnv(req.env) as NodeJS.ProcessEnv,
+    });
     const timer = setTimeout(() => {
       timedOut = true;
       child.kill("SIGKILL");
