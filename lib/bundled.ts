@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute, join } from "node:path";
+import { findSubjectDir } from "./subject";
 import type { RunReport } from "./pipeline";
 
 // The run that ships with the repository (DESIGN 7-2b), so the report can be seen without
@@ -8,8 +9,10 @@ import type { RunReport } from "./pipeline";
 /** Stands in for a run id: the outputs route serves this one from the bundle, not from runs/. */
 export const BUNDLED_RUN_ID = "bundled";
 
-export function bundledDir(root: string): string {
-  return join(root, "samples", "bundled");
+/** The bundled run of a subject: <subject>/bundled/. It may not exist. Found without reading the settings. */
+export async function bundledDir(root: string, subjectId?: string): Promise<string | null> {
+  const dir = await findSubjectDir(root, subjectId);
+  return dir && join(dir, "bundled");
 }
 
 /**
@@ -17,8 +20,9 @@ export function bundledDir(root: string): string {
  * to the bundle so that no one's home directory ends up in the repository.
  * null when there is no bundle.
  */
-export async function loadBundledReport(root: string): Promise<RunReport | null> {
-  const dir = bundledDir(root);
+export async function loadBundledReport(root: string, subjectId?: string): Promise<RunReport | null> {
+  const dir = await bundledDir(root, subjectId);
+  if (!dir) return null;
   const text = await readFile(join(dir, "report.json"), "utf8").catch(() => null);
   if (text === null) return null;
   const report: RunReport = { ...(JSON.parse(text) as RunReport), origin: "bundled" };

@@ -1,7 +1,8 @@
-// Copies one finished run into samples/bundled/, the run that ships with the repository so that
-// the report can be seen without PHP, composer or an API key (DESIGN 7-2b).
-// Usage: npm run bundle                   the newest run in which every case was judged
-//        npm run bundle -- <run id>       a specific run under runs/
+// Copies one finished run into samples/<subject>/bundled/, the run that ships with the repository
+// so that the report can be seen without PHP, composer or an API key (DESIGN 7-2b).
+// Usage: npm run bundle                          the newest run in which every case was judged
+//        npm run bundle -- <run id>              a specific run under runs/
+//        npm run bundle -- --subject <name> ...  a subject other than estimate
 //
 // Paths are rewritten relative to the bundle, and the result is checked for the home directory:
 // the bundle is committed to a public repository.
@@ -15,10 +16,14 @@ import { RUN_ID_PATTERN } from "../lib/runner/run-dir";
 
 const root = process.cwd();
 const runsRoot = join(root, "runs");
-const outDir = bundledDir(root);
 
 async function main(): Promise<void> {
-  const runId = process.argv[2] ?? (await newestJudgedRun());
+  const args = process.argv.slice(2);
+  const subjectArg = args.indexOf("--subject");
+  const subjectId = subjectArg === -1 ? undefined : args.splice(subjectArg, 2)[1];
+  const outDir = await bundledDir(root, subjectId);
+  if (!outDir) throw new Error(`題材「${subjectId}」の設定が見つかりません`);
+  const runId = args[0] ?? (await newestJudgedRun());
   if (!runId) throw new Error("判定まで済んだ実行が runs/ にありません。先に npm run samples -- --judge を実行してください");
   if (!RUN_ID_PATTERN.test(runId)) throw new Error(`実行の ID の形ではありません: ${runId}`);
   const runDir = join(runsRoot, runId);
@@ -43,7 +48,7 @@ async function main(): Promise<void> {
   await writeFile(join(outDir, "report.json"), JSON.stringify(bundled, null, 2) + "\n");
 
   await assertNoHomeDirectory(outDir);
-  console.log(`${runId} を samples/bundled/ に写しました（${report.cases.map((c) => `${c.caseId}: ${c.verdict?.verdict ?? "判定なし"}`).join("・")}）`);
+  console.log(`${runId} を ${outDir.slice(root.length + 1)}/ に写しました（${report.cases.map((c) => `${c.caseId}: ${c.verdict?.verdict ?? "判定なし"}`).join("・")}）`);
 }
 
 async function newestJudgedRun(): Promise<string | undefined> {

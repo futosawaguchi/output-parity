@@ -3,11 +3,12 @@ import { join } from "node:path";
 import { connection } from "next/server";
 import { loadBundledReport } from "@/lib/bundled";
 import { adapterFor } from "@/lib/compare/adapters";
-import { loadConfig, type ParityConfig } from "@/lib/config";
+import type { ParityConfig } from "@/lib/config";
 import { SetupError } from "@/lib/errors";
 import { currentJob, startJob } from "@/lib/jobs";
 import { runPipeline } from "@/lib/pipeline";
 import { preflight } from "@/lib/runner/preflight";
+import { loadSubject } from "@/lib/subject";
 import { isFromOurPage } from "@/lib/same-origin";
 import { alreadyRunning, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses";
 
@@ -16,18 +17,16 @@ import { alreadyRunning, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses"
 // with fixed wording.
 
 const root = process.cwd();
-const samplesDir = join(root, "samples");
-const workDir = join(root, "work");
 
 /** Starts a run of every sample case. 202 with a job id, or 409 if one is already running. */
 export async function POST(request: Request): Promise<Response> {
   if (!isFromOurPage(request)) {
     return notFromOurPage();
   }
-  let config, adapter;
+  let subject, adapter;
   try {
-    config = await loadConfig(join(samplesDir, "parity.config.jsonc"));
-    adapter = adapterFor(config.output.format);
+    subject = await loadSubject(root);
+    adapter = adapterFor(subject.config.output.format);
   } catch (e) {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;
@@ -36,9 +35,10 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json(NO_KEY, { status: 400 });
   }
   const client = new Anthropic();
+  const { config, runRoot } = subject;
 
   const result = startJob("run", (onProgress) =>
-    runPipeline({ config, adapter, root: workDir, prepare: true, runsRoot: join(root, "runs"), client, onProgress }),
+    runPipeline({ config, adapter, root: runRoot, prepare: true, runsRoot: join(root, "runs"), client, onProgress }),
   );
   if (!result.started) return alreadyRunning(result.runningJobId);
   return Response.json({ jobId: result.jobId }, { status: 202 });
@@ -58,7 +58,7 @@ export async function GET(): Promise<Response> {
   let cannotApply = null;
   const bundled = await loadBundledReport(root);
   try {
-    const config = await loadConfig(join(samplesDir, "parity.config.jsonc"));
+    const { config } = await loadSubject(root);
     target = {
       name: config.name,
       description: config.description,

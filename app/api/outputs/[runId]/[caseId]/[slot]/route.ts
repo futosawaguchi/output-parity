@@ -18,7 +18,8 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/outputs/[runId]
     return notFound();
   }
   const root = process.cwd();
-  const dir = bundled ? insideRoot(bundledDir(root), caseId, slot) : insideRoot(join(root, "runs"), runId, caseId, slot);
+  const bundledRoot = bundled ? await bundledDir(root) : null;
+  const dir = bundled ? bundledRoot && insideRoot(bundledRoot, caseId, slot) : insideRoot(join(root, "runs"), runId, caseId, slot);
   if (!dir) return notFound();
 
   const name = (await readdir(dir).catch(() => [])).find((f) => f.startsWith("output."));

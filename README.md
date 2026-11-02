@@ -25,7 +25,7 @@
 
 > ⭐ **Node 22 以上**（⚠️ 理由は書かない。要件だけ）／`npm run dev` で起動
 > ⭐ **php も composer も無しで試せるモード**を先に書く（同梱の出力を読み込むだけ）
-> ⚠️ 全部動かすなら php 7.4 / 8.5 と `samples/lib-old` `samples/lib-new` の `composer install`
+> ⚠️ 全部動かすなら php 7.4 / 8.5 と `samples/estimate/app/lib-old` `samples/estimate/app/lib-new` の `composer install`
 > ⚠️ `.env.example` を `.env` にコピーして `ANTHROPIC_API_KEY` を入れる
 
 ### ⚠️ サンプルについて

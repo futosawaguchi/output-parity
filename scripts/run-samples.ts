@@ -1,29 +1,30 @@
-// Runs every case in samples/parity.config.jsonc, compares the outputs and prints what happened.
-// Usage: npm run samples            run and compare (no API calls)
-//        npm run samples -- --judge also ask Claude to judge (uses ANTHROPIC_API_KEY from .env)
+// Runs every case of a subject, compares the outputs and prints what happened.
+// Usage: npm run samples                      the estimate subject: run and compare (no API calls)
+//        npm run samples -- --judge           also ask Claude to judge (uses ANTHROPIC_API_KEY from .env)
+//        npm run samples -- --subject <name>  samples/<name>/ or targets/<name>/ instead
 
 import Anthropic from "@anthropic-ai/sdk";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { adapterFor } from "../lib/compare/adapters";
 import type { Comparison } from "../lib/compare/compare-case";
-import { loadConfig } from "../lib/config";
 import { SetupError } from "../lib/errors";
 import { VERDICT_LABEL, type CaseVerdict } from "../lib/judge/verdict";
 import { describeOutcome } from "../lib/runner/outcome";
 import { runPipeline } from "../lib/pipeline";
+import { loadSubject } from "../lib/subject";
 
 const root = process.cwd();
-const samplesDir = join(root, "samples");
-const workDir = join(root, "work");
 const runsRoot = join(root, "runs");
 const withJudge = process.argv.includes("--judge");
+const subjectArg = process.argv.indexOf("--subject");
+const subjectId = subjectArg === -1 ? undefined : process.argv[subjectArg + 1];
 
 async function main(): Promise<void> {
-  const config = await loadConfig(join(samplesDir, "parity.config.jsonc"));
+  const { config, runRoot } = await loadSubject(root, subjectId);
   const adapter = adapterFor(config.output.format);
   const client = withJudge ? createClient() : null;
-  const report = await runPipeline({ config, adapter, root: workDir, prepare: true, runsRoot, client });
+  const report = await runPipeline({ config, adapter, root: runRoot, prepare: true, runsRoot, client });
 
   console.log(`${report.configName}`);
   console.log(`記録: ${join(runsRoot, report.runId)}\n`);

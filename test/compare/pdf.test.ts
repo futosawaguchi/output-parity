@@ -25,12 +25,12 @@ function caseResult(caseId: string): CaseResult {
 }
 
 test("extracting the same PDF twice gives identical results", async () => {
-  const path = fixture("2b-fatal", "old");
+  const path = fixture("case-c", "old");
   assert.deepEqual(await extractPdf(path), await extractPdf(path));
 });
 
 test("Japanese text, page markers and layout are extracted", async () => {
-  const doc = await extractPdf(fixture("2b-fatal", "old"));
+  const doc = await extractPdf(fixture("case-c", "old"));
   assert.ok(doc.lines.includes("--- page 1 ---"));
   assert.ok(doc.lines.includes("A-102 夜間割増 12,000"));
   assert.ok(doc.lines.includes("合計 72,000"));
@@ -40,7 +40,7 @@ test("Japanese text, page markers and layout are extracted", async () => {
 });
 
 test("sample 1: after the baseline, nothing is left", async () => {
-  const { comparison } = await compareCase(caseResult("1-harmless"), extractPdf);
+  const { comparison } = await compareCase(caseResult("case-a"), extractPdf);
   assert.equal(comparison.kind, "compared");
   if (comparison.kind !== "compared") return;
   assert.deepEqual(comparison.changes.filter((c) => !c.explainedByBaseline), []);
@@ -48,7 +48,7 @@ test("sample 1: after the baseline, nothing is left", async () => {
 });
 
 test("sample 2-b: exactly the three vanished rows are left", async () => {
-  const { comparison } = await compareCase(caseResult("2b-fatal"), extractPdf);
+  const { comparison } = await compareCase(caseResult("case-c"), extractPdf);
   assert.equal(comparison.kind, "compared");
   if (comparison.kind !== "compared") return;
   const kept = comparison.changes.filter((c) => !c.explainedByBaseline);
@@ -57,14 +57,14 @@ test("sample 2-b: exactly the three vanished rows are left", async () => {
 });
 
 test("a missing output is reported, not compared", async () => {
-  const result = caseResult("2b-fatal");
+  const result = caseResult("case-c");
   result.slots[1].outputPath = null;
   const { comparison } = await compareCase(result, extractPdf);
   assert.deepEqual(comparison, { kind: "missingOutput", missing: ["new"] });
 });
 
 test("an unreadable output is reported as such", async () => {
-  const result = caseResult("2b-fatal");
+  const result = caseResult("case-c");
   result.slots[1].outputPath = __filename; // a file that is not a PDF
   const { comparison } = await compareCase(result, extractPdf);
   assert.equal(comparison.kind, "unreadable");

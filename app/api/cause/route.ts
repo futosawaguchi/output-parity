@@ -4,7 +4,9 @@ import { loadBundledReport } from "@/lib/bundled";
 import { CASE_ID_PATTERN } from "@/lib/config";
 import { addCause } from "@/lib/fix/add-cause";
 import { currentJob, startJob } from "@/lib/jobs";
+import { SetupError } from "@/lib/errors";
 import { isFromOurPage } from "@/lib/same-origin";
+import { loadSubject } from "@/lib/subject";
 import { alreadyRunning, NO_KEY, notFromOurPage } from "../responses";
 
 // Reads the API key, like app/api/runs/ and app/api/rejudge/. The key never leaves the server.
@@ -27,8 +29,15 @@ export async function POST(request: Request): Promise<Response> {
   if (!process.env.ANTHROPIC_API_KEY) return Response.json(NO_KEY, { status: 400 });
   const client = new Anthropic();
 
+  let subject;
+  try {
+    subject = await loadSubject(root);
+  } catch (e) {
+    if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
+    throw e;
+  }
   // The source that produced the outputs: work/ for a run made here, the original for the bundle.
-  const source = base.origin === "run" ? join(root, "work") : join(root, "samples");
+  const source = base.origin === "run" ? subject.runRoot : subject.config.source;
   const result = startJob("cause", (onProgress) => addCause(base, caseId, client, { root: source, runsRoot: join(root, "runs"), onProgress }));
   if (!result.started) return alreadyRunning(result.runningJobId);
   return Response.json({ jobId: result.jobId }, { status: 202 });

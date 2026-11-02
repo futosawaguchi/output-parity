@@ -3,10 +3,11 @@
 {
   "version": 1,
   "name": "見積書 estimate.php（PHP 7.4 → 8.5）",
-  "description": "架空の見積書を PDF で出す小さな PHP アプリ（samples/estimate.php）を、PHP 7.4 と PHP 8.5 で同じ入力から動かして比べます。見積書は今回作った架空のもので、PDF ライブラリ（TCPDF・FPDI）は本物の公開 OSS です。",
+  "description": "架空の見積書を PDF で出す小さな PHP アプリ（samples/estimate/app/estimate.php）を、PHP 7.4 と PHP 8.5 で同じ入力から動かして比べます。見積書は今回作った架空のもので、PDF ライブラリ（TCPDF・FPDI）は本物の公開 OSS です。",
 
-  // プログラムのソース。実行のたびに work/ に写して、そこで動かす（原本は書き換えない）
-  "source": ".",
+  // プログラムのソース。実行のたびに work/estimate/ に写して、そこで動かす（原本は書き換えない）
+  // ⚠️ この設定ファイルと bundled/（答えを含む同梱の結果）は source の外に置く。原因探しで Claude が読めないように
+  "source": "app",
   // 直し方を work/ に当てて、流し直して確かめる
   "fixes": "apply",
 
@@ -22,31 +23,31 @@
   // プログラムが {output} に PDF を書く
   "output": { "format": "pdf", "from": "file" },
 
-  // label と description は画面に出る。期待する判定が分からない書き方にする
+  // id・label・description・入力のファイル名は、画面に出たり Claude に渡ったりする。期待する判定が分からない名前にする
   "cases": [
     {
-      "id": "1-harmless",
+      "id": "case-a",
       "label": "入力 A",
       "description": "明細3行の見積書",
-      "args": ["estimate.php", "lib-new", "data/1-harmless.json", "{output}"]
+      "args": ["estimate.php", "lib-new", "data/case-a.json", "{output}"]
     },
     {
-      "id": "2a-harmless",
+      "id": "case-b",
       "label": "入力 B",
       "description": "明細5行の見積書（うち3行は金額 0）",
-      "args": ["estimate.php", "lib-new", "data/2a-harmless.json", "{output}"]
+      "args": ["estimate.php", "lib-new", "data/case-b.json", "{output}"]
     },
     {
-      "id": "2b-fatal",
+      "id": "case-c",
       "label": "入力 C",
       "description": "明細5行の見積書（値引きを含む）",
-      "args": ["estimate.php", "lib-new", "data/2b-fatal.json", "{output}"]
+      "args": ["estimate.php", "lib-new", "data/case-c.json", "{output}"]
     },
     {
-      "id": "3-crash",
+      "id": "case-d",
       "label": "入力 D",
       "description": "明細3行の見積書を、古い版の PDF ライブラリ（TCPDF 6.2.26）で出す",
-      "args": ["estimate.php", "lib-old", "data/3-crash.json", "{output}"]
+      "args": ["estimate.php", "lib-old", "data/case-d.json", "{output}"]
     }
   ]
 }

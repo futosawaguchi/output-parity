@@ -1,9 +1,8 @@
-import { join } from "node:path";
-import { loadConfig } from "@/lib/config";
 import { SetupError } from "@/lib/errors";
 import { undoFixes } from "@/lib/fix/undo";
 import { currentJob, startJob } from "@/lib/jobs";
 import { isFromOurPage } from "@/lib/same-origin";
+import { loadSubject } from "@/lib/subject";
 import { alreadyRunning, notFromOurPage } from "../responses";
 
 const root = process.cwd();
@@ -17,14 +16,14 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ message: "元に戻すものがありません", nextStep: "画面を読み込み直してください" }, { status: 400 });
   }
   const report = job.report;
-  let config;
+  let subject;
   try {
-    config = await loadConfig(join(root, "samples", "parity.config.jsonc"));
+    subject = await loadSubject(root);
   } catch (e) {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;
   }
-  const result = startJob("undo", () => undoFixes(report, config, join(root, "work")));
+  const result = startJob("undo", () => undoFixes(report, subject.config, subject.workDir));
   if (!result.started) return alreadyRunning(result.runningJobId);
   return Response.json({ jobId: result.jobId }, { status: 202 });
 }

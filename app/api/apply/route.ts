@@ -1,18 +1,18 @@
 import { join } from "node:path";
 import { loadBundledReport } from "@/lib/bundled";
 import { adapterFor } from "@/lib/compare/adapters";
-import { CASE_ID_PATTERN, loadConfig } from "@/lib/config";
+import { CASE_ID_PATTERN } from "@/lib/config";
 import { SetupError } from "@/lib/errors";
 import { applyAndVerify } from "@/lib/fix/apply-and-verify";
 import { currentJob, startJob } from "@/lib/jobs";
 import { preflight } from "@/lib/runner/preflight";
 import { isFromOurPage } from "@/lib/same-origin";
+import { loadSubject } from "@/lib/subject";
 import { alreadyRunning, notFromOurPage } from "../responses";
 
 // No API key here: whether an edit worked is decided by comparing outputs, not by Claude.
 
 const root = process.cwd();
-const samplesDir = join(root, "samples");
 
 /**
  * Applies one proposed edit to work/ and runs every case again (DESIGN 7-4). Only a person
@@ -30,12 +30,12 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ message: "当てる直し方が見つかりません", nextStep: "画面を読み込み直し、原因をもう一度探してください" }, { status: 400 });
   }
 
-  let config, adapter;
+  let subject, adapter;
   try {
-    config = await loadConfig(join(samplesDir, "parity.config.jsonc"));
-    adapter = adapterFor(config.output.format);
+    subject = await loadSubject(root);
+    adapter = adapterFor(subject.config.output.format);
     // Running again needs the interpreters; say so now rather than after writing to work/.
-    await preflight(config, join(config.source, config.run.cwd));
+    await preflight(subject.config, join(subject.config.source, subject.config.run.cwd));
   } catch (e) {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;
@@ -43,9 +43,9 @@ export async function POST(request: Request): Promise<Response> {
 
   const result = startJob("verify", (onProgress) =>
     applyAndVerify(base, caseId as string, candidate, {
-      config,
+      config: subject.config,
       adapter,
-      workDir: join(root, "work"),
+      workDir: subject.workDir,
       runsRoot: join(root, "runs"),
       onProgress,
     }),
