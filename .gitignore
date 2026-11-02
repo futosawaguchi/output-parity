@@ -5,12 +5,11 @@ docs/
 # Claude Code の設定（サブエージェント・スキル・フック）。中身を確かめてから公開する
 /.claude/
 
-# 作業用コピー。samples/ から毎回作り直す（先頭の / で直下だけ。app/api/ などの同名フォルダを巻き込まない）
+# 作業用コピー。題材のソースから work/<題材>/ に毎回作り直す（先頭の / で直下だけ。app/api/ などの同名フォルダを巻き込まない）
 /work/
 
-# TCPDF は LGPL-3.0。MIT のこのリポジトリに実体を入れず、composer で取得する
+# TCPDF は LGPL-3.0。MIT のこのリポジトリに実体を入れず、composer で取得する（どの階層の vendor/ も）
 vendor/
-samples/*/vendor/
 
 # 実行ごとの出力。再生成できる（先頭の / で直下だけ。app/api/runs/ を巻き込まない）
 /runs/
@@ -39,3 +38,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# 自分のシステムの設定（targets/<名前>/parity.config.jsonc）。社内のパスや名前が入るので公開しない
+/targets/
