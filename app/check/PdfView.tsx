@@ -2,9 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./check.module.css";
+import { loadPdfjs } from "./pdfjs-client";
+
+type Props = { src: string; label: string };
 
 /** Draws every page of one PDF into canvases sized to the column. */
-export function PdfView({ src, label }: { src: string; label: string }) {
+export function PdfView(props: Props) {
+  // A new document gets a fresh view, so a failure shown for one PDF never sticks to the next.
+  return <PdfCanvas key={props.src} {...props} />;
+}
+
+function PdfCanvas({ src, label }: Props) {
   const holder = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -15,9 +23,14 @@ export function PdfView({ src, label }: { src: string; label: string }) {
     if (!el) return;
 
     (async () => {
-      // This entry point also starts pdfjs's worker from the package itself.
-      const pdfjs = await import("pdfjs-dist/webpack.mjs");
-      const task = pdfjs.getDocument({ url: src, cMapUrl: "/api/pdfjs/cmaps/", cMapPacked: true, standardFontDataUrl: "/api/pdfjs/standard_fonts/" });
+      const { pdfjs, worker } = await loadPdfjs();
+      const task = pdfjs.getDocument({
+        url: src,
+        worker,
+        cMapUrl: "/api/pdfjs/cmaps/",
+        cMapPacked: true,
+        standardFontDataUrl: "/api/pdfjs/standard_fonts/",
+      });
       destroy = () => task.destroy();
       const doc = await task.promise;
       el.replaceChildren();
@@ -33,7 +46,11 @@ export function PdfView({ src, label }: { src: string; label: string }) {
         el.appendChild(canvas);
         await page.render({ canvas, viewport }).promise;
       }
-    })().catch(() => !cancelled && setFailed(true));
+    })().catch((e: unknown) => {
+      if (cancelled) return;
+      console.error(`PDF を表示できませんでした: ${src}`, e);
+      setFailed(true);
+    });
 
     return () => {
       cancelled = true;
