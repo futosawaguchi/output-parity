@@ -9,6 +9,7 @@ import styles from "./check.module.css";
 import { NaiveDiffView } from "./NaiveDiffView";
 import { PdfView } from "./PdfView";
 import { SentLine } from "./SentLine";
+import { outputUrl } from "./urls";
 
 /** Everything about one case: both outputs, the plain diff, the verdict and what was set aside. */
 export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseReport; cause: CauseActions }) {
@@ -28,7 +29,7 @@ export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseRep
       <div className={styles.pdfs}>
         {(["old", "new"] as const).map((slot) =>
           run(slot).outputPath ? (
-            <PdfView key={slot} src={`/api/outputs/${report.runId}/${c.caseId}/${slot}`} label={report.environments[slot].label} />
+            <PdfView key={slot} src={outputUrl(report, c.caseId, slot)} label={report.environments[slot].label} />
           ) : (
             <figure key={slot} className={styles.pdf}>
               <figcaption className={styles.pdfLabel}>{report.environments[slot].label}</figcaption>
@@ -38,14 +39,14 @@ export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseRep
         )}
       </div>
       <NaiveDiffView naive={c.naive} />
-      {c.verdict ? <VerdictBlock verdict={c.verdict} /> : <p className={styles.muted}>判定していません</p>}
-      <CauseSection c={c} actions={cause} />
+      {c.verdict ? <VerdictBlock verdict={c.verdict} subjectId={report.subjectId} /> : <p className={styles.muted}>判定していません</p>}
+      <CauseSection c={c} subjectId={report.subjectId} actions={cause} />
       <DroppedLines comparison={c.comparison} />
     </article>
   );
 }
 
-export function VerdictBlock({ verdict }: { verdict: CaseVerdict }) {
+export function VerdictBlock({ verdict, subjectId }: { verdict: CaseVerdict; subjectId: string }) {
   const by =
     verdict.judgedBy.kind === "claude"
       ? `Claude（${verdict.judgedBy.model}）が判定`
@@ -62,7 +63,7 @@ export function VerdictBlock({ verdict }: { verdict: CaseVerdict }) {
         {by}
         {verdict.judgedBy.kind === "failed" && ` → ${verdict.judgedBy.nextStep}`}
       </p>
-      {verdict.sent && <SentLine sent={verdict.sent} />}
+      {verdict.sent && <SentLine sent={verdict.sent} subjectId={subjectId} />}
       {verdict.findings.length > 0 && (
         <ul className={styles.findings}>
           {verdict.findings.map((f, i) => (

@@ -552,3 +552,18 @@
   list-style: none;
   margin: 8px 0;
 }
+
+.subjectPicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.subjectPicker select {
+  font: inherit;
+  font-weight: 400;
+  padding: 4px 8px;
+  max-width: 100%;
+}

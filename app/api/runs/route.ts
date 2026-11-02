@@ -6,12 +6,12 @@ import { describeScope, whyNotSending } from "@/lib/claude-scope";
 import { adapterFor } from "@/lib/compare/adapters";
 import type { ParityConfig } from "@/lib/config";
 import { SetupError } from "@/lib/errors";
-import { currentJob, startJob } from "@/lib/jobs";
+import { currentJob, runningJob, startJob } from "@/lib/jobs";
 import { runPipeline } from "@/lib/pipeline";
 import { preflight } from "@/lib/runner/preflight";
-import { loadSubject, whyNoApplying } from "@/lib/subject";
+import { listSubjects, loadSubject, subjectIdOf, whyNoApplying } from "@/lib/subject";
 import { isFromOurPage } from "@/lib/same-origin";
-import { alreadyRunning, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses";
+import { alreadyRunning, busyWithAnother, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses";
 
 // Together with app/api/rejudge/, the only places in the app that read the API key (CLAUDE.md).
 // The key never leaves the server: it is not in any response, and errors are reported by type
@@ -19,14 +19,15 @@ import { alreadyRunning, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses"
 
 const root = process.cwd();
 
-/** Starts a run of every sample case. 202 with a job id, or 409 if one is already running. */
+/** Starts a run of every case of a subject. Body: { subject }. 202 with a job id, or 409 if one is already running. */
 export async function POST(request: Request): Promise<Response> {
   if (!isFromOurPage(request)) {
     return notFromOurPage();
   }
+  const subjectId = subjectIdOf(((await request.json().catch(() => ({}))) as { subject?: unknown }).subject);
   let subject, adapter;
   try {
-    subject = await loadSubject(root);
+    subject = await loadSubject(root, subjectId);
     adapter = adapterFor(subject.config.output.format);
   } catch (e) {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
@@ -40,31 +41,36 @@ export async function POST(request: Request): Promise<Response> {
   }
   const client = judging ? new Anthropic() : null;
 
-  const result = startJob("run", (onProgress) =>
-    runPipeline({ config, adapter, root: runRoot, prepare: subject.workDir !== null, runsRoot: join(root, "runs"), client, onProgress }),
+  const result = startJob("run", subjectId, (onProgress) =>
+    runPipeline({ subjectId, config, adapter, root: runRoot, prepare: subject.workDir !== null, runsRoot: join(root, "runs"), client, onProgress }),
   );
-  if (!result.started) return alreadyRunning(result.runningJobId);
+  if (!result.started) return alreadyRunning(result.running, subjectId);
   return Response.json({ jobId: result.jobId }, { status: 202 });
 }
 
 /**
- * What will be checked (shown before anything runs), whether it can run or rejudge here, and
- * the job that is running or finished last, so a reloaded page can pick it up again. With no job
- * yet, the bundled run is sent instead, so the page shows a report without PHP or a key (DESIGN 7-2b).
- * Commands are left out of the target: they are local paths.
+ * For the subject in ?subject= (the default one without it): what will be checked (shown before
+ * anything runs), whether it can run or rejudge here, and the job that is running or finished
+ * last, so a reloaded page can pick it up again. With no job yet, the bundled run is sent instead,
+ * so the page shows a report without PHP or a key (DESIGN 7-2b). Also every subject there is, to
+ * choose from. Commands are left out of the target: they are local paths.
  */
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
   await connection();
-  const job = currentJob();
+  const subjectId = subjectIdOf(new URL(request.url).searchParams.get("subject"));
+  const job = currentJob(subjectId);
+  // A job of another subject holds the programs and work/ until it ends.
+  const elsewhere = runningJob();
+  const busyElsewhere = elsewhere && elsewhere.subjectId !== subjectId ? busyWithAnother(elsewhere.subjectId) : null;
   let target = null;
   let cannotRun = null;
   let cannotApply = null;
   let cannotRejudge = null;
   let cannotAskClaude = null;
-  const bundled = await loadBundledReport(root);
+  const bundled = await loadBundledReport(root, subjectId);
   const noKey = process.env.ANTHROPIC_API_KEY ? null : NO_KEY;
   try {
-    const subject = await loadSubject(root);
+    const subject = await loadSubject(root, subjectId);
     const { config } = subject;
     target = {
       name: config.name,
@@ -76,9 +82,9 @@ export async function GET(): Promise<Response> {
     };
     const cannotExecute = await whyCannotExecute(config);
     const notJudging = whyNotSending(config, "judge");
-    cannotApply = whyNoApplying(subject) ?? cannotExecute;
+    cannotApply = busyElsewhere ?? whyNoApplying(subject) ?? cannotExecute;
     // A run without judging needs no key.
-    cannotRun = cannotExecute ?? (notJudging ? null : noKey);
+    cannotRun = busyElsewhere ?? cannotExecute ?? (notJudging ? null : noKey);
     // Judging the bundled outputs again needs the key, not PHP.
     cannotRejudge = bundled === null ? NO_BUNDLE : (notJudging ?? noKey);
     // Looking for a cause needs the key and the source, not PHP.
@@ -88,6 +94,8 @@ export async function GET(): Promise<Response> {
     cannotRun = cannotApply = cannotRejudge = cannotAskClaude = { message: e.message, nextStep: e.nextStep };
   }
   return Response.json({
+    subjectId,
+    subjects: await listSubjects(root),
     job: job ? { jobId: job.jobId, status: job.status } : null,
     target,
     cannotRun,
@@ -98,7 +106,7 @@ export async function GET(): Promise<Response> {
     bundled: job ? null : bundled,
     // The bundled run after applying the bundled cause's edit: shown instead of running, when this
     // machine cannot run the programs, so the round trip can still be followed (DESIGN 7-2b).
-    bundledFix: job ? null : await loadBundledFix(root),
+    bundledFix: job ? null : await loadBundledFix(root, subjectId),
   });
 }
 

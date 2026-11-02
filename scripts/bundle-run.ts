@@ -1,6 +1,6 @@
 // Copies one finished run into samples/<subject>/bundled/, the run that ships with the repository
 // so that the report can be seen without PHP, composer or an API key (DESIGN 7-2b).
-// Usage: npm run bundle                          the newest run in which every case was judged
+// Usage: npm run bundle                          the subject's newest run in which every case was judged
 //        npm run bundle -- <run id>              a specific run under runs/
 // When an edit was applied to that run's report (the "apply and check" button), the newest such
 // run is shipped too, in bundled/fix/.
@@ -16,6 +16,7 @@ import { BUNDLED_FIX_DIR, BUNDLED_FIX_RUN_ID, BUNDLED_RUN_ID, bundledDir } from 
 import type { FixAttempt } from "../lib/fix/verify";
 import type { RunReport } from "../lib/pipeline";
 import { RUN_ID_PATTERN } from "../lib/runner/run-dir";
+import { subjectIdOf } from "../lib/subject";
 
 const root = process.cwd();
 const runsRoot = join(root, "runs");
@@ -23,13 +24,18 @@ const runsRoot = join(root, "runs");
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const subjectArg = args.indexOf("--subject");
-  const subjectId = subjectArg === -1 ? undefined : args.splice(subjectArg, 2)[1];
+  const subjectId = subjectIdOf(subjectArg === -1 ? undefined : args.splice(subjectArg, 2)[1]);
   const outDir = await bundledDir(root, subjectId);
   if (!outDir) throw new Error(`題材「${subjectId}」の設定が見つかりません`);
-  const runId = args[0] ?? (await newestJudgedRun());
-  if (!runId) throw new Error("判定まで済んだ実行が runs/ にありません。先に npm run samples -- --judge を実行してください");
+  const runId = args[0] ?? (await newestJudgedRun(subjectId));
+  if (!runId) {
+    throw new Error(`題材「${subjectId}」の判定まで済んだ実行が runs/ にありません。先に npm run samples -- --judge --subject ${subjectId} を実行してください`);
+  }
   if (!RUN_ID_PATTERN.test(runId)) throw new Error(`実行の ID の形ではありません: ${runId}`);
   const report = await readReport(runId);
+  if (report.subjectId !== subjectId) {
+    throw new Error(`${runId} は題材「${report.subjectId ?? "不明（題材を記録する前の実行）"}」の実行です。題材「${subjectId}」の実行を指定してください`);
+  }
   // The run after an edit to this one, if one was made: shipped too, so the round trip can be seen.
   const fixId = await newestFixOf(runId);
 
@@ -98,12 +104,13 @@ async function runIdsNewestFirst(): Promise<string[]> {
   return (await readdir(runsRoot).catch(() => [])).filter((id) => RUN_ID_PATTERN.test(id)).sort().reverse();
 }
 
-async function newestJudgedRun(): Promise<string | undefined> {
+/** The newest run of the subject in which every case was judged. Runs from before reports named their subject are skipped. */
+async function newestJudgedRun(subjectId: string): Promise<string | undefined> {
   for (const id of await runIdsNewestFirst()) {
     const text = await readFile(join(runsRoot, id, "report.json"), "utf8").catch(() => null);
     const report = text ? (JSON.parse(text) as RunReport) : null;
     // A run after an edit is judged by the machine only; it is shipped with the run it came from.
-    if (report && !report.fixAttempt && report.cases.every((c) => c.verdict !== null)) return id;
+    if (report?.subjectId === subjectId && !report.fixAttempt && report.cases.every((c) => c.verdict !== null)) return id;
   }
   return undefined;
 }

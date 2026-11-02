@@ -3,6 +3,7 @@ import { Badge } from "./Badge";
 import { CalcCheck } from "./CaseDetail";
 import styles from "./check.module.css";
 import { PdfView } from "./PdfView";
+import { outputUrl } from "./urls";
 
 /**
  * Two cases side by side (DESIGN 6): the new outputs, the text that changed and the verdicts.
@@ -38,7 +39,7 @@ function CompareColumn({ report, c }: { report: RunReport; c: CaseReport }) {
         <span className={styles.caseDescription}>{c.description}</span>
       </p>
       {newRun?.outputPath ? (
-        <PdfView src={`/api/outputs/${report.runId}/${c.caseId}/new`} label={report.environments.new.label} />
+        <PdfView src={outputUrl(report, c.caseId, "new")} label={report.environments.new.label} />
       ) : (
         <p className={styles.noOutput}>出力なし</p>
       )}

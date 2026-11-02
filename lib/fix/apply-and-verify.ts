@@ -41,6 +41,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
   if (applied.kind === "refused") return { ...base, fixAttempt: attempt };
 
   const after = await runPipeline({
+    subjectId: base.subjectId,
     config: opts.config,
     adapter: opts.adapter,
     root: opts.workDir,

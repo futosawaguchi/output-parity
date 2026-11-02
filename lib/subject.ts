@@ -1,4 +1,4 @@
-import { realpath, stat } from "node:fs/promises";
+import { readdir, realpath, stat } from "node:fs/promises";
 import { isAbsolute, join, relative, sep } from "node:path";
 import { loadConfig, type ParityConfig } from "./config";
 import { ConfigError } from "./errors";
@@ -24,6 +24,36 @@ export type Subject = {
   /** A finished run shipped with the subject; it may not exist. */
   bundledDir: string;
 };
+
+/** A subject as offered on the page: its id, and its name when its settings can be read. */
+export type SubjectEntry = { id: string; name: string | null };
+
+/** The subject a request names, or the default one when it names none. Checked by loadSubject. */
+export function subjectIdOf(value: unknown): string {
+  return typeof value === "string" && value !== "" ? value : DEFAULT_SUBJECT;
+}
+
+/**
+ * Every subject there is, in samples/ then targets/. An id found in both is the one in samples/,
+ * as findSubjectDir picks it. A subject whose settings cannot be read is listed without a name,
+ * so it can still be chosen and its error read.
+ */
+export async function listSubjects(root: string): Promise<SubjectEntry[]> {
+  const entries: SubjectEntry[] = [];
+  for (const place of PLACES) {
+    const ids = (await readdir(join(root, place), { withFileTypes: true }).catch(() => []))
+      .filter((e) => e.isDirectory() && SUBJECT_ID_PATTERN.test(e.name))
+      .map((e) => e.name)
+      .sort();
+    for (const id of ids) {
+      if (entries.some((e) => e.id === id)) continue;
+      const path = join(root, place, id, CONFIG_FILE);
+      if (!(await stat(path).catch(() => null))?.isFile()) continue;
+      entries.push({ id, name: await loadConfig(path).then((c) => c.name, () => null) });
+    }
+  }
+  return entries;
+}
 
 /** The folder holding the subject's settings, without reading them. null when there is none. */
 export async function findSubjectDir(root: string, id: string = DEFAULT_SUBJECT): Promise<string | null> {

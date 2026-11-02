@@ -5,12 +5,13 @@ import { BUNDLED_FIX_DIR, BUNDLED_FIX_RUN_ID, BUNDLED_RUN_ID, bundledDir } from 
 import { CASE_ID_PATTERN } from "@/lib/config";
 import { RUN_ID_PATTERN } from "@/lib/runner/run-dir";
 import { insideRoot } from "@/lib/safe-path";
+import { subjectIdOf } from "@/lib/subject";
 
 const SLOTS = new Set(["old", "new", "baseline"]);
 const CONTENT_TYPES: Record<string, string> = { pdf: "application/pdf" };
 
-/** The output file of one execution, from runs/ or from the bundled run. Read-only. */
-export async function GET(_req: Request, ctx: RouteContext<"/api/outputs/[runId]/[caseId]/[slot]">): Promise<Response> {
+/** The output file of one execution, from runs/ or from the bundled run of ?subject=. Read-only. */
+export async function GET(request: Request, ctx: RouteContext<"/api/outputs/[runId]/[caseId]/[slot]">): Promise<Response> {
   await connection();
   const { runId, caseId, slot } = await ctx.params;
   const bundled = runId === BUNDLED_RUN_ID || runId === BUNDLED_FIX_RUN_ID;
@@ -18,7 +19,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/outputs/[runId]
     return notFound();
   }
   const root = process.cwd();
-  const bundledBase = bundled ? await bundledDir(root) : null;
+  const bundledBase = bundled ? await bundledDir(root, subjectIdOf(new URL(request.url).searchParams.get("subject"))) : null;
   const bundledRoot = bundledBase && (runId === BUNDLED_FIX_RUN_ID ? join(bundledBase, BUNDLED_FIX_DIR) : bundledBase);
   const dir = bundled ? bundledRoot && insideRoot(bundledRoot, caseId, slot) : insideRoot(join(root, "runs"), runId, caseId, slot);
   if (!dir) return notFound();

@@ -27,7 +27,7 @@ export type CauseActions = {
 };
 
 /** Where in the source a broken or doubtful case comes from (DESIGN 7-4). Asked for by a button. */
-export function CauseSection({ c, actions }: { c: CaseReport; actions: CauseActions }) {
+export function CauseSection({ c, subjectId, actions }: { c: CaseReport; subjectId: string; actions: CauseActions }) {
   // Judged cases that are not harmless; unjudged ones (the run after an edit) while a difference is left.
   const left = remainingOf(c.comparison);
   const worthAsking = c.verdict ? c.verdict.verdict !== "harmless" : !(left.kind === "lines" && left.count === 0);
@@ -54,6 +54,7 @@ export function CauseSection({ c, actions }: { c: CaseReport; actions: CauseActi
       ) : c.cause ? (
         <CauseResult
           cause={c.cause}
+          subjectId={subjectId}
           onApply={(i) => actions.apply(c.caseId, i)}
           busy={actions.busy}
           cannotApply={actions.cannotApply}
@@ -71,13 +72,13 @@ export function CauseSection({ c, actions }: { c: CaseReport; actions: CauseActi
 
 type ApplyProps = { onApply: (candidate: number) => void; busy: boolean; cannotApply: Problem | null; replay: CauseActions["replay"] };
 
-function CauseResult({ cause, ...apply }: { cause: CauseReport } & ApplyProps) {
+function CauseResult({ cause, subjectId, ...apply }: { cause: CauseReport; subjectId: string } & ApplyProps) {
   if (cause.kind === "failed") {
     return (
       <div className={styles.problem} role="alert">
         <p>原因を探せませんでした: {cause.reason}</p>
         <p className={styles.nextStep}>→ {cause.nextStep}</p>
-        {cause.sent && <SentLine sent={cause.sent} />}
+        {cause.sent && <SentLine sent={cause.sent} subjectId={subjectId} />}
       </div>
     );
   }
@@ -88,7 +89,7 @@ function CauseResult({ cause, ...apply }: { cause: CauseReport } & ApplyProps) {
         Claude（{cause.model}）が {cause.reads.join("・") || "ソース"} を読んで特定
         {cause.candidates.length > 1 && `。候補は ${cause.candidates.length} つ（確からしい順）`}
       </p>
-      {cause.sent && <SentLine sent={cause.sent} />}
+      {cause.sent && <SentLine sent={cause.sent} subjectId={subjectId} />}
       <ul className={styles.findings}>
         {cause.candidates.map((k, i) => (
           <Candidate key={i} k={k} {...apply} onApply={() => apply.onApply(i)} replay={apply.replay && k.edit && sameEdit(apply.replay.edit, k.edit) ? apply.replay : null} />

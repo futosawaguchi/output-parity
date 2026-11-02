@@ -36,6 +36,8 @@ export type RunReport = {
   runId: string;
   /** run: executed here / rejudge: the bundled outputs judged again here / bundled: shipped as is. */
   origin: "run" | "rejudge" | "bundled";
+  /** The subject the run belongs to (samples/<id>/ or targets/<id>/), so reports of different subjects are never mixed. */
+  subjectId: string;
   configName: string;
   configDescription: string;
   environments: EnvironmentSummaries;
@@ -48,6 +50,8 @@ export type RunReport = {
 };
 
 export type PipelineOptions = {
+  /** Recorded in the report (lib/subject.ts). */
+  subjectId: string;
   config: ParityConfig;
   adapter: Adapter;
   /** The program's root for this run: work/ (DESIGN 7-4), or the source itself when fixes is suggest-only. run.cwd is inside it. */
@@ -94,6 +98,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
   const runReport: RunReport = {
     runId: run.id,
     origin: "run",
+    subjectId: opts.subjectId,
     configName: config.name,
     configDescription: config.description,
     environments,

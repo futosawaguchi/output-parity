@@ -12,7 +12,8 @@ import type { ProgressEvent, RunReport } from "./pipeline";
  */
 export type JobKind = "run" | "rejudge" | "cause" | "verify" | "undo";
 
-type JobBase = { jobId: string; kind: JobKind; progress: ProgressEvent[] };
+/** subjectId: the subject the job works on (lib/subject.ts). The page shows only its own subject's job. */
+type JobBase = { jobId: string; kind: JobKind; subjectId: string; progress: ProgressEvent[] };
 
 export type JobState =
   | (JobBase & { status: "running" })
@@ -24,19 +25,23 @@ type Registry = { current: JobState | null };
 // Kept on globalThis so that hot reloads in development do not forget a running job.
 const registry: Registry = ((globalThis as { __outputParityJobs?: Registry }).__outputParityJobs ??= { current: null });
 
-export type StartResult = { started: true; jobId: string } | { started: false; runningJobId: string };
+export type StartResult = { started: true; jobId: string } | { started: false; running: JobState };
 
-/** Starts `work` unless another job is still running. Only one job exists at a time. */
-export function startJob(kind: JobKind, work: (onProgress: (e: ProgressEvent) => void) => Promise<RunReport>): StartResult {
-  if (registry.current?.status === "running") return { started: false, runningJobId: registry.current.jobId };
+/** Starts `work` unless another job is still running, of any subject. Only one job exists at a time. */
+export function startJob(
+  kind: JobKind,
+  subjectId: string,
+  work: (onProgress: (e: ProgressEvent) => void) => Promise<RunReport>,
+): StartResult {
+  if (registry.current?.status === "running") return { started: false, running: registry.current };
 
   const jobId = randomBytes(6).toString("hex");
   const progress: ProgressEvent[] = [];
-  registry.current = { jobId, kind, status: "running", progress };
+  registry.current = { jobId, kind, subjectId, status: "running", progress };
 
   work((e) => progress.push(e)).then(
     (report) => {
-      registry.current = { jobId, kind, status: "done", progress, report };
+      registry.current = { jobId, kind, subjectId, status: "done", progress, report };
     },
     (e: unknown) => {
       // Setup problems carry their own wording (DESIGN 7-6 B). Anything else is a bug in this
@@ -46,7 +51,7 @@ export function startJob(kind: JobKind, work: (onProgress: (e: ProgressEvent) =>
         e instanceof SetupError
           ? { message: e.message, nextStep: e.nextStep }
           : { message: "予期しないエラーで止まりました", nextStep: "npm run dev を動かしているターミナルのログを確認してください" };
-      registry.current = { jobId, kind, status: "failed", progress, error };
+      registry.current = { jobId, kind, subjectId, status: "failed", progress, error };
     },
   );
   return { started: true, jobId };
@@ -56,6 +61,12 @@ export function getJob(jobId: string): JobState | null {
   return registry.current?.jobId === jobId ? registry.current : null;
 }
 
-export function currentJob(): JobState | null {
-  return registry.current;
+/** The job running or finished last, if it is about `subjectId`. */
+export function currentJob(subjectId: string): JobState | null {
+  return registry.current?.subjectId === subjectId ? registry.current : null;
+}
+
+/** The job running now, of any subject: one at a time across subjects (programs and work/ are shared). */
+export function runningJob(): JobState | null {
+  return registry.current?.status === "running" ? registry.current : null;
 }

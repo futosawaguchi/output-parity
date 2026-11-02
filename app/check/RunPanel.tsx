@@ -20,13 +20,26 @@ type Target = {
   claudeScope: string[];
 };
 
+/** A subject to choose from (lib/subject.ts). name is null when its settings cannot be read. */
+type SubjectEntry = { id: string; name: string | null };
+
 const POLL_MS = 1000;
 
 /** Where each kind of job is started (lib/jobs.ts says what each one does). */
 const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge", cause: "/api/cause", verify: "/api/apply", undo: "/api/undo" };
 
+/**
+ * The subject in the address (?subject=), or none for the default one. Read when needed rather
+ * than kept: choosing another subject loads the page again, so nothing of the last one stays.
+ */
+function subjectInAddress(): string | null {
+  return new URLSearchParams(window.location.search).get("subject");
+}
+
 /** The run button, the progress while running, and the report once done. */
 export function RunPanel() {
+  const [subjects, setSubjects] = useState<SubjectEntry[]>([]);
+  const [subjectId, setSubjectId] = useState<string | null>(null);
   const [job, setJob] = useState<JobState | null>(null);
   // Which button was pressed, until the server has answered with a job.
   const [starting, setStarting] = useState<JobKind | null>(null);
@@ -74,9 +87,12 @@ export function RunPanel() {
 
   // A reloaded page picks up the job that is running or finished last.
   useEffect(() => {
-    fetch("/api/runs", { cache: "no-store" })
+    const subject = subjectInAddress();
+    fetch(subject ? `/api/runs?subject=${encodeURIComponent(subject)}` : "/api/runs", { cache: "no-store" })
       .then((res) => res.json())
       .then((body) => {
+        setSubjects(body.subjects);
+        setSubjectId(body.subjectId);
         setTarget(body.target);
         setCannotRun(body.cannotRun);
         if (body.bundled) setReport(body.bundled);
@@ -97,7 +113,7 @@ export function RunPanel() {
       const res = await fetch(ENDPOINTS[kind], {
         method: "POST",
         headers: { [SAME_ORIGIN_HEADER]: "1", "content-type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ subject: subjectInAddress() ?? undefined, ...payload }),
       });
       const body = await res.json();
       // 409: already running (another tab, for example). Follow that run instead of starting one.
@@ -143,6 +159,7 @@ export function RunPanel() {
 
   return (
     <section>
+      {subjectId && (subjects.length > 1 || !subjects.some((s) => s.id === subjectId)) && <SubjectPicker subjects={subjects} current={subjectId} disabled={running} />}
       {target && <TargetIntro target={target} showCases={!shown} />}
       <div className={styles.controls}>
         <button className={styles.runButton} onClick={() => start("run")} disabled={running || cannotRun !== null}>
@@ -182,6 +199,29 @@ export function RunPanel() {
         />
       )}
     </section>
+  );
+}
+
+/** Choosing another subject loads the page for it. Not while a job runs: it belongs to this subject. */
+function SubjectPicker({ subjects, current, disabled }: { subjects: SubjectEntry[]; current: string; disabled: boolean }) {
+  return (
+    <label className={styles.subjectPicker}>
+      題材
+      <select
+        value={current}
+        disabled={disabled}
+        onChange={(e) => {
+          window.location.search = new URLSearchParams({ subject: e.target.value }).toString();
+        }}
+      >
+        {subjects.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.name ?? `${s.id}（設定が読めません）`}
+          </option>
+        ))}
+        {!subjects.some((s) => s.id === current) && <option value={current}>{current}（見つかりません）</option>}
+      </select>
+    </label>
   );
 }
 
