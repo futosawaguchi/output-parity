@@ -68,6 +68,19 @@ export type Case = {
   args: string[];
 };
 
+/**
+ * Many cases written once (DESIGN 7-4c): one case per file in run.cwd whose name matches
+ * each.file. In id, label, description and args, {file} is the file's name and {name} the same
+ * without its extension. Expanded into cases when the subject is loaded (lib/case-groups.ts).
+ */
+export type CaseGroup = {
+  each: { file: string };
+  id: string;
+  label: string;
+  description: string;
+  args: string[];
+};
+
 export type ParityConfig = {
   version: 1;
   name: string;
@@ -83,6 +96,7 @@ export type ParityConfig = {
   run: RunSpec;
   output: OutputSpec;
   cases: Case[];
+  caseGroups: CaseGroup[];
 };
 
 export const CONFIG_VERSION = 1;
@@ -118,7 +132,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   }
 
   if (!isObject(json)) return fail("中身がオブジェクトではありません");
-  const { version, name, description, source, workspace, fixes, claude, run, output, cases } = json;
+  const { version, name, description, source, workspace, fixes, claude, run, output, cases, caseGroups } = json;
 
   if (version === undefined) fail(`version がありません（"version": ${CONFIG_VERSION} を書いてください）`);
   if (version !== CONFIG_VERSION) fail(`version ${JSON.stringify(version)} には対応していません（対応しているのは ${CONFIG_VERSION}）`);
@@ -154,9 +168,12 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   if (output.from !== "file" && output.from !== "stdout") fail('output.from は "file" か "stdout" にしてください');
   const from = output.from as OutputSpec["from"];
 
-  if (!Array.isArray(cases) || cases.length === 0) return fail("cases が空です");
+  const parsedGroups = parseCaseGroups(caseGroups, from, fail);
+  if (cases !== undefined && !Array.isArray(cases)) return fail("cases が配列ではありません");
+  const caseList: unknown[] = cases ?? [];
+  if (caseList.length === 0 && parsedGroups.length === 0) return fail("cases も caseGroups も空です（入力を1つ以上書いてください）");
   const seen = new Set<string>();
-  const parsedCases = cases.map((c, i): Case => {
+  const parsedCases = caseList.map((c, i): Case => {
     if (!isObject(c) || typeof c.id !== "string" || !CASE_ID_PATTERN.test(c.id)) {
       return fail(`cases[${i}].id は英数字・-・_ だけにしてください`);
     }
@@ -184,7 +201,31 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     run: runSpec,
     output: { format: output.format, from },
     cases: parsedCases,
+    caseGroups: parsedGroups,
   };
+}
+
+function parseCaseGroups(groups: unknown, from: OutputSpec["from"], fail: (what: string) => never): CaseGroup[] {
+  if (groups === undefined) return [];
+  if (!Array.isArray(groups)) return fail("caseGroups が配列ではありません");
+  return groups.map((g, i): CaseGroup => {
+    const at = `caseGroups[${i}]`;
+    if (!isObject(g) || !isObject(g.each) || typeof g.each.file !== "string") return fail(`${at}.each.file（当てはめるファイル名の形。例 "example_*.php"）がありません`);
+    const file = g.each.file;
+    if (file === "" || /[\\/]/.test(file) || !/[*?]/.test(file)) fail(`${at}.each.file は、/ を含まず * か ? を含むファイル名の形にしてください`);
+    if (!isStringArray(g.args)) return fail(`${at}.args が文字列の配列ではありません`);
+    if (from === "file" && !g.args.includes(OUTPUT_PLACEHOLDER)) fail(`${at}.args に ${OUTPUT_PLACEHOLDER} がありません（output.from が "file" のとき必要）`);
+    for (const key of ["id", "label", "description"] as const) {
+      if (g[key] !== undefined && typeof g[key] !== "string") fail(`${at}.${key} は文字列にしてください`);
+    }
+    return {
+      each: { file },
+      id: (g.id as string | undefined) ?? "{name}",
+      label: (g.label as string | undefined) ?? "{file}",
+      description: (g.description as string | undefined) ?? "",
+      args: g.args,
+    };
+  });
 }
 
 function parseRun(run: unknown, fail: (what: string) => never): RunSpec {

@@ -1,5 +1,6 @@
 import { readdir, realpath, stat } from "node:fs/promises";
 import { isAbsolute, join, relative, sep } from "node:path";
+import { expandCaseGroups } from "./case-groups";
 import { loadConfig, type ParityConfig } from "./config";
 import { ConfigError } from "./errors";
 
@@ -77,10 +78,11 @@ export async function loadSubject(root: string, id: string = DEFAULT_SUBJECT): P
       `自分のシステムなら targets/${id}/${CONFIG_FILE} を作ってください（書き方は README の「設定ファイル」）`,
     );
   }
-  const config = await loadConfig(join(dir, CONFIG_FILE));
+  const settings = await loadConfig(join(dir, CONFIG_FILE));
   const workDir = join(root, "work", id);
   const bundledDir = join(dir, "bundled");
-  await checkPlaces(config.source, join(root, "work"), bundledDir);
+  await checkPlaces(settings.source, join(root, "work"), bundledDir);
+  const config = await expandCaseGroups(settings);
   if (config.fixes === "suggest-only") return { id, config, runRoot: config.source, workDir: null, bundledDir };
   return { id, config, runRoot: workDir, workDir, bundledDir };
 }
