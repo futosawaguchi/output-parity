@@ -77,6 +77,15 @@
   background: var(--broken-bg);
 }
 
+/* Not an error: this machine lacks PHP or a key, and the bundled run is shown instead. */
+.notice {
+  margin-top: 14px;
+  padding: 10px 16px;
+  border-left: 4px solid var(--line);
+  color: var(--muted);
+  font-size: 15px;
+}
+
 .nextStep {
   color: var(--muted);
 }

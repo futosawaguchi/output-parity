@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { JobState } from "@/lib/jobs";
+import type { RunReport } from "@/lib/pipeline";
 import { SAME_ORIGIN_HEADER } from "@/lib/same-origin";
 import styles from "./check.module.css";
 import { ReportView } from "./ReportView";
@@ -24,6 +25,10 @@ export function RunPanel() {
   const [starting, setStarting] = useState(false);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [target, setTarget] = useState<Target | null>(null);
+  // Why this machine cannot run the samples (no PHP, no key), as checked before any click.
+  const [cannotRun, setCannotRun] = useState<Problem | null>(null);
+  // The run that ships with the repository, shown until a run is made here (DESIGN 7-2b).
+  const [bundled, setBundled] = useState<RunReport | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = () => {
@@ -54,6 +59,8 @@ export function RunPanel() {
       .then((res) => res.json())
       .then((body) => {
         setTarget(body.target);
+        setCannotRun(body.cannotRun);
+        setBundled(body.bundled);
         if (body.job) poll(body.job.jobId);
       })
       .catch(() => {});
@@ -79,20 +86,27 @@ export function RunPanel() {
 
   // Disabled by state, not by a timer (DESIGN 5): from the click until the run has finished.
   const running = starting || job?.status === "running";
+  const shown = job?.status === "done" ? job.report : !job ? bundled : null;
 
   return (
     <section>
-      {target && <TargetIntro target={target} showCases={job?.status !== "done"} />}
+      {target && <TargetIntro target={target} showCases={!shown} />}
       <div className={styles.controls}>
-        <button className={styles.runButton} onClick={start} disabled={running}>
+        <button className={styles.runButton} onClick={start} disabled={running || cannotRun !== null}>
           {running ? "実行中…" : "実行して判定する"}
         </button>
         {job?.status === "running" && <Progress job={job} labelOf={(id) => target?.cases.find((c) => c.id === id)?.label ?? id} />}
       </div>
+      {cannotRun && !job && (
+        <p className={styles.notice}>
+          この環境ではまだ実行できません: {cannotRun.message}
+          <br />→ {cannotRun.nextStep}
+        </p>
+      )}
 
       {problem && <ProblemBox problem={problem} />}
       {job?.status === "failed" && <ProblemBox problem={job.error} />}
-      {job?.status === "done" && <ReportView report={job.report} />}
+      {shown && <ReportView report={shown} bundled={shown === bundled} />}
     </section>
   );
 }

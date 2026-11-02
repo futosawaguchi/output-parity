@@ -8,7 +8,7 @@ import styles from "./check.module.css";
 import { CompareView } from "./CompareView";
 
 /** The overview of one run, and below it either one case in detail or two side by side. */
-export function ReportView({ report }: { report: RunReport }) {
+export function ReportView({ report, bundled }: { report: RunReport; bundled: boolean }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
 
@@ -19,10 +19,15 @@ export function ReportView({ report }: { report: RunReport }) {
   // Same order as the table, whichever box was ticked first.
   const pair = picked.length === 2 ? (report.cases.filter((c) => picked.includes(c.caseId)) as [CaseReport, CaseReport]) : null;
   const open = openId ? byId(openId) : undefined;
+  const finishedAt = new Date(report.finishedAt).toLocaleString("ja-JP");
 
   return (
     <div className={styles.report}>
-      <p className={styles.reportMeta}>{new Date(report.finishedAt).toLocaleString("ja-JP")} に実行</p>
+      <p className={styles.reportMeta}>
+        {bundled
+          ? `同梱の結果です（${finishedAt} に作者の手元で実行し、リポジトリに入れたもの）。PHP も API キーも無しで見られます。`
+          : `${finishedAt} に実行`}
+      </p>
       <CaseTable cases={report.cases} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
       {pair ? (
         <CompareView report={report} cases={pair} />
