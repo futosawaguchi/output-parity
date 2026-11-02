@@ -7,9 +7,8 @@ import { Badge } from "./Badge";
 import { CauseSection, type CauseActions } from "./CauseView";
 import styles from "./check.module.css";
 import { NaiveDiffView } from "./NaiveDiffView";
-import { PdfView } from "./PdfView";
+import { OutputView } from "./OutputView";
 import { SentLine } from "./SentLine";
-import { outputUrl } from "./urls";
 
 /** Everything about one case: both outputs, the plain diff, the verdict and what was set aside. */
 export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseReport; cause: CauseActions }) {
@@ -29,7 +28,7 @@ export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseRep
       <div className={styles.pdfs}>
         {(["old", "new"] as const).map((slot) =>
           run(slot).outputPath ? (
-            <PdfView key={slot} src={outputUrl(report, c.caseId, slot)} label={report.environments[slot].label} />
+            <OutputView key={slot} report={report} c={c} slot={slot} />
           ) : (
             <figure key={slot} className={styles.pdf}>
               <figcaption className={styles.pdfLabel}>{report.environments[slot].label}</figcaption>

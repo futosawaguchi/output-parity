@@ -587,3 +587,25 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+/* Text and HTML outputs: the lines they were compared by, changed ones marked. */
+.textLines {
+  max-height: 340px;
+  overflow: auto;
+  margin: 0;
+  padding: 8px 10px 8px 3.2em;
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.lineRemoved {
+  background: var(--broken-bg);
+}
+
+.lineAdded {
+  background: var(--review-bg);
+}
