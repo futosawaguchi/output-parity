@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises";
 import { sep } from "node:path";
 import type { Change } from "../compare/baseline";
 import type { CaseComparison } from "../compare/compare-case";
+import { redactSecrets } from "../redact";
 import { describeOutcome } from "../runner/outcome";
 import type { Slot, SlotResult } from "../runner/run-case";
+import type { SentRecorder } from "../sent-log";
 import { checkArithmetic } from "./arithmetic";
 import { askClaude } from "./call-claude";
 import { buildUserMessage, changeId, SYSTEM_PROMPT, type JudgeInput } from "./prompt";
@@ -16,6 +18,8 @@ export type JudgeContext = {
   oldLabel: string;
   newLabel: string;
   outputDescription: string;
+  /** Keeps what is sent (DESIGN 7-4e ④). Left out in tests. */
+  record?: SentRecorder;
 };
 
 type Labels = Pick<JudgeContext, "oldLabel" | "newLabel">;
@@ -71,7 +75,16 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
     newPages: cmp.new.pages,
     unreadable: [...cmp.old.unreadable.map((u) => `旧 ${u}`), ...cmp.new.unreadable.map((u) => `新 ${u}`)],
   };
-  const answer = await askClaude(ctx.client, SYSTEM_PROMPT, buildUserMessage(input));
+  // Secrets are masked before anything leaves the machine, and what leaves is kept (DESIGN 7-4e ③④).
+  const message = redactSecrets(buildUserMessage(input));
+  const sent = await ctx.record?.({
+    caseId: c.caseId,
+    purpose: "judge",
+    text: `${SYSTEM_PROMPT}\n\n---\n\n${message.text}`,
+    masked: message.count,
+    maskedKinds: message.kinds,
+  });
+  const answer = await askClaude(ctx.client, SYSTEM_PROMPT, message.text);
   const ids = kept.map((_, i) => changeId(i));
 
   if (answer.kind === "failed") {
@@ -85,10 +98,13 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
         finding("needs_review", `変更 ${id} は判定できませんでした`, reason, [...kept[i].oldLines, ...kept[i].newLines], "変更された行", [id]),
       ),
       judgedBy: { kind: "failed", reason, nextStep },
+      sent,
     };
   }
 
-  const quotable = [...cmp.old.lines, ...cmp.new.lines];
+  // Claude saw the masked text, so a quote of it is a quote of the output.
+  const raw = [...cmp.old.lines, ...cmp.new.lines];
+  const quotable = [...raw, ...raw.map((l) => redactSecrets(l).text)];
   const findings = [...fromClaude(answer.response, ids).map((f) => reviewByMachine(f, quotable)), ...unanswered(answer.response, ids, kept)];
   return {
     caseId: c.caseId,
@@ -96,6 +112,7 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
     summary: answer.response.summary,
     findings,
     judgedBy: { kind: "claude", model: answer.model },
+    sent,
   };
 }
 

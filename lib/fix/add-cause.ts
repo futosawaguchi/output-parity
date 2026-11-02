@@ -2,6 +2,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { ProgressEvent, RunReport } from "../pipeline";
+import { sentRecorder } from "../sent-log";
 import { locateCause } from "./locate-cause";
 import type { ReadScope } from "./read-scope";
 
@@ -16,7 +17,12 @@ export type AddCauseOptions = {
 export async function addCause(base: RunReport, caseId: string, client: Anthropic, opts: AddCauseOptions): Promise<RunReport> {
   const target = base.cases.find((c) => c.caseId === caseId);
   if (!target) throw new Error(`no case ${caseId} in the report`);
-  const cause = await locateCause(client, target, { scope: opts.scope, environments: base.environments, onProgress: opts.onProgress });
+  const cause = await locateCause(client, target, {
+    scope: opts.scope,
+    environments: base.environments,
+    record: sentRecorder(join(opts.runsRoot, "sent")),
+    onProgress: opts.onProgress,
+  });
   const report: RunReport = { ...base, cases: base.cases.map((c) => (c.caseId === caseId ? { ...c, cause } : c)) };
   if (report.origin === "run") {
     await writeFile(join(opts.runsRoot, report.runId, "report.json"), JSON.stringify(report, null, 2) + "\n");

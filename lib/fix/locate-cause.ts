@@ -6,6 +6,8 @@ import type { EnvironmentSummaries } from "../config";
 import { classifyApiError } from "../judge/api-failure";
 import { JUDGE_MODEL } from "../judge/call-claude";
 import type { CaseReport, ProgressEvent } from "../pipeline";
+import { redactSecrets } from "../redact";
+import type { SentRecord, SentRecorder } from "../sent-log";
 import { checkEdit, checkLine, type EditCheck, type LineCheck } from "./check-cause";
 import { buildCauseMessage, CAUSE_SYSTEM_PROMPT } from "./prompt";
 import { CauseResponseSchema } from "./schema";
@@ -27,14 +29,20 @@ export type CauseCandidate = {
   editCheck: EditCheck | null;
 };
 
-export type CauseReport =
+export type CauseReport = (
   | { kind: "found"; summary: string; candidates: CauseCandidate[]; model: string; reads: string[] }
-  | { kind: "failed"; reason: string; nextStep: string };
+  | { kind: "failed"; reason: string; nextStep: string }
+) & {
+  /** Everything sent to Claude while looking (after redaction): the first message and every file it read. */
+  sent?: SentRecord;
+};
 
 export type CauseOptions = {
   /** What Claude may read: the source that produced the outputs (work/ after a run, the original for the bundled run), minus hidden paths. */
   scope: ReadScope;
   environments: EnvironmentSummaries;
+  /** Keeps what is sent (DESIGN 7-4e ④). Left out in tests. */
+  record?: SentRecorder;
   onProgress?: (event: ProgressEvent) => void;
 };
 
@@ -48,6 +56,23 @@ const TIME_LIMIT_MS = 10 * 60 * 1000;
  * The client is passed in, so this module never reads the API key.
  */
 export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseOptions): Promise<CauseReport> {
+  // Everything that goes out passes through here: secrets masked, the text kept (DESIGN 7-4e ③④).
+  const transcript = [CAUSE_SYSTEM_PROMPT];
+  let masked = 0;
+  const maskedKinds = new Set<string>();
+  const send = (label: string, text: string): string => {
+    const r = redactSecrets(text);
+    masked += r.count;
+    r.kinds.forEach((k) => maskedKinds.add(k));
+    transcript.push(`--- ${label}\n${r.text}`);
+    return r.text;
+  };
+  const report = await askForCause(client, c, opts, send);
+  const sent = await opts.record?.({ caseId: c.caseId, purpose: "cause", text: transcript.join("\n\n"), masked, maskedKinds: [...maskedKinds] });
+  return { ...report, sent };
+}
+
+async function askForCause(client: Anthropic, c: CaseReport, opts: CauseOptions, send: (label: string, text: string) => string): Promise<CauseReport> {
   const reads: string[] = [];
   const say = (message: string) => opts.onProgress?.({ caseId: c.caseId, message });
   const tools = [
@@ -57,7 +82,7 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
       inputSchema: z.object({ path: z.string().describe("ソースのディレクトリからの相対パス。直下なら .") }),
       run: async ({ path }) => {
         say(`Claude が ${path} の中を見ています`);
-        return listDir(opts.scope, path);
+        return send(`list_files ${path}`, await listDir(opts.scope, path));
       },
     }),
     betaZodTool({
@@ -71,7 +96,7 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
       run: async ({ path, start_line, end_line }) => {
         reads.push(path);
         say(`Claude が ${path} を読んでいます${start_line ? `（${start_line} 行目から）` : ""}`);
-        return readLines(opts.scope, path, start_line, end_line);
+        return send(`read_file ${path} ${start_line ?? 1}-${end_line ?? ""}`, await readLines(opts.scope, path, start_line, end_line));
       },
     }),
     betaZodTool({
@@ -83,7 +108,7 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
       }),
       run: async ({ text, path }) => {
         say(`Claude が「${text}」を探しています`);
-        return searchText(opts.scope, text, path);
+        return send(`search_text 「${text}」 ${path ?? "."}`, await searchText(opts.scope, text, path));
       },
     }),
   ];
@@ -100,7 +125,7 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
         betas: ["server-side-fallback-2026-07-01"],
         fallbacks: "default",
         system: CAUSE_SYSTEM_PROMPT,
-        messages: [{ role: "user", content: await buildCauseMessage(c, opts.environments, opts.scope.root) }],
+        messages: [{ role: "user", content: send("最初のメッセージ", await buildCauseMessage(c, opts.environments, opts.scope.root)) }],
         tools,
         max_iterations: MAX_TURNS,
         // Reading takes several turns; streaming keeps each long turn from timing out.

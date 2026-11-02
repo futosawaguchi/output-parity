@@ -43,6 +43,7 @@ async function main(): Promise<void> {
     await bundle(fixId, { ...fix, fixAttempt: attempt as FixAttempt }, join(outDir, BUNDLED_FIX_DIR), BUNDLED_FIX_RUN_ID);
   }
 
+  await bundleSent([report], outDir);
   await assertNoHomeDirectory(outDir);
   const verdicts = report.cases.map((c) => `${c.caseId}: ${c.verdict?.verdict ?? "判定なし"}${c.cause ? "・原因あり" : ""}`).join("・");
   console.log(`${runId} を ${outDir.slice(root.length + 1)}/ に写しました（${verdicts}）`);
@@ -71,6 +72,16 @@ async function bundle(runId: string, report: RunReport, to: string, asRunId: str
   }
   const bundled: RunReport = { ...mapStrings(report, strip), runId: asRunId };
   await writeFile(join(to, "report.json"), JSON.stringify(bundled, null, 2) + "\n");
+}
+
+/** Copies what was sent to Claude for the bundled verdicts and causes, so the page can show it too. */
+async function bundleSent(reports: RunReport[], outDir: string): Promise<void> {
+  const files = reports.flatMap((r) => r.cases.flatMap((c) => [c.verdict?.sent?.file, c.cause?.sent?.file])).filter((f): f is string => !!f);
+  if (files.length === 0) return;
+  await mkdir(join(outDir, "sent"), { recursive: true });
+  for (const f of files) {
+    await writeFile(join(outDir, "sent", f), (await readFile(join(runsRoot, "sent", f), "utf8")).split(root + sep).join(""));
+  }
 }
 
 /** The newest run made by applying an edit to `runId`'s report that was applied and ran. */

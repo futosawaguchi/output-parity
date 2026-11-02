@@ -361,6 +361,12 @@
   font-weight: 700;
 }
 
+.sentLine {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 /* Overview table */
 
 .table {

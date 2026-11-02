@@ -4,6 +4,7 @@ import { join } from "node:path";
 import type { Adapter } from "./compare/adapters";
 import { checkCase, type ProgressEvent, type RunReport } from "./pipeline";
 import { createRunDir } from "./runner/run-dir";
+import { sentRecorder } from "./sent-log";
 
 export type RejudgeOptions = {
   adapter: Adapter;
@@ -31,6 +32,7 @@ export async function rejudgeBundled(bundled: RunReport, opts: RejudgeOptions): 
         adapter: opts.adapter,
         client: opts.client,
         environments: bundled.environments,
+        record: sentRecorder(join(opts.runsRoot, "sent")),
         onProgress: opts.onProgress,
       }),
     );

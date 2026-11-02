@@ -12,6 +12,7 @@ import type { CaseVerdict } from "./judge/verdict";
 import { preflight } from "./runner/preflight";
 import { runCase, type CaseResult, type SlotResult } from "./runner/run-case";
 import { createRunDir } from "./runner/run-dir";
+import { sentRecorder, type SentRecorder } from "./sent-log";
 import { prepareWorkspace } from "./workspace";
 
 export type ProgressEvent = { caseId: string; message: string };
@@ -77,6 +78,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
 
   const cases: CaseReport[] = [];
   const environments = summarizeEnvironments(config.run.environments);
+  const record = sentRecorder(join(opts.runsRoot, "sent"));
   for (const testCase of config.cases) {
     const caseId = testCase.id;
     report(
@@ -86,7 +88,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
       caseId,
     );
     const result = await runCase(config, testCase, cwd, join(run.path, caseId), opts.keepOld?.get(caseId));
-    cases.push(await checkCase(result, testCase, { adapter, client, environments, onProgress: opts.onProgress }));
+    cases.push(await checkCase(result, testCase, { adapter, client, environments, record, onProgress: opts.onProgress }));
   }
 
   const runReport: RunReport = {
@@ -109,6 +111,8 @@ export type CheckOptions = {
   adapter: Adapter;
   client: Anthropic | null;
   environments: EnvironmentSummaries;
+  /** Keeps what is sent to Claude (runs/sent/). */
+  record: SentRecorder;
   onProgress?: (event: ProgressEvent) => void;
 };
 
@@ -121,7 +125,7 @@ export async function checkCase(
   about: { label: string; description: string },
   opts: CheckOptions,
 ): Promise<CaseReport> {
-  const { adapter, client, environments } = opts;
+  const { adapter, client, environments, record } = opts;
   const caseId = result.caseId;
   const report = (message: string) => opts.onProgress?.({ caseId, message });
 
@@ -140,6 +144,7 @@ export async function checkCase(
       oldLabel: environments.old.label,
       newLabel: environments.new.label,
       outputDescription: adapter.description,
+      record,
     });
   }
   return { caseId, label: about.label, description: about.description, runs: result.slots, comparison: compared.comparison, naive, verdict };

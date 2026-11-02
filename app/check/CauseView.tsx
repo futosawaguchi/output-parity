@@ -4,6 +4,7 @@ import type { CauseCandidate, CauseReport } from "@/lib/fix/locate-cause";
 import { remainingOf } from "@/lib/fix/verify";
 import type { CaseReport } from "@/lib/pipeline";
 import styles from "./check.module.css";
+import { SentLine } from "./SentLine";
 
 type Problem = { message: string; nextStep: string };
 
@@ -76,6 +77,7 @@ function CauseResult({ cause, ...apply }: { cause: CauseReport } & ApplyProps) {
       <div className={styles.problem} role="alert">
         <p>原因を探せませんでした: {cause.reason}</p>
         <p className={styles.nextStep}>→ {cause.nextStep}</p>
+        {cause.sent && <SentLine sent={cause.sent} />}
       </div>
     );
   }
@@ -86,6 +88,7 @@ function CauseResult({ cause, ...apply }: { cause: CauseReport } & ApplyProps) {
         Claude（{cause.model}）が {cause.reads.join("・") || "ソース"} を読んで特定
         {cause.candidates.length > 1 && `。候補は ${cause.candidates.length} つ（確からしい順）`}
       </p>
+      {cause.sent && <SentLine sent={cause.sent} />}
       <ul className={styles.findings}>
         {cause.candidates.map((k, i) => (
           <Candidate key={i} k={k} {...apply} onApply={() => apply.onApply(i)} replay={apply.replay && k.edit && sameEdit(apply.replay.edit, k.edit) ? apply.replay : null} />

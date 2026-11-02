@@ -8,6 +8,7 @@ import { CauseSection, type CauseActions } from "./CauseView";
 import styles from "./check.module.css";
 import { NaiveDiffView } from "./NaiveDiffView";
 import { PdfView } from "./PdfView";
+import { SentLine } from "./SentLine";
 
 /** Everything about one case: both outputs, the plain diff, the verdict and what was set aside. */
 export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseReport; cause: CauseActions }) {
@@ -61,6 +62,7 @@ export function VerdictBlock({ verdict }: { verdict: CaseVerdict }) {
         {by}
         {verdict.judgedBy.kind === "failed" && ` → ${verdict.judgedBy.nextStep}`}
       </p>
+      {verdict.sent && <SentLine sent={verdict.sent} />}
       {verdict.findings.length > 0 && (
         <ul className={styles.findings}>
           {verdict.findings.map((f, i) => (

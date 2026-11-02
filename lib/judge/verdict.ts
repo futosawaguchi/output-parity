@@ -1,3 +1,5 @@
+import type { SentRecord } from "../sent-log";
+
 /** The three levels of DESIGN 8-1. */
 export type Verdict = "harmless" | "needs_review" | "broken";
 
@@ -42,4 +44,6 @@ export type CaseVerdict = {
   summary: string;
   findings: Finding[];
   judgedBy: JudgedBy;
+  /** What was sent to Claude for this verdict (after redaction). Absent when the machine decided. */
+  sent?: SentRecord;
 };
