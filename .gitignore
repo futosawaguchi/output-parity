@@ -1,0 +1,33 @@
+# 開発メモ（非公開）
+CLAUDE.md
+docs/
+
+# 作業用コピー。samples/ から毎回作り直す
+work/
+
+# TCPDF は LGPL-3.0。MIT のこのリポジトリに実体を入れず、composer で取得する
+vendor/
+samples/*/vendor/
+
+# 実行ごとの出力。再生成できる
+runs/
+
+# 鍵
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# Node / Next.js
+node_modules/
+.next/
+*.tsbuildinfo
+
+# OS・エディタ
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
