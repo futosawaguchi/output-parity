@@ -24,7 +24,7 @@ export async function POST(request: Request): Promise<Response> {
   }
   let adapter;
   try {
-    adapter = adapterFor(bundled.outputFormat);
+    adapter = adapterFor({ format: bundled.outputFormat, encoding: bundled.outputEncoding });
     // The bundle belongs to a subject; its settings decide what may be sent.
     const refused = whyNotSending((await loadSubject(root, subjectId)).config, "judge");
     if (refused) return Response.json(refused, { status: 400 });

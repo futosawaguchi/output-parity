@@ -36,7 +36,7 @@ export async function POST(request: Request): Promise<Response> {
   let subject, adapter;
   try {
     subject = await loadSubject(root, subjectId);
-    adapter = adapterFor(subject.config.output.format);
+    adapter = adapterFor(subject.config.output);
     // Running again needs the interpreters; say so now rather than after writing to work/.
     await preflight(subject.config, join(subject.config.source, subject.config.run.cwd));
   } catch (e) {

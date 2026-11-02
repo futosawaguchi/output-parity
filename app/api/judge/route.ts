@@ -29,7 +29,7 @@ export async function POST(request: Request): Promise<Response> {
   const held = job.report;
   let adapter;
   try {
-    adapter = adapterFor(held.outputFormat);
+    adapter = adapterFor({ format: held.outputFormat, encoding: held.outputEncoding });
     const refused = whyNotSending((await loadSubject(root, subjectId)).config, "judge");
     if (refused) return Response.json(refused, { status: 400 });
   } catch (e) {

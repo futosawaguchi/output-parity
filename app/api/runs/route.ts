@@ -28,7 +28,7 @@ export async function POST(request: Request): Promise<Response> {
   let subject, adapter;
   try {
     subject = await loadSubject(root, subjectId);
-    adapter = adapterFor(subject.config.output.format);
+    adapter = adapterFor(subject.config.output);
   } catch (e) {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;

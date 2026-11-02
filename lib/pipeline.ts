@@ -42,6 +42,8 @@ export type RunReport = {
   configDescription: string;
   environments: EnvironmentSummaries;
   outputFormat: string;
+  /** The encoding text and HTML outputs were read in. Missing in reports from before it was recorded: utf-8. */
+  outputEncoding?: string;
   startedAt: string;
   finishedAt: string;
   cases: CaseReport[];
@@ -121,6 +123,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
     configDescription: config.description,
     environments,
     outputFormat: config.output.format,
+    outputEncoding: config.output.encoding,
     startedAt: startedAt.toISOString(),
     finishedAt: new Date().toISOString(),
     cases,

@@ -36,8 +36,10 @@ export type RunSpec = {
 };
 
 export type OutputSpec = {
-  /** Selects the adapter that turns the output into text (only "pdf" for now). */
+  /** Selects the adapter that turns the output into text: pdf, text or html (compare/adapters.ts). */
   format: string;
+  /** How text and HTML outputs are written (a WHATWG name: utf-8, shift_jis, euc-jp). HTML that declares its charset is read in that. */
+  encoding: string;
   /** "file": the program writes to {output}. "stdout": the runner saves stdout. */
   from: "file" | "stdout";
 };
@@ -167,6 +169,8 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   if (!isObject(output) || typeof output.format !== "string") return fail("output.format がありません");
   if (output.from !== "file" && output.from !== "stdout") fail('output.from は "file" か "stdout" にしてください');
   const from = output.from as OutputSpec["from"];
+  const encoding = output.encoding ?? "utf-8";
+  if (typeof encoding !== "string" || !isEncoding(encoding)) fail(`output.encoding「${String(encoding)}」は読めない文字コードです（utf-8 / shift_jis / euc-jp など）`);
 
   const parsedGroups = parseCaseGroups(caseGroups, from, fail);
   if (cases !== undefined && !Array.isArray(cases)) return fail("cases が配列ではありません");
@@ -199,7 +203,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     fixes: (fixes as FixMode | undefined) ?? "apply",
     claude: { send: claude.send as SendScope, neverRead: neverRead as string[] },
     run: runSpec,
-    output: { format: output.format, from },
+    output: { format: output.format, encoding: encoding as string, from },
     cases: parsedCases,
     caseGroups: parsedGroups,
   };
@@ -270,6 +274,15 @@ export function summarizeEnvironments(envs: Record<EnvironmentName, Environment>
     old: { label: envs.old.label, command: envs.old.command },
     new: { label: envs.new.label, command: envs.new.command },
   };
+}
+
+function isEncoding(label: string): boolean {
+  try {
+    new TextDecoder(label);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function isObject(v: unknown): v is Record<string, unknown> {

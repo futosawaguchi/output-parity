@@ -1,6 +1,8 @@
 import { ConfigError } from "../errors";
 import type { Extractor } from "./document";
+import { extractHtml } from "./html";
 import { extractPdf } from "./pdf";
+import { extractText } from "./text";
 
 export type Adapter = {
   extract: Extractor;
@@ -8,28 +10,46 @@ export type Adapter = {
   description: string;
 };
 
+/** What an adapter is chosen by: the settings' output.format, and the encoding for text formats. */
+export type OutputKind = { format: string; encoding?: string };
+
+export const DEFAULT_ENCODING = "utf-8";
+
 /**
  * Output format → adapter. Supporting a new format means adding one adapter file
- * (e.g. text.ts) and one line here; nothing after extraction depends on the format.
+ * (e.g. text.ts) and one entry here; nothing after extraction depends on the format.
  */
-const adapters: Record<string, Adapter> = {
-  pdf: {
+const adapters: Record<string, (encoding: string) => Adapter> = {
+  pdf: () => ({
     extract: extractPdf,
     description:
       "PDF から取り出したテキスト。先頭に文書のメタデータ（meta・xmp・id で始まる行）、" +
       "続いてページごとに「--- page N ---」の行と本文の行が上から順に並ぶ。" +
       "文字の位置（座標）は捨てているので、同じ高さにある文字は1行にまとめてある。" +
       "各ページの最後の「layout」で始まる行は、文字以外の見た目（用紙の大きさ・画像の数・文字のはみ出し）を表す。",
-  },
+  }),
+  text: (encoding) => ({
+    extract: (path) => extractText(path, encoding),
+    description: `テキストの出力（ログ・CSV・標準出力など）を、文字コード ${encoding} で読んで行ごとに並べたもの。行の中身には手を加えていない。`,
+  }),
+  html: (encoding) => ({
+    extract: (path) => extractHtml(path, encoding),
+    description:
+      "HTML の画面から、人に見える文字を上から順に行にしたもの。段落や見出しなどのまとまりごとに1行、" +
+      "表は1つの行（tr）を1行にしてセルを「 | 」で区切る。「[input …]」「[select …]」「[textarea …]」「[checkbox …]」の形の部分はフォームの値（hidden を含む）。" +
+      "「title:」で始まる行はページの題名。script・style は除いてあり、色や配置などの見た目は見ていない。",
+  }),
 };
 
-export function adapterFor(format: string): Adapter {
-  const adapter = adapters[format];
-  if (!adapter) {
+export const OUTPUT_FORMATS = Object.keys(adapters);
+
+export function adapterFor(output: OutputKind): Adapter {
+  const make = adapters[output.format];
+  if (!make) {
     throw new ConfigError(
-      `output.format「${format}」には対応していません`,
-      `設定ファイルの output.format を ${Object.keys(adapters).join(" / ")} のどれかにしてください`,
+      `output.format「${output.format}」には対応していません`,
+      `設定ファイルの output.format を ${OUTPUT_FORMATS.join(" / ")} のどれかにしてください`,
     );
   }
-  return adapter;
+  return make(output.encoding ?? DEFAULT_ENCODING);
 }

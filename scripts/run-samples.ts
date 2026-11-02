@@ -26,7 +26,7 @@ const subjectId = subjectArg === -1 ? undefined : process.argv[subjectArg + 1];
 
 async function main(): Promise<void> {
   const { id, config, runRoot, workDir } = await loadSubject(root, subjectId);
-  const adapter = adapterFor(config.output.format);
+  const adapter = adapterFor(config.output);
   const refused = withJudge ? whyNotSending(config, "judge") : null;
   if (refused) throw new SetupError(refused.message, refused.nextStep);
   const client = withJudge ? createClient() : null;
