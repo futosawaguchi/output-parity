@@ -47,12 +47,14 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
    ```sh
    composer install -d samples/estimate/app/lib-old   # TCPDF 6.2.26
    composer install -d samples/estimate/app/lib-new   # TCPDF 6.3.0
+   composer install -d samples/tcpdf-examples/app     # TCPDF 6.3.0 の公式の例 65 本（題材「TCPDF の公式の例」）
    ```
 3. `.env.example` を `.env` にコピーし、`ANTHROPIC_API_KEY` を入れます
 4. 画面の「実行して判定する」を押します。コマンドからも同じ流れを動かせます
    ```sh
    npm run samples              # 実行と比較だけ（Claude を呼ばない）
    npm run samples -- --judge   # 判定まで（Claude を呼ぶ）
+   npm run samples -- --subject tcpdf-examples   # TCPDF の公式の例 65 本
    ```
 
 ## 自分のシステムで試す
@@ -80,10 +82,14 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 | `run.cwd` / `run.timeoutMs` | | 動かす場所（source の中。既定 `.`）／打ち切るまでの時間（既定 30000） |
 | `run.environments.old` / `.new` | ⭕ | `label`・`command`（フルパス）・`args`（全入力の前に付ける引数）・`env`（その側だけの環境変数） |
 | `output.format` / `output.from` | ⭕ | `pdf`／`file`（プログラムが `{output}` に書く）か `stdout` |
-| `cases[]` | ⭕ | `id`・`label`・`description`・`args`。`args` の `{output}` は出力ファイルのパスに置き換わります |
+| `cases[]` | ※ | `id`・`label`・`description`・`args`。`args` の `{output}` は出力ファイルのパスに置き換わります |
+| `caseGroups[]` | ※ | まとめ書き。`each.file`（例 `"example_*.php"`）に当てはまる `run.cwd` のファイルごとに入力を1つ作ります。`id`・`label`・`description`・`args` の `{file}` はファイル名、`{name}` は拡張子を除いた名前に置き換わります（既定は id `{name}`・label `{file}`） |
+
+※ `cases` と `caseGroups` のどちらかに、入力が1つ以上要ります。
 
 - ⚠️ `id`・`label`・`description` は画面に出て、Claude にも渡ります。期待する判定が分かる名前にしないでください
 - ⚠️ 設定ファイルと同梱の結果は `source` の外に置きます（原因探しで Claude に答えを読ませないため）
+- ⚠️ PHP の CLI は、警告を標準出力に混ぜます。PDF を標準出力に書くプログラムでは、PDF の先頭に警告が入って開けなくなります → `args` に `["-d", "display_errors=0"]`（例は `samples/tcpdf-examples/parity.config.jsonc`）
 
 ## 安全について
 
@@ -105,6 +111,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 | `output-and-source` | 同上 | 判定・変わった行・実行のしかた・標準エラー出力の先頭と、Claude が選んで読んだソースと入力データ |
 
 - **読ませない範囲**: `.env`・鍵・証明書・`.git` などは、設定にかかわらず読ませません。`claude.neverRead` で足せます（減らせません）。リンクは実体の場所で判断します
+- **判定の件数の守り**: Claude を呼ぶのは、機械で決まらなかった入力だけです（差なし・出力なし・読めないは機械が決めます）。1件につき1回呼び、新しい出力の全文を送ります。それが **10 件を超えるときは1件も送らずに止め**、件数を見せて、押されてから送ります（コマンドでは `--judge-all`）
 - **伏せ字**: 送る前に、パスワード・キー・トークンらしい値を `***` にします。⚠️ **これは網であって保証ではありません。** 名前も決まった形も無いパスワードは通ります
 - **送った全文を残します**: `runs/sent/` に、伏せ字のあとの全文を残します。画面の各結果からも開けます
 - **試すプログラムに渡す環境変数**: `PATH`・`HOME`・ロケールなど起動に要るものと、設定の `env` だけです。API キーは渡しません
@@ -158,6 +165,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 
 - 同梱の見積書と入力データは、**この作品のために作った架空のもの**です。実在の取引先・案件・金額は含みません
 - PDF ライブラリは本物の公開 OSS です（TCPDF 6.2.26 / 6.3.0、FPDI 1.6.2）。アプリ（`samples/estimate/app/estimate.php`）は自分で書きました
+- もう1つの題材は、TCPDF 6.3.0 に付属する公式の例 65 本そのものです（書き換えずに動かします）。手元の測定では 64 本が差なし、`example_050`（2次元バーコード PDF417）だけが PHP 8.5 で構文エラーになり、PDF が出ません。この題材は同梱していません（composer で取得します）
 - TCPDF は LGPL-3.0 です。MIT のこのリポジトリに実体を入れないよう、`vendor/` は同梱せず composer で取得します。古い版を使うので、composer の脆弱性の勧告はパッケージ名で無視しています
 
 ## Claude をどう使ったか
