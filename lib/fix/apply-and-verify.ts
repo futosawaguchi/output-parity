@@ -24,6 +24,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
   const edit = cause?.kind === "found" ? cause.candidates[candidate]?.edit : null;
   if (!edit) throw new Error(`no edit ${candidate} for ${caseId}`);
   const say = (message: string) => opts.onProgress?.({ caseId, message });
+  const original: RunReport = { ...(base.fixAttempt?.original ?? base), fixAttempt: undefined };
 
   // The edit was read from the source that produced this report. A run made here left that source
   // in work/; for the bundled outputs it is the original, so work/ starts from a fresh copy.
@@ -33,7 +34,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
   }
   say("直し方を work/ に当てています");
   const applied = await applyEdit(opts.workDir, edit);
-  const attempt: FixAttempt = { caseId, edit, applied };
+  const attempt: FixAttempt = { caseId, edit, applied, original };
   if (applied.kind === "refused") return { ...base, fixAttempt: attempt };
 
   const after = await runPipeline({

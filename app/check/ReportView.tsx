@@ -10,7 +10,7 @@ import { CompareView } from "./CompareView";
 import { FixResult } from "./FixResult";
 
 /** The overview of one run, and below it either one case in detail or two side by side. */
-export function ReportView({ report, cause }: { report: RunReport; cause: CauseActions }) {
+export function ReportView({ report, cause, onUndo }: { report: RunReport; cause: CauseActions; onUndo: () => void }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
 
@@ -35,7 +35,7 @@ export function ReportView({ report, cause }: { report: RunReport; cause: CauseA
         }
       </p>
       {report.fixAttempt && (
-        <FixResult attempt={report.fixAttempt} labelOf={(id) => byId(id)?.label ?? id} />
+        <FixResult attempt={report.fixAttempt} labelOf={(id) => byId(id)?.label ?? id} onUndo={onUndo} busy={cause.busy} />
       )}
       <CaseTable cases={report.cases} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
       {pair ? (

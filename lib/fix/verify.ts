@@ -22,6 +22,11 @@ export type FixAttempt = {
   caseId: string;
   edit: Edit;
   applied: ApplyResult;
+  /**
+   * The report from before any edit was applied, to go back to with "undo". After two edits in a
+   * row it is still the one before the first: undo returns work/ to the original, not one step.
+   */
+  original: RunReport;
   /** Present only when the edit was applied and everything ran again. */
   verification?: { outcome: FixOutcome; deltas: CaseDelta[] };
 };

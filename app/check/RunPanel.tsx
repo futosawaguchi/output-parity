@@ -21,7 +21,7 @@ type Target = {
 const POLL_MS = 1000;
 
 /** Where each kind of job is started (lib/jobs.ts says what each one does). */
-const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge", cause: "/api/cause", verify: "/api/apply" };
+const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge", cause: "/api/cause", verify: "/api/apply", undo: "/api/undo" };
 
 /** The run button, the progress while running, and the report once done. */
 export function RunPanel() {
@@ -163,7 +163,7 @@ export function RunPanel() {
 
       {problem && <ProblemBox problem={problem} />}
       {job?.status === "failed" && <ProblemBox problem={job.error} />}
-      {shown && <ReportView report={shown} cause={causeActions} />}
+      {shown && <ReportView report={shown} cause={causeActions} onUndo={() => start("undo")} />}
     </section>
   );
 }

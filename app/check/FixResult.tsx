@@ -8,13 +8,16 @@ const HEADLINE: Record<FixOutcome, string> = {
 };
 
 /** The answer to "did the edit work?", decided by running everything again (DESIGN 7-4). */
-export function FixResult({ attempt, labelOf }: { attempt: FixAttempt; labelOf: (caseId: string) => string }) {
+type Props = { attempt: FixAttempt; labelOf: (caseId: string) => string; onUndo: () => void; busy: boolean };
+
+export function FixResult({ attempt, labelOf, onUndo, busy }: Props) {
   const { edit, applied, verification } = attempt;
   if (applied.kind === "refused") {
     return (
       <div className={styles.problem} role="alert">
         <p>直し方を当てられませんでした: {applied.message}</p>
         <p className={styles.nextStep}>→ {applied.nextStep}</p>
+        <UndoRow onUndo={onUndo} busy={busy} />
       </div>
     );
   }
@@ -42,7 +45,18 @@ export function FixResult({ attempt, labelOf }: { attempt: FixAttempt; labelOf: 
           </li>
         ))}
       </ul>
-      <p className={styles.muted}>work/ に当てたままです。元に戻すには「実行して判定する」を押してください（work/ を samples/ から作り直します）。</p>
+      <UndoRow onUndo={onUndo} busy={busy} />
     </section>
+  );
+}
+
+function UndoRow({ onUndo, busy }: { onUndo: () => void; busy: boolean }) {
+  return (
+    <div className={styles.applyRow}>
+      <button className={styles.subButton} onClick={onUndo} disabled={busy}>
+        元に戻す
+      </button>
+      <span className={styles.muted}>work/ を samples/ から作り直し、当てる前の結果に戻します（PHP も Claude も動かしません）</span>
+    </div>
   );
 }
