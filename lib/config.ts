@@ -78,7 +78,8 @@ export type ParityConfig = {
   /** Directories linked into work/ instead of copied: large, and never edited. */
   workspace: { link: string[] };
   fixes: FixMode;
-  claude: { send: SendScope };
+  /** neverRead: paths Claude is never shown while looking for a cause, on top of keys and the like (fix/read-scope.ts). */
+  claude: { send: SendScope; neverRead: string[] };
   run: RunSpec;
   output: OutputSpec;
   cases: Case[];
@@ -142,6 +143,10 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     fail(`claude.send がありません。Claude に送る範囲を選んでください（${SEND_SCOPES.join(" / ")}。README の「Claude に送るもの」）`);
   }
   if (!SEND_SCOPES.includes(claude.send as SendScope)) fail(`claude.send は ${SEND_SCOPES.map((s) => `"${s}"`).join(" / ")} のどれかにしてください`);
+  const neverRead = (claude.neverRead as unknown) ?? [];
+  if (!isStringArray(neverRead) || neverRead.some((p) => p === "" || isAbsolute(p) || p.split(/[\\/]/).includes(".."))) {
+    fail("claude.neverRead は source からの相対パス（* と ** が使える）の配列にしてください");
+  }
 
   const runSpec = parseRun(run, fail);
 
@@ -175,7 +180,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     source: resolve(dirname(path), source),
     workspace: { link },
     fixes: (fixes as FixMode | undefined) ?? "apply",
-    claude: { send: claude.send as SendScope },
+    claude: { send: claude.send as SendScope, neverRead: neverRead as string[] },
     run: runSpec,
     output: { format: output.format, from },
     cases: parsedCases,

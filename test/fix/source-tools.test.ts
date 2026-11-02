@@ -8,6 +8,10 @@ import { listDir, readLines, searchText } from "../../lib/fix/source-tools";
 
 const APP = ["<?php", "$rows = load();", "if ($r['deleted'] == 0) {", "    show($r);", "}", ""].join("\n");
 
+function scopeOf(root: string) {
+  return { root, alsoAllow: [], neverRead: [] };
+}
+
 async function source(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), "output-parity-"));
   await mkdir(join(root, "data"));
@@ -17,20 +21,20 @@ async function source(): Promise<string> {
 }
 
 test("lines are read with their numbers, so an answer can say file:line", async () => {
-  const out = await readLines(await source(), "app.php", 3, 3);
+  const out = await readLines(scopeOf(await source()), "app.php", 3, 3);
   assert.equal(out, "     3| if ($r['deleted'] == 0) {\n（app.php は全 6 行。続きは start_line=4 で読めます）");
 });
 
 test("reading outside the source directory is refused, not thrown", async () => {
-  assert.match(await readLines(await source(), "../../etc/hosts"), /外です/);
+  assert.match(await readLines(scopeOf(await source()), "../../etc/hosts"), /外です/);
 });
 
 test("directories are listed with a trailing slash", async () => {
-  assert.equal(await listDir(await source()), "app.php\ndata/");
+  assert.equal(await listDir(scopeOf(await source())), "app.php\ndata/");
 });
 
 test("search answers with file:line", async () => {
-  assert.equal(await searchText(await source(), "deleted"), "app.php:3: if ($r['deleted'] == 0) {\ndata/input.json:1: {\"deleted\": \"\"}");
+  assert.equal(await searchText(scopeOf(await source()), "deleted"), "app.php:3: if ($r['deleted'] == 0) {\ndata/input.json:1: {\"deleted\": \"\"}");
 });
 
 test("the line Claude quoted is checked against the file", async () => {

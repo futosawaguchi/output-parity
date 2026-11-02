@@ -1,20 +1,21 @@
 import { readdir, readFile, stat } from "node:fs/promises";
-import { join, relative } from "node:path";
-import { insideRoot } from "../safe-path";
+import { join } from "node:path";
+import { access, refusal, type ReadScope } from "./read-scope";
 
 // What Claude may do with the program's source while looking for a cause (DESIGN 7-4): read,
-// list and search. Nothing here writes. Every path comes from Claude, so it is confined to the
-// source directory; problems are returned as text for Claude to read, not thrown.
+// list and search. Nothing here writes. Every path comes from Claude, so it goes through the
+// read scope (read-scope.ts): confined to the source, and never into keys or hidden paths.
+// Problems are returned as text for Claude to read, not thrown.
 
 const MAX_LINES = 300;
 const MAX_HITS = 40;
 const MAX_SEARCH_FILE_BYTES = 4 * 1024 * 1024;
 
 /** Lines `start`..`end` (1-based, inclusive) with their numbers, so Claude can answer with file:line. */
-export async function readLines(root: string, path: string, start = 1, end?: number): Promise<string> {
-  const file = insideRoot(root, path);
-  if (!file) return `読めません（ソースのディレクトリの外です）: ${path}`;
-  const text = await readFile(file, "utf8").catch(() => null);
+export async function readLines(scope: ReadScope, path: string, start = 1, end?: number): Promise<string> {
+  const a = await access(scope, path);
+  if (!a.ok) return refusal(a.why, path);
+  const text = await readFile(a.path, "utf8").catch(() => null);
   if (text === null) return `ファイルがありません: ${path}`;
   const lines = text.split("\n");
   const from = Math.max(1, start);
@@ -25,38 +26,45 @@ export async function readLines(root: string, path: string, start = 1, end?: num
   return body.join("\n") + more;
 }
 
-/** The entries of one directory, directories marked with a trailing slash. */
-export async function listDir(root: string, path = "."): Promise<string> {
-  const dir = insideRoot(root, path);
-  if (!dir) return `見られません（ソースのディレクトリの外です）: ${path}`;
-  const entries = await readdir(dir, { withFileTypes: true }).catch(() => null);
+/** The entries of one directory, directories marked with a trailing slash. Hidden entries are left out. */
+export async function listDir(scope: ReadScope, path = "."): Promise<string> {
+  const a = await access(scope, path);
+  if (!a.ok) return refusal(a.why, path, "見られません");
+  const entries = await readdir(a.path, { withFileTypes: true }).catch(() => null);
   if (!entries) return `ディレクトリがありません: ${path}`;
-  // A linked dependency directory reports as a link, not a directory; stat follows it.
   const names = await Promise.all(
-    entries.map(async (e) => ((await stat(join(dir, e.name)).catch(() => null))?.isDirectory() ? `${e.name}/` : e.name)),
+    entries.map(async (e) => {
+      const entry = await access(scope, join(a.rel, e.name));
+      if (!entry.ok) return null;
+      // A linked dependency directory reports as a link, not a directory; stat follows it.
+      return (await stat(entry.path).catch(() => null))?.isDirectory() ? `${e.name}/` : e.name;
+    }),
   );
-  return names.sort().join("\n") || "（空です）";
+  return names.filter((n): n is string => n !== null).sort().join("\n") || "（空です）";
 }
 
 /** Lines containing `text` (plain text, not a pattern) under `path`, as file:line: content. */
-export async function searchText(root: string, text: string, path = "."): Promise<string> {
-  const start = insideRoot(root, path);
-  if (!start) return `探せません（ソースのディレクトリの外です）: ${path}`;
+export async function searchText(scope: ReadScope, text: string, path = "."): Promise<string> {
+  const start = await access(scope, path);
+  if (!start.ok) return refusal(start.why, path, "探せません");
   if (text === "") return "探す文字列が空です";
   const hits: string[] = [];
-  const visit = async (p: string): Promise<void> => {
+  // Hidden folders are not entered and hidden files not opened, so nothing in them is quoted.
+  const visit = async (rel: string): Promise<void> => {
     if (hits.length >= MAX_HITS) return;
-    const s = await stat(p).catch(() => null);
+    const a = await access(scope, rel);
+    if (!a.ok) return;
+    const s = await stat(a.path).catch(() => null);
     if (s?.isDirectory()) {
-      for (const name of (await readdir(p)).sort()) await visit(join(p, name));
+      for (const name of (await readdir(a.path)).sort()) await visit(join(a.rel, name));
     } else if (s?.isFile() && s.size <= MAX_SEARCH_FILE_BYTES) {
-      const lines = (await readFile(p, "utf8")).split("\n");
+      const lines = (await readFile(a.path, "utf8")).split("\n");
       lines.forEach((line, i) => {
-        if (hits.length < MAX_HITS && line.includes(text)) hits.push(`${relative(root, p)}:${i + 1}: ${line.trim().slice(0, 200)}`);
+        if (hits.length < MAX_HITS && line.includes(text)) hits.push(`${a.rel}:${i + 1}: ${line.trim().slice(0, 200)}`);
       });
     }
   };
-  await visit(start);
+  await visit(start.rel);
   if (hits.length === 0) return `見つかりません: ${text}`;
   return hits.join("\n") + (hits.length >= MAX_HITS ? `\n（${MAX_HITS} 件で打ち切りました。範囲を絞ってください）` : "");
 }

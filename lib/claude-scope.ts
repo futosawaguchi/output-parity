@@ -39,6 +39,7 @@ export function describeScope(config: Pick<ParityConfig, "claude">): string[] {
       return [
         "判定: 新しい出力の全文・変わった行（旧の側も）・レイアウトの数値・環境名と終了コード",
         "原因探し: 判定・変わった行・実行のしかた・標準エラー出力の先頭と、Claude が選んで読んだソースと入力データ",
+        `読ませないもの: .env・鍵・証明書・.git など（いつも）${config.claude.neverRead.length > 0 ? `と、設定の claude.neverRead（${config.claude.neverRead.join("・")}）` : ""}`,
       ];
   }
 }

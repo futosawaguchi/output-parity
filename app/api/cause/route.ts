@@ -41,7 +41,9 @@ export async function POST(request: Request): Promise<Response> {
 
   // The source that produced the outputs: work/ for a run made here, the original for the bundle.
   const source = base.origin === "run" ? subject.runRoot : subject.config.source;
-  const result = startJob("cause", (onProgress) => addCause(base, caseId, client, { root: source, runsRoot: join(root, "runs"), onProgress }));
+  // Links in work/ lead to the original's dependencies, which may be read; keys never are.
+  const scope = { root: source, alsoAllow: [subject.config.source], neverRead: subject.config.claude.neverRead };
+  const result = startJob("cause", (onProgress) => addCause(base, caseId, client, { scope, runsRoot: join(root, "runs"), onProgress }));
   if (!result.started) return alreadyRunning(result.runningJobId);
   return Response.json({ jobId: result.jobId }, { status: 202 });
 }

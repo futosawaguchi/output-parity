@@ -9,6 +9,7 @@ import type { CaseReport, ProgressEvent } from "../pipeline";
 import { checkEdit, checkLine, type EditCheck, type LineCheck } from "./check-cause";
 import { buildCauseMessage, CAUSE_SYSTEM_PROMPT } from "./prompt";
 import { CauseResponseSchema } from "./schema";
+import type { ReadScope } from "./read-scope";
 import { listDir, readLines, searchText } from "./source-tools";
 
 export type CauseCandidate = {
@@ -31,8 +32,8 @@ export type CauseReport =
   | { kind: "failed"; reason: string; nextStep: string };
 
 export type CauseOptions = {
-  /** Where the program's source is: work/ after a run, samples/ for the bundled run. */
-  root: string;
+  /** What Claude may read: the source that produced the outputs (work/ after a run, the original for the bundled run), minus hidden paths. */
+  scope: ReadScope;
   environments: EnvironmentSummaries;
   onProgress?: (event: ProgressEvent) => void;
 };
@@ -56,7 +57,7 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
       inputSchema: z.object({ path: z.string().describe("ソースのディレクトリからの相対パス。直下なら .") }),
       run: async ({ path }) => {
         say(`Claude が ${path} の中を見ています`);
-        return listDir(opts.root, path);
+        return listDir(opts.scope, path);
       },
     }),
     betaZodTool({
@@ -70,7 +71,7 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
       run: async ({ path, start_line, end_line }) => {
         reads.push(path);
         say(`Claude が ${path} を読んでいます${start_line ? `（${start_line} 行目から）` : ""}`);
-        return readLines(opts.root, path, start_line, end_line);
+        return readLines(opts.scope, path, start_line, end_line);
       },
     }),
     betaZodTool({
@@ -82,7 +83,7 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
       }),
       run: async ({ text, path }) => {
         say(`Claude が「${text}」を探しています`);
-        return searchText(opts.root, text, path);
+        return searchText(opts.scope, text, path);
       },
     }),
   ];
@@ -99,7 +100,7 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
         betas: ["server-side-fallback-2026-07-01"],
         fallbacks: "default",
         system: CAUSE_SYSTEM_PROMPT,
-        messages: [{ role: "user", content: await buildCauseMessage(c, opts.environments, opts.root) }],
+        messages: [{ role: "user", content: await buildCauseMessage(c, opts.environments, opts.scope.root) }],
         tools,
         max_iterations: MAX_TURNS,
         // Reading takes several turns; streaming keeps each long turn from timing out.
@@ -137,8 +138,8 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
         why: k.why,
         edit,
         steps: k.steps,
-        lineCheck: await checkLine(opts.root, k.file, k.line, k.code),
-        editCheck: edit && (await checkEdit(opts.root, edit.file, edit.oldText)),
+        lineCheck: await checkLine(opts.scope.root, k.file, k.line, k.code),
+        editCheck: edit && (await checkEdit(opts.scope.root, edit.file, edit.oldText)),
       };
     }),
   );
