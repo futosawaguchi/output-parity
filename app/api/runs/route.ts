@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { join } from "node:path";
 import { connection } from "next/server";
 import { loadBundledFix, loadBundledReport } from "@/lib/bundled";
+import { describeScope, whyNotSending } from "@/lib/claude-scope";
 import { adapterFor } from "@/lib/compare/adapters";
 import type { ParityConfig } from "@/lib/config";
 import { SetupError } from "@/lib/errors";
@@ -31,11 +32,13 @@ export async function POST(request: Request): Promise<Response> {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
+  const { config, runRoot } = subject;
+  // With claude.send "none" nothing is sent: the run compares, and the machine settles what it can.
+  const judging = whyNotSending(config, "judge") === null;
+  if (judging && !process.env.ANTHROPIC_API_KEY) {
     return Response.json(NO_KEY, { status: 400 });
   }
-  const client = new Anthropic();
-  const { config, runRoot } = subject;
+  const client = judging ? new Anthropic() : null;
 
   const result = startJob("run", (onProgress) =>
     runPipeline({ config, adapter, root: runRoot, prepare: subject.workDir !== null, runsRoot: join(root, "runs"), client, onProgress }),
@@ -56,7 +59,10 @@ export async function GET(): Promise<Response> {
   let target = null;
   let cannotRun = null;
   let cannotApply = null;
+  let cannotRejudge = null;
+  let cannotAskClaude = null;
   const bundled = await loadBundledReport(root);
+  const noKey = process.env.ANTHROPIC_API_KEY ? null : NO_KEY;
   try {
     const subject = await loadSubject(root);
     const { config } = subject;
@@ -65,13 +71,21 @@ export async function GET(): Promise<Response> {
       description: config.description,
       environments: { old: config.run.environments.old.label, new: config.run.environments.new.label },
       cases: config.cases.map((c) => ({ id: c.id, label: c.label, description: c.description })),
+      // Shown before anything is pressed (DESIGN 7-4e ④).
+      claudeScope: describeScope(config),
     };
     const cannotExecute = await whyCannotExecute(config);
+    const notJudging = whyNotSending(config, "judge");
     cannotApply = whyNoApplying(subject) ?? cannotExecute;
-    cannotRun = cannotExecute ?? (process.env.ANTHROPIC_API_KEY ? null : NO_KEY);
+    // A run without judging needs no key.
+    cannotRun = cannotExecute ?? (notJudging ? null : noKey);
+    // Judging the bundled outputs again needs the key, not PHP.
+    cannotRejudge = bundled === null ? NO_BUNDLE : (notJudging ?? noKey);
+    // Looking for a cause needs the key and the source, not PHP.
+    cannotAskClaude = whyNotSending(config, "cause") ?? noKey;
   } catch (e) {
     if (!(e instanceof SetupError)) throw e;
-    cannotRun = cannotApply = { message: e.message, nextStep: e.nextStep };
+    cannotRun = cannotApply = cannotRejudge = cannotAskClaude = { message: e.message, nextStep: e.nextStep };
   }
   return Response.json({
     job: job ? { jobId: job.jobId, status: job.status } : null,
@@ -79,10 +93,8 @@ export async function GET(): Promise<Response> {
     cannotRun,
     // Applying an edit runs the programs again (PHP needed) but asks no one (no key needed).
     cannotApply,
-    // Judging the bundled outputs again needs the key, not PHP.
-    cannotRejudge: bundled === null ? NO_BUNDLE : process.env.ANTHROPIC_API_KEY ? null : NO_KEY,
-    // Looking for a cause needs the key and the source, not PHP.
-    cannotAskClaude: process.env.ANTHROPIC_API_KEY ? null : NO_KEY,
+    cannotRejudge,
+    cannotAskClaude,
     bundled: job ? null : bundled,
     // The bundled run after applying the bundled cause's edit: shown instead of running, when this
     // machine cannot run the programs, so the round trip can still be followed (DESIGN 7-2b).

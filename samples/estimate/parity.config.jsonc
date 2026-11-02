@@ -10,6 +10,8 @@
   "source": "app",
   // 直し方を work/ に当てて、流し直して確かめる
   "fixes": "apply",
+  // Claude に送る範囲（必須）。架空のサンプルなので、出力もソースも送ってよい
+  "claude": { "send": "output-and-source" },
 
   "run": {
     "type": "command",

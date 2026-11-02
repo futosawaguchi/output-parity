@@ -12,6 +12,7 @@ function minimal(): Record<string, unknown> {
     version: 1,
     name: "demo",
     source: "app",
+    claude: { send: "none" },
     run: {
       type: "command",
       environments: {

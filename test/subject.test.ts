@@ -15,6 +15,7 @@ async function setUp(opts: { place?: string; source?: string; fixes?: string } =
     version: 1,
     name: "demo",
     source: opts.source ?? "app",
+    claude: { send: "none" },
     ...(opts.fixes ? { fixes: opts.fixes } : {}),
     run: { type: "command", environments: { old: { label: "a", command: "/bin/a" }, new: { label: "b", command: "/bin/b" } } },
     output: { format: "pdf", from: "file" },

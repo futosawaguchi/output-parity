@@ -16,6 +16,8 @@ type Target = {
   description: string;
   environments: { old: string; new: string };
   cases: { id: string; label: string; description: string }[];
+  /** What each use of Claude sends, from the settings (claude.send). */
+  claudeScope: string[];
 };
 
 const POLL_MS = 1000;
@@ -188,6 +190,15 @@ function TargetIntro({ target, showCases }: { target: Target; showCases: boolean
     <div className={styles.target}>
       <p className={styles.targetName}>{target.name}</p>
       <p>{target.description}</p>
+      <div className={styles.scope}>
+        <p className={styles.scopeTitle}>Claude に送るもの</p>
+        <ul>
+          {target.claudeScope.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+        <p className={styles.muted}>パスワード・鍵・トークンに見える値は *** にしてから送ります。送ったものは実行ごとに残り、各入力の詳細で見られます</p>
+      </div>
       {showCases && (
         <ul className={styles.targetCases}>
           {target.cases.map((c) => (

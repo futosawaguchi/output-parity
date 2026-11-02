@@ -48,6 +48,16 @@ export type OutputSpec = {
  */
 export type FixMode = "apply" | "suggest-only";
 
+/**
+ * What may be sent to Claude (DESIGN 7-4e ①). There is no default: the person whose system it is
+ * chooses, knowing what each one sends.
+ *   none               nothing; the outputs are compared and the machine settles what it can
+ *   output             the outputs (judging)
+ *   output-and-source  the outputs, and source files Claude chooses to read (looking for a cause)
+ */
+export type SendScope = "none" | "output" | "output-and-source";
+export const SEND_SCOPES: readonly SendScope[] = ["none", "output", "output-and-source"];
+
 export type Case = {
   id: string;
   /** Name shown on screen. Neutral on purpose: it must not give away the expected verdict. */
@@ -68,6 +78,7 @@ export type ParityConfig = {
   /** Directories linked into work/ instead of copied: large, and never edited. */
   workspace: { link: string[] };
   fixes: FixMode;
+  claude: { send: SendScope };
   run: RunSpec;
   output: OutputSpec;
   cases: Case[];
@@ -106,7 +117,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   }
 
   if (!isObject(json)) return fail("中身がオブジェクトではありません");
-  const { version, name, description, source, workspace, fixes, run, output, cases } = json;
+  const { version, name, description, source, workspace, fixes, claude, run, output, cases } = json;
 
   if (version === undefined) fail(`version がありません（"version": ${CONFIG_VERSION} を書いてください）`);
   if (version !== CONFIG_VERSION) fail(`version ${JSON.stringify(version)} には対応していません（対応しているのは ${CONFIG_VERSION}）`);
@@ -126,6 +137,11 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   }
 
   if (fixes !== undefined && fixes !== "apply" && fixes !== "suggest-only") fail('fixes は "apply" か "suggest-only" にしてください');
+
+  if (!isObject(claude) || claude.send === undefined) {
+    fail(`claude.send がありません。Claude に送る範囲を選んでください（${SEND_SCOPES.join(" / ")}。README の「Claude に送るもの」）`);
+  }
+  if (!SEND_SCOPES.includes(claude.send as SendScope)) fail(`claude.send は ${SEND_SCOPES.map((s) => `"${s}"`).join(" / ")} のどれかにしてください`);
 
   const runSpec = parseRun(run, fail);
 
@@ -159,6 +175,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     source: resolve(dirname(path), source),
     workspace: { link },
     fixes: (fixes as FixMode | undefined) ?? "apply",
+    claude: { send: claude.send as SendScope },
     run: runSpec,
     output: { format: output.format, from },
     cases: parsedCases,

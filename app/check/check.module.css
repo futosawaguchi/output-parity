@@ -348,6 +348,19 @@
   margin-top: 8px;
 }
 
+.scope {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.scope ul {
+  margin: 2px 0 2px 1.2em;
+}
+
+.scopeTitle {
+  font-weight: 700;
+}
+
 /* Overview table */
 
 .table {

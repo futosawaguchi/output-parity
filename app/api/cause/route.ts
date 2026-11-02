@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { join } from "node:path";
 import { loadBundledReport } from "@/lib/bundled";
+import { whyNotSending } from "@/lib/claude-scope";
 import { CASE_ID_PATTERN } from "@/lib/config";
 import { addCause } from "@/lib/fix/add-cause";
 import { currentJob, startJob } from "@/lib/jobs";
@@ -26,9 +27,6 @@ export async function POST(request: Request): Promise<Response> {
   if (typeof caseId !== "string" || !CASE_ID_PATTERN.test(caseId) || !base?.cases.some((c) => c.caseId === caseId)) {
     return Response.json({ message: "その入力は結果にありません", nextStep: "画面を読み込み直してください" }, { status: 400 });
   }
-  if (!process.env.ANTHROPIC_API_KEY) return Response.json(NO_KEY, { status: 400 });
-  const client = new Anthropic();
-
   let subject;
   try {
     subject = await loadSubject(root);
@@ -36,6 +34,11 @@ export async function POST(request: Request): Promise<Response> {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;
   }
+  const refused = whyNotSending(subject.config, "cause");
+  if (refused) return Response.json(refused, { status: 400 });
+  if (!process.env.ANTHROPIC_API_KEY) return Response.json(NO_KEY, { status: 400 });
+  const client = new Anthropic();
+
   // The source that produced the outputs: work/ for a run made here, the original for the bundle.
   const source = base.origin === "run" ? subject.runRoot : subject.config.source;
   const result = startJob("cause", (onProgress) => addCause(base, caseId, client, { root: source, runsRoot: join(root, "runs"), onProgress }));

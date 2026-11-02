@@ -6,6 +6,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { whyNotSending } from "../lib/claude-scope";
 import { adapterFor } from "../lib/compare/adapters";
 import type { Comparison } from "../lib/compare/compare-case";
 import { SetupError } from "../lib/errors";
@@ -23,6 +24,8 @@ const subjectId = subjectArg === -1 ? undefined : process.argv[subjectArg + 1];
 async function main(): Promise<void> {
   const { config, runRoot, workDir } = await loadSubject(root, subjectId);
   const adapter = adapterFor(config.output.format);
+  const refused = withJudge ? whyNotSending(config, "judge") : null;
+  if (refused) throw new SetupError(refused.message, refused.nextStep);
   const client = withJudge ? createClient() : null;
   const report = await runPipeline({ config, adapter, root: runRoot, prepare: workDir !== null, runsRoot, client });
 
