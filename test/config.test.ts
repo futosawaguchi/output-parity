@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { test } from "node:test";
-import { parseConfig } from "../lib/config";
+import { parseConfig, type CommandRun } from "../lib/config";
 import { ConfigError } from "../lib/errors";
 
 const PATH = "/somewhere/samples/demo/parity.config.jsonc";
+
+/** The command type's run, which these settings use. */
+const commandRun = (c: { run: unknown }) => c.run as CommandRun;
 
 /** The smallest settings that are accepted; each test changes one thing. */
 function minimal(): Record<string, unknown> {
@@ -34,9 +37,9 @@ test("defaults are filled in, and source is relative to the settings file", () =
   assert.equal(c.source, join("/somewhere/samples/demo", "app"));
   assert.equal(c.fixes, "apply");
   assert.deepEqual(c.workspace.link, ["vendor", "node_modules"]);
-  assert.equal(c.run.cwd, ".");
-  assert.equal(c.run.timeoutMs, 30_000);
-  assert.deepEqual(c.run.environments.old, { label: "PHP 7.4", command: "/usr/bin/php7", args: [], env: {} });
+  assert.equal(commandRun(c).cwd, ".");
+  assert.equal(commandRun(c).timeoutMs, 30_000);
+  assert.deepEqual(commandRun(c).environments.old, { label: "PHP 7.4", command: "/usr/bin/php7", args: [], env: {} });
   assert.deepEqual(c.cases[0], { id: "case-a", label: "case-a", description: "", args: ["app.php", "{output}"] });
 });
 
@@ -56,16 +59,16 @@ test("per-side arguments and environment variables are read", () => {
     env: { APP_ENV: "test" },
   };
   const c = parseConfig(json, PATH);
-  assert.deepEqual(c.run.environments.old.args, ["-d", "display_errors=0"]);
-  assert.deepEqual(c.run.environments.old.env, { APP_ENV: "test" });
-  rejects({ ...json, run: { ...(json.run as object), environments: { ...c.run.environments, new: { label: "x", command: "y", env: { "BAD-NAME": "1" } } } } }, /env の「BAD-NAME」/);
+  assert.deepEqual(commandRun(c).environments.old.args, ["-d", "display_errors=0"]);
+  assert.deepEqual(commandRun(c).environments.old.env, { APP_ENV: "test" });
+  rejects({ ...json, run: { ...(json.run as object), environments: { ...commandRun(c).environments, new: { label: "x", command: "y", env: { "BAD-NAME": "1" } } } } }, /env の「BAD-NAME」/);
 });
 
 test("run.cwd must stay inside the source", () => {
   for (const cwd of ["..", "../other", "/abs"]) {
     rejects({ ...minimal(), run: { ...(minimal().run as object), cwd } }, /run\.cwd は source の中/);
   }
-  assert.equal(parseConfig({ ...minimal(), run: { ...(minimal().run as object), cwd: "public/..//bin" } }, PATH).run.cwd, "public/..//bin");
+  assert.equal(commandRun(parseConfig({ ...minimal(), run: { ...(minimal().run as object), cwd: "public/..//bin" } }, PATH)).cwd, "public/..//bin");
 });
 
 test("only the command type is accepted for now", () => {

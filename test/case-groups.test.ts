@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { expandCaseGroups } from "../lib/case-groups";
-import { parseConfig } from "../lib/config";
+import { parseConfig, type CommandRun } from "../lib/config";
 import { ConfigError } from "../lib/errors";
 
 /** A source whose run.cwd holds a few example files, and settings with the given cases and groups. */
@@ -56,7 +56,7 @@ test("a group that matches nothing, or makes an id that cannot be used, says whi
 
 test("a run.cwd that is not there yet (dependencies not installed) points to getting them", async () => {
   const config = await setUp({ caseGroups: [{ each: { file: "*.php" }, args: ["{file}"] }] });
-  await assert.rejects(expandCaseGroups({ ...config, run: { ...config.run, cwd: "vendor/x/examples" } }), (e: Error) => e instanceof ConfigError && /全部動かす/.test(e.nextStep));
+  await assert.rejects(expandCaseGroups({ ...config, run: { ...(config.run as CommandRun), cwd: "vendor/x/examples" } }), (e: Error) => e instanceof ConfigError && /全部動かす/.test(e.nextStep));
 });
 
 test("the settings say what is wrong with a group before any file is looked at", async () => {
