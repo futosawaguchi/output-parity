@@ -8,16 +8,23 @@ const HEADLINE: Record<FixOutcome, string> = {
 };
 
 /** The answer to "did the edit work?", decided by running everything again (DESIGN 7-4). */
-type Props = { attempt: FixAttempt; labelOf: (caseId: string) => string; onUndo: () => void; busy: boolean };
+type Props = {
+  attempt: FixAttempt;
+  labelOf: (caseId: string) => string;
+  onUndo: () => void;
+  busy: boolean;
+  /** The shipped result of an edit applied on the author's machine, not one applied here. */
+  bundled: boolean;
+};
 
-export function FixResult({ attempt, labelOf, onUndo, busy }: Props) {
+export function FixResult({ attempt, labelOf, onUndo, busy, bundled }: Props) {
   const { edit, applied, verification } = attempt;
   if (applied.kind === "refused") {
     return (
       <div className={styles.problem} role="alert">
         <p>直し方を当てられませんでした: {applied.message}</p>
         <p className={styles.nextStep}>→ {applied.nextStep}</p>
-        <UndoRow onUndo={onUndo} busy={busy} />
+        <UndoRow onUndo={onUndo} busy={busy} bundled={bundled} />
       </div>
     );
   }
@@ -30,6 +37,7 @@ export function FixResult({ attempt, labelOf, onUndo, busy }: Props) {
         {target && `: ${labelOf(attempt.caseId)} は ${describeRemaining(target.before)} → ${describeRemaining(target.after)}`}
       </p>
       <p className={styles.muted}>
+        {bundled && "同梱の結果です（作者の手元で当てて流し直したもの）。"}
         <code className={styles.location}>
           {applied.file}:{applied.line}
         </code>{" "}
@@ -45,18 +53,20 @@ export function FixResult({ attempt, labelOf, onUndo, busy }: Props) {
           </li>
         ))}
       </ul>
-      <UndoRow onUndo={onUndo} busy={busy} />
+      <UndoRow onUndo={onUndo} busy={busy} bundled={bundled} />
     </section>
   );
 }
 
-function UndoRow({ onUndo, busy }: { onUndo: () => void; busy: boolean }) {
+function UndoRow({ onUndo, busy, bundled }: { onUndo: () => void; busy: boolean; bundled: boolean }) {
   return (
     <div className={styles.applyRow}>
       <button className={styles.subButton} onClick={onUndo} disabled={busy}>
         元に戻す
       </button>
-      <span className={styles.muted}>work/ を原本から作り直し、当てる前の結果に戻します（PHP も Claude も動かしません）</span>
+      <span className={styles.muted}>
+        {bundled ? "当てる前の同梱の結果に戻ります（何も動かしません）" : "work/ を原本から作り直し、当てる前の結果に戻します（PHP も Claude も動かしません）"}
+      </span>
     </div>
   );
 }

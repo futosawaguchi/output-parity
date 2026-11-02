@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import type { Adapter } from "../compare/adapters";
 import type { ParityConfig } from "../config";
 import { runPipeline, type ProgressEvent, type RunReport } from "../pipeline";
@@ -48,5 +50,9 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
     onProgress: opts.onProgress,
   });
   attempt.verification = assessFix(caseId, base, after);
-  return { ...after, fixAttempt: attempt };
+  // Saved with the edit and the verdict on it: the record of what was applied (DESIGN 4-5), and
+  // what npm run bundle ships so the round trip can be seen without PHP.
+  const report: RunReport = { ...after, fixAttempt: attempt };
+  await writeFile(join(opts.runsRoot, after.runId, "report.json"), JSON.stringify(report, null, 2) + "\n");
+  return report;
 }

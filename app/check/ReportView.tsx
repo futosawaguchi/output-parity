@@ -35,7 +35,7 @@ export function ReportView({ report, cause, onUndo }: { report: RunReport; cause
         }
       </p>
       {report.fixAttempt && (
-        <FixResult attempt={report.fixAttempt} labelOf={(id) => byId(id)?.label ?? id} onUndo={onUndo} busy={cause.busy} />
+        <FixResult attempt={report.fixAttempt} labelOf={(id) => byId(id)?.label ?? id} onUndo={onUndo} busy={cause.busy} bundled={report.origin === "bundled"} />
       )}
       <CaseTable cases={report.cases} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
       {pair ? (

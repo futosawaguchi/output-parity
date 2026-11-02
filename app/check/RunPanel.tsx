@@ -41,6 +41,8 @@ export function RunPanel() {
   const [cannotAskClaude, setCannotAskClaude] = useState<Problem | null>(null);
   // Why an edit cannot be applied and run again here (no PHP).
   const [cannotApply, setCannotApply] = useState<Problem | null>(null);
+  // The bundled run after applying the bundled cause's edit, offered when this machine cannot apply.
+  const [bundledFix, setBundledFix] = useState<RunReport | null>(null);
   // The case whose cause was asked for from this page (after a reload, the job's progress says).
   const [askedCause, setAskedCause] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -76,6 +78,7 @@ export function RunPanel() {
         setTarget(body.target);
         setCannotRun(body.cannotRun);
         if (body.bundled) setReport(body.bundled);
+        setBundledFix(body.bundledFix);
         setCannotRejudge(body.cannotRejudge);
         setCannotAskClaude(body.cannotAskClaude);
         setCannotApply(body.cannotApply);
@@ -121,6 +124,11 @@ export function RunPanel() {
     },
     cannotApply,
     apply: (caseId, candidate) => start("verify", { caseId, candidate }),
+    // Only on the bundled report it was made from: nothing runs, the shipped result is shown.
+    replay:
+      bundledFix?.fixAttempt && shown?.origin === "bundled" && !shown.fixAttempt
+        ? { caseId: bundledFix.fixAttempt.caseId, edit: bundledFix.fixAttempt.edit, show: () => setReport(bundledFix) }
+        : null,
     // The case being looked into, and what Claude is reading right now.
     working:
       busy === "cause"
@@ -163,7 +171,14 @@ export function RunPanel() {
 
       {problem && <ProblemBox problem={problem} />}
       {job?.status === "failed" && <ProblemBox problem={job.error} />}
-      {shown && <ReportView report={shown} cause={causeActions} onUndo={() => start("undo")} />}
+      {shown && (
+        <ReportView
+          report={shown}
+          cause={causeActions}
+          // A shipped result is only being looked at: going back is showing the bundled report again.
+          onUndo={() => (shown.origin === "bundled" && shown.fixAttempt ? setReport(shown.fixAttempt.original) : start("undo"))}
+        />
+      )}
     </section>
   );
 }

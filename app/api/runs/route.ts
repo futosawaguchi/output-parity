@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { join } from "node:path";
 import { connection } from "next/server";
-import { loadBundledReport } from "@/lib/bundled";
+import { loadBundledFix, loadBundledReport } from "@/lib/bundled";
 import { adapterFor } from "@/lib/compare/adapters";
 import type { ParityConfig } from "@/lib/config";
 import { SetupError } from "@/lib/errors";
@@ -84,6 +84,9 @@ export async function GET(): Promise<Response> {
     // Looking for a cause needs the key and the source, not PHP.
     cannotAskClaude: process.env.ANTHROPIC_API_KEY ? null : NO_KEY,
     bundled: job ? null : bundled,
+    // The bundled run after applying the bundled cause's edit: shown instead of running, when this
+    // machine cannot run the programs, so the round trip can still be followed (DESIGN 7-2b).
+    bundledFix: job ? null : await loadBundledFix(root),
   });
 }
 

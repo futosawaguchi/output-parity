@@ -1,4 +1,5 @@
 import type { EditCheck, LineCheck } from "@/lib/fix/check-cause";
+import type { Edit } from "@/lib/fix/apply-edit";
 import type { CauseCandidate, CauseReport } from "@/lib/fix/locate-cause";
 import { remainingOf } from "@/lib/fix/verify";
 import type { CaseReport } from "@/lib/pipeline";
@@ -15,6 +16,11 @@ export type CauseActions = {
   /** Why an edit cannot be applied and run again here (no PHP). */
   cannotApply: Problem | null;
   apply: (caseId: string, candidate: number) => void;
+  /**
+   * An edit already applied and checked on the author's machine, shipped with the bundle. Offered
+   * instead of applying when this machine cannot run the programs (no PHP).
+   */
+  replay: { caseId: string; edit: Edit; show: () => void } | null;
   /** A cause being looked for: which case (null until the server has answered) and the latest step. */
   working: { caseId: string | null; message: string } | null;
 };
@@ -45,7 +51,13 @@ export function CauseSection({ c, actions }: { c: CaseReport; actions: CauseActi
           {actions.working?.message || "Claude が原因を探し始めました"}
         </p>
       ) : c.cause ? (
-        <CauseResult cause={c.cause} onApply={(i) => actions.apply(c.caseId, i)} busy={actions.busy} cannotApply={actions.cannotApply} />
+        <CauseResult
+          cause={c.cause}
+          onApply={(i) => actions.apply(c.caseId, i)}
+          busy={actions.busy}
+          cannotApply={actions.cannotApply}
+          replay={actions.replay?.caseId === c.caseId ? actions.replay : null}
+        />
       ) : (
         <p className={styles.muted}>
           Claude がプログラムのソースと入力データを読んで、どの行が原因かを探します（PHP は要りません）。
@@ -56,7 +68,7 @@ export function CauseSection({ c, actions }: { c: CaseReport; actions: CauseActi
   );
 }
 
-type ApplyProps = { onApply: (candidate: number) => void; busy: boolean; cannotApply: Problem | null };
+type ApplyProps = { onApply: (candidate: number) => void; busy: boolean; cannotApply: Problem | null; replay: CauseActions["replay"] };
 
 function CauseResult({ cause, ...apply }: { cause: CauseReport } & ApplyProps) {
   if (cause.kind === "failed") {
@@ -76,14 +88,18 @@ function CauseResult({ cause, ...apply }: { cause: CauseReport } & ApplyProps) {
       </p>
       <ul className={styles.findings}>
         {cause.candidates.map((k, i) => (
-          <Candidate key={i} k={k} {...apply} onApply={() => apply.onApply(i)} />
+          <Candidate key={i} k={k} {...apply} onApply={() => apply.onApply(i)} replay={apply.replay && k.edit && sameEdit(apply.replay.edit, k.edit) ? apply.replay : null} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Candidate({ k, onApply, busy, cannotApply }: { k: CauseCandidate; onApply: () => void; busy: boolean; cannotApply: Problem | null }) {
+function sameEdit(a: Edit, b: Edit): boolean {
+  return a.file === b.file && a.oldText === b.oldText && a.newText === b.newText;
+}
+
+function Candidate({ k, onApply, busy, cannotApply, replay }: { k: CauseCandidate; onApply: () => void } & Omit<ApplyProps, "onApply">) {
   return (
     <li className={styles.finding}>
       <p className={styles.findingWhat}>
@@ -106,18 +122,7 @@ function Candidate({ k, onApply, busy, cannotApply }: { k: CauseCandidate; onApp
                 {[...k.edit.oldText.split("\n").map((l) => `- ${l}`), ...k.edit.newText.split("\n").map((l) => `+ ${l}`)].join("\n")}
               </pre>
               <p className={k.editCheck === "once" ? styles.calcOk : styles.calcWrong}>{EDIT_CHECK[k.editCheck ?? "missing"](k.edit.file)}</p>
-              {k.editCheck === "once" && (
-                <div className={styles.applyRow}>
-                  <button className={styles.subButton} onClick={onApply} disabled={busy || cannotApply !== null}>
-                    work/ に当てて、もう一度流して確かめる
-                  </button>
-                  <span className={styles.muted}>
-                    {cannotApply
-                      ? `いまは押せません: ${cannotApply.message} → ${cannotApply.nextStep}`
-                      : "原本は書き換えません。当てるのは写しの work/ です"}
-                  </span>
-                </div>
-              )}
+              {k.editCheck === "once" && <ApplyRow onApply={onApply} busy={busy} cannotApply={cannotApply} replay={replay} />}
             </>
           ) : (
             <>
@@ -132,6 +137,32 @@ function Candidate({ k, onApply, busy, cannotApply }: { k: CauseCandidate; onApp
         </dd>
       </dl>
     </li>
+  );
+}
+
+/** Apply the edit and run everything again, or, where that cannot run, look at the bundled result of doing so. */
+function ApplyRow({ onApply, busy, cannotApply, replay }: { onApply: () => void } & Omit<ApplyProps, "onApply">) {
+  if (cannotApply && replay) {
+    return (
+      <div className={styles.applyRow}>
+        <button className={styles.subButton} onClick={replay.show} disabled={busy}>
+          同梱の「当てて確かめた結果」を見る
+        </button>
+        <span className={styles.muted}>
+          この環境では当てて流し直せません（{cannotApply.message}）。作者の手元で同じ直し方を work/ に当て、全部の入力を流し直した結果を見せます
+        </span>
+      </div>
+    );
+  }
+  return (
+    <div className={styles.applyRow}>
+      <button className={styles.subButton} onClick={onApply} disabled={busy || cannotApply !== null}>
+        work/ に当てて、もう一度流して確かめる
+      </button>
+      <span className={styles.muted}>
+        {cannotApply ? `いまは押せません: ${cannotApply.message} → ${cannotApply.nextStep}` : "原本は書き換えません。当てるのは写しの work/ です"}
+      </span>
+    </div>
   );
 }
 
