@@ -40,7 +40,7 @@ function countingClient() {
 async function setUp() {
   const client = countingClient();
   const opts: CheckOptions = {
-    adapter: adapterFor("pdf"),
+    adapter: adapterFor({ format: "pdf" }),
     client: client as unknown as Anthropic,
     environments: { old: { label: "旧", command: "a" }, new: { label: "新", command: "b" } },
     record: sentRecorder(await mkdtemp(join(tmpdir(), "output-parity-"))),
