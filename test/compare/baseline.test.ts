@@ -6,7 +6,7 @@ import { diffLines } from "../../lib/compare/line-diff";
 test("lines that differ between two runs of the same environment are unstable", () => {
   const first = ["date: 10:00:01", "body", "id: aaa"];
   const second = ["date: 10:00:02", "body", "id: bbb"];
-  assert.deepEqual([...unstableLines(first, second)].sort(), [0, 2]);
+  assert.deepEqual([...unstableLines(first, second).keys()].sort(), [0, 2]);
 });
 
 test("identical runs have no unstable lines", () => {
@@ -16,7 +16,7 @@ test("identical runs have no unstable lines", () => {
 test("a replaced unstable line is explained by the baseline", () => {
   const old = ["date: 09:00", "body"];
   const now = ["date: 10:00", "body"];
-  const changes = applyBaseline(diffLines(old, now), new Set([0]));
+  const changes = applyBaseline(diffLines(old, now), new Map([[0, "whole" as const]]));
   assert.equal(changes.length, 1);
   assert.equal(changes[0].explainedByBaseline, true);
 });
@@ -24,14 +24,14 @@ test("a replaced unstable line is explained by the baseline", () => {
 test("a removed line is never explained, even next to unstable lines", () => {
   const old = ["date: 09:00", "row A", "total"];
   const now = ["date: 10:00", "total"];
-  const changes = applyBaseline(diffLines(old, now), new Set([0]));
+  const changes = applyBaseline(diffLines(old, now), new Map([[0, "whole" as const]]));
   assert.ok(changes.some((c) => c.oldLines.includes("row A") && !c.explainedByBaseline));
 });
 
 test("a replaced stable line stays unexplained even when it neighbours an unstable one", () => {
   const old = ["date: 09:00", "producer: v1", "body"];
   const now = ["date: 10:00", "producer: v2", "body"];
-  const changes = applyBaseline(diffLines(old, now), new Set([0]));
+  const changes = applyBaseline(diffLines(old, now), new Map([[0, "whole" as const]]));
   assert.deepEqual(
     changes.map((c) => [c.newLines, c.explainedByBaseline]),
     [
@@ -42,6 +42,34 @@ test("a replaced stable line stays unexplained even when it neighbours an unstab
 });
 
 test("without a baseline nothing is explained", () => {
-  const changes = applyBaseline(diffLines(["a"], ["b"]), new Set());
+  const changes = applyBaseline(diffLines(["a"], ["b"]), new Map());
   assert.equal(changes[0].explainedByBaseline, false);
+});
+
+test("in an unstable line only the parts that changed are set aside", () => {
+  // The issue time changes on every run; the total on the same line does not.
+  const unstable = unstableLines(["発行 10:00:01 合計 72,000"], ["発行 10:00:05 合計 72,000"]);
+  const changes = applyBaseline(diffLines(["発行 09:59:58 合計 72,000"], ["発行 10:00:01 合計 72,000"]), unstable);
+  assert.equal(changes[0].explainedByBaseline, true);
+});
+
+test("a changed amount on the same line as a timestamp is not hidden by the baseline", () => {
+  const unstable = unstableLines(["発行 10:00:01 合計 57,000"], ["発行 10:00:05 合計 57,000"]);
+  const changes = applyBaseline(diffLines(["発行 09:59:58 合計 72,000"], ["発行 10:00:01 合計 57,000"]), unstable);
+  assert.equal(changes[0].explainedByBaseline, false);
+});
+
+test("a timestamp is one piece, so a run crossing a minute does not count as a real change", () => {
+  const unstable = unstableLines(["at 10:00:01 x"], ["at 10:00:03 x"]);
+  assert.equal(applyBaseline(diffLines(["at 09:59:59 x"], ["at 10:00:01 x"]), unstable)[0].explainedByBaseline, true);
+});
+
+test("a random id is one piece, whatever mix of letters and digits it has", () => {
+  const unstable = unstableLines(["id 0: f9519d9ca9fc4713"], ["id 0: 77454a5f67191296"]);
+  assert.equal(applyBaseline(diffLines(["id 0: 8a575c10d9d180ab"], ["id 0: f9519d9ca9fc4713"]), unstable)[0].explainedByBaseline, true);
+});
+
+test("Japanese text right next to a number stays a separate piece", () => {
+  const unstable = unstableLines(["発行10:00:01合計57,000"], ["発行10:00:05合計57,000"]);
+  assert.equal(applyBaseline(diffLines(["発行09:59:58合計72,000"], ["発行10:00:01合計57,000"]), unstable)[0].explainedByBaseline, false);
 });
