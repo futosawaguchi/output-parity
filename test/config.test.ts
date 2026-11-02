@@ -82,3 +82,16 @@ test("a case writing to a file must say where", () => {
   rejects({ ...minimal(), cases: [{ id: "case-a", args: ["app.php"] }] }, /\{output\} がありません/);
   assert.ok(parseConfig({ ...minimal(), output: { format: "pdf", from: "stdout" }, cases: [{ id: "case-a", args: ["app.php"] }] }, PATH));
 });
+
+test("claude.send has no default: the person whose system it is chooses", () => {
+  const noClaude = minimal();
+  delete noClaude.claude;
+  rejects(noClaude, /claude\.send がありません/);
+  rejects({ ...minimal(), claude: { send: "all" } }, /claude\.send は "none" \/ "output" \/ "output-and-source"/);
+  assert.deepEqual(parseConfig({ ...minimal(), claude: { send: "output" } }, PATH).claude, { send: "output", neverRead: [] });
+});
+
+test("claude.neverRead takes paths inside the source", () => {
+  assert.deepEqual(parseConfig({ ...minimal(), claude: { send: "output-and-source", neverRead: ["config/*.php"] } }, PATH).claude.neverRead, ["config/*.php"]);
+  for (const bad of ["/etc/passwd", "../x", ""]) rejects({ ...minimal(), claude: { send: "none", neverRead: [bad] } }, /claude\.neverRead/);
+});
