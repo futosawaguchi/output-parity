@@ -17,6 +17,7 @@ import { alreadyRunning, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses"
 
 const root = process.cwd();
 const samplesDir = join(root, "samples");
+const workDir = join(root, "work");
 
 /** Starts a run of every sample case. 202 with a job id, or 409 if one is already running. */
 export async function POST(request: Request): Promise<Response> {
@@ -37,7 +38,7 @@ export async function POST(request: Request): Promise<Response> {
   const client = new Anthropic();
 
   const result = startJob("run", (onProgress) =>
-    runPipeline({ config, adapter, cwd: samplesDir, runsRoot: join(root, "runs"), client, onProgress }),
+    runPipeline({ config, adapter, cwd: workDir, prepareFrom: samplesDir, runsRoot: join(root, "runs"), client, onProgress }),
   );
   if (!result.started) return alreadyRunning(result.runningJobId);
   return Response.json({ jobId: result.jobId }, { status: 202 });

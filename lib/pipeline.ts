@@ -10,6 +10,7 @@ import type { CaseVerdict } from "./judge/verdict";
 import { preflight } from "./runner/preflight";
 import { runCase, type CaseResult, type SlotResult } from "./runner/run-case";
 import { createRunDir } from "./runner/run-dir";
+import { prepareWorkspace } from "./workspace";
 
 export type ProgressEvent = { caseId: string; message: string };
 
@@ -40,8 +41,10 @@ export type RunReport = {
 export type PipelineOptions = {
   config: ParityConfig;
   adapter: Adapter;
-  /** Directory the programs run in. */
+  /** Directory the programs run in: work/, never the original (DESIGN 7-4). */
   cwd: string;
+  /** Copy this directory into `cwd` first, for a fresh start. Left out when re-running after an edit. */
+  prepareFrom?: string;
   runsRoot: string;
   /** Pass a client to judge; null to stop after comparing. The client is created by the caller. */
   client: Anthropic | null;
@@ -53,6 +56,10 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
   const { config, adapter, client } = opts;
   const report = (message: string, caseId = "") => opts.onProgress?.({ caseId, message });
 
+  if (opts.prepareFrom) {
+    report("work/ を作り直しています");
+    await prepareWorkspace(opts.prepareFrom, opts.cwd);
+  }
   await preflight(config, opts.cwd);
   const startedAt = new Date();
   const run = await createRunDir(opts.runsRoot, startedAt);

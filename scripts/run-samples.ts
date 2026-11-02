@@ -15,6 +15,7 @@ import { runPipeline } from "../lib/pipeline";
 
 const root = process.cwd();
 const samplesDir = join(root, "samples");
+const workDir = join(root, "work");
 const runsRoot = join(root, "runs");
 const withJudge = process.argv.includes("--judge");
 
@@ -22,7 +23,7 @@ async function main(): Promise<void> {
   const config = await loadConfig(join(samplesDir, "parity.config.json"));
   const adapter = adapterFor(config.output.format);
   const client = withJudge ? createClient() : null;
-  const report = await runPipeline({ config, adapter, cwd: samplesDir, runsRoot, client });
+  const report = await runPipeline({ config, adapter, cwd: workDir, prepareFrom: samplesDir, runsRoot, client });
 
   console.log(`${report.configName}`);
   console.log(`記録: ${join(runsRoot, report.runId)}\n`);
