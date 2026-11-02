@@ -1,0 +1,16 @@
+{
+    "require": {
+        "tecnickcom/tcpdf": "6.2.26",
+        "setasign/fpdi": "1.6.2"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        },
+        "policy": {
+            "advisories": {
+                "ignore": ["tecnickcom/tcpdf", "setasign/fpdi"]
+            }
+        }
+    }
+}
