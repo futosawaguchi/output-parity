@@ -1,0 +1,514 @@
+{
+  "runId": "bundled",
+  "origin": "run",
+  "subjectId": "worklog",
+  "configName": "作業日報の集計 worklog.py（Python 3.10 → 3.12）",
+  "configDescription": "架空の作業日報を集計して CSV（Shift_JIS）で出す小さな Python のスクリプト（samples/worklog/app/worklog.py）を、Python 3.10 と Python 3.12 で同じ入力から動かして比べます。日報は今回作った架空のものです。",
+  "environments": {
+    "old": {
+      "label": "Python 3.10",
+      "command": "/opt/homebrew/bin/python3.10"
+    },
+    "new": {
+      "label": "Python 3.12",
+      "command": "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12"
+    }
+  },
+  "outputFormat": "text",
+  "outputEncoding": "shift_jis",
+  "startedAt": "2026-11-02T13:27:38.526Z",
+  "finishedAt": "2026-11-02T13:28:03.692Z",
+  "cases": [
+    {
+      "caseId": "case-a",
+      "label": "入力 A",
+      "description": "4件の日報",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/bin/python3.10",
+          "args": [
+            "worklog.py",
+            "data/case-a.json"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 270,
+          "outputPath": "case-a/old/output.text",
+          "stdoutPath": "case-a/old/stdout.txt",
+          "stderrPath": "case-a/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12",
+          "args": [
+            "worklog.py",
+            "data/case-a.json"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 340,
+          "outputPath": "case-a/new/output.text",
+          "stdoutPath": "case-a/new/stdout.txt",
+          "stderrPath": "case-a/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12",
+          "args": [
+            "worklog.py",
+            "data/case-a.json"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 118,
+          "outputPath": "case-a/baseline/output.text",
+          "stdoutPath": "case-a/baseline/stdout.txt",
+          "stderrPath": "case-a/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "作業日報 総務チーム A,出力 2026-11-02 22:27:38",
+            "日付,担当,作業,時間",
+            "2026-10-01,佐藤,備品の棚卸し,3.5",
+            "2026-10-01,鈴木,週報の作成,1.5",
+            "2026-10-02,佐藤,会議室の予約整理,2.0",
+            "2026-10-03,高橋,郵便物の仕分け,1.0",
+            "合計,,,8.0"
+          ],
+          "unreadable": [],
+          "pages": []
+        },
+        "new": {
+          "lines": [
+            "作業日報 総務チーム A,出力 2026-11-02 22:27:39",
+            "日付,担当,作業,時間",
+            "2026-10-01,佐藤,備品の棚卸し,3.5",
+            "2026-10-01,鈴木,週報の作成,1.5",
+            "2026-10-02,佐藤,会議室の予約整理,2.0",
+            "2026-10-03,高橋,郵便物の仕分け,1.0",
+            "合計,,,8.0"
+          ],
+          "unreadable": [],
+          "pages": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 0,
+            "oldLines": [
+              "作業日報 総務チーム A,出力 2026-11-02 22:27:38"
+            ],
+            "newStart": 0,
+            "newLines": [
+              "作業日報 総務チーム A,出力 2026-11-02 22:27:39"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 221,
+        "newBytes": 221,
+        "differingLines": 2,
+        "totalLines": 8,
+        "excerpt": [
+          "< ········ ·····`·[·· A,·o·· 2026-11-02 22:27:38·",
+          "> ········ ·····`·[·· A,·o·· 2026-11-02 22:27:39·"
+        ]
+      },
+      "verdict": {
+        "caseId": "case-a",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "case-b",
+      "label": "入力 B",
+      "description": "4件の日報（日付の書き方が混ざっている）",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/bin/python3.10",
+          "args": [
+            "worklog.py",
+            "data/case-b.json"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 89,
+          "outputPath": "case-b/old/output.text",
+          "stdoutPath": "case-b/old/stdout.txt",
+          "stderrPath": "case-b/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12",
+          "args": [
+            "worklog.py",
+            "data/case-b.json"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 77,
+          "outputPath": "case-b/new/output.text",
+          "stdoutPath": "case-b/new/stdout.txt",
+          "stderrPath": "case-b/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12",
+          "args": [
+            "worklog.py",
+            "data/case-b.json"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 43,
+          "outputPath": "case-b/baseline/output.text",
+          "stdoutPath": "case-b/baseline/stdout.txt",
+          "stderrPath": "case-b/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "作業日報 総務チーム B,出力 2026-11-02 22:27:40",
+            "日付,担当,作業,時間",
+            "2026-10-01,田中,請求書の確認,2.5",
+            "2026-10-02,田中,週報の作成,1.0",
+            "合計,,,3.5"
+          ],
+          "unreadable": [],
+          "pages": []
+        },
+        "new": {
+          "lines": [
+            "作業日報 総務チーム B,出力 2026-11-02 22:27:40",
+            "日付,担当,作業,時間",
+            "2026-10-01,田中,請求書の確認,2.5",
+            "2026-10-02,伊藤,名刺の発注,1.5",
+            "2026-10-02,田中,週報の作成,1.0",
+            "2026-10-03,伊藤,研修資料の作成,3.0",
+            "合計,,,8.0"
+          ],
+          "unreadable": [],
+          "pages": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 3,
+            "oldLines": [],
+            "newStart": 3,
+            "newLines": [
+              "2026-10-02,伊藤,名刺の発注,1.5"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 4,
+            "oldLines": [
+              "合計,,,3.5"
+            ],
+            "newStart": 5,
+            "newLines": [
+              "2026-10-03,伊藤,研修資料の作成,3.0",
+              "合計,,,8.0"
+            ],
+            "explainedByBaseline": false
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 147,
+        "newBytes": 215,
+        "differingLines": 4,
+        "totalLines": 8,
+        "excerpt": [
+          "> 2026-10-02,····,···h······,1.5·",
+          "< ···v,,,3.5·",
+          "> 2026-10-03,····,···C··········,3.0·",
+          "> ···v,,,8.0·"
+        ]
+      },
+      "verdict": {
+        "caseId": "case-b",
+        "verdict": "broken",
+        "summary": "同じ入力なのに、新では伊藤の作業2行が増え、合計が3.5から8.0に変わった。新の合計は明細と合っているが、日報の中身そのものが変わっている。",
+        "findings": [
+          {
+            "verdict": "broken",
+            "changeIds": [
+              "C1",
+              "C2"
+            ],
+            "what": "新では伊藤の明細2行（10/02 名刺の発注 1.5、10/03 研修資料の作成 3.0）が増え、合計が3.5から8.0になった。",
+            "why": "新の合計は新の明細と一致しており、新の出力の中に矛盾はない。ただし同じ入力から載る作業と総時間が変わっており、どちらが正しいかに関係なく読む人の判断は確実に変わる。",
+            "evidence": [
+              "2026-10-02,伊藤,名刺の発注,1.5",
+              "2026-10-03,伊藤,研修資料の作成,3.0",
+              "合計,,,3.5",
+              "合計,,,8.0"
+            ],
+            "calculation": "旧: 2.5 + 1.0 = 3.5 ／ 新: 2.5 + 1.5 + 1.0 + 3.0 = 8.0 ≠ 3.5（差 4.5 = 伊藤の2行 1.5 + 3.0）",
+            "checkHere": "見出し「作業日報 総務チーム B」の範囲に伊藤の行が入るべきかを、入力データで確認する。旧で伊藤の行が抜けていたのか、新で余分に入ったのかを見る。",
+            "machineNotes": [
+              "計算が合いません: 3.5 = 1.5 + 3.0"
+            ]
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        },
+        "sent": {
+          "purpose": "judge",
+          "at": "2026-11-02T13:27:42.939Z",
+          "file": "20261102-222742-case-b-judge-94ab.txt",
+          "chars": 1661,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      }
+    },
+    {
+      "caseId": "case-c",
+      "label": "入力 C",
+      "description": "5件の日報（別のシステムから取り込んだ行を含む）",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/bin/python3.10",
+          "args": [
+            "worklog.py",
+            "data/case-c.json"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 40,
+          "outputPath": "case-c/old/output.text",
+          "stdoutPath": "case-c/old/stdout.txt",
+          "stderrPath": "case-c/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12",
+          "args": [
+            "worklog.py",
+            "data/case-c.json"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 38,
+          "outputPath": "case-c/new/output.text",
+          "stdoutPath": "case-c/new/stdout.txt",
+          "stderrPath": "case-c/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12",
+          "args": [
+            "worklog.py",
+            "data/case-c.json"
+          ],
+          "outcome": {
+            "kind": "exited",
+            "exitCode": 0
+          },
+          "durationMs": 45,
+          "outputPath": "case-c/baseline/output.text",
+          "stdoutPath": "case-c/baseline/stdout.txt",
+          "stderrPath": "case-c/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "作業日報 総務チーム C,出力 2026-11-02 22:27:41",
+            "日付,担当,作業,時間",
+            "2026-10-01,渡辺,新人研修の準備,4.0",
+            "2026-10-02,山本,社内報の編集,2.0",
+            "2026-10-03,渡辺,週報の作成,1.0",
+            "合計,,,7.0"
+          ],
+          "unreadable": [],
+          "pages": []
+        },
+        "new": {
+          "lines": [
+            "作業日報 総務チーム C,出力 2026-11-02 22:27:41",
+            "日付,担当,作業,時間",
+            "2026-10-01,渡辺,新人研修の準備,4.0",
+            "2026-10-01,渡辺,新人研修の準備,4.0",
+            "2026-10-02,山本,社内報の編集,2.0",
+            "2026-10-02,山本,社内報の編集,2.0",
+            "2026-10-03,渡辺,週報の作成,1.0",
+            "合計,,,13.0"
+          ],
+          "unreadable": [],
+          "pages": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 3,
+            "oldLines": [],
+            "newStart": 3,
+            "newLines": [
+              "2026-10-01,渡辺,新人研修の準備,4.0"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 4,
+            "oldLines": [],
+            "newStart": 5,
+            "newLines": [
+              "2026-10-02,山本,社内報の編集,2.0"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 5,
+            "oldLines": [
+              "合計,,,7.0"
+            ],
+            "newStart": 7,
+            "newLines": [
+              "合計,,,13.0"
+            ],
+            "explainedByBaseline": false
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 183,
+        "newBytes": 254,
+        "differingLines": 4,
+        "totalLines": 9,
+        "excerpt": [
+          "> 2026-10-01,·n··,·V·l···C······,4.0·",
+          "> 2026-10-02,·R·{,···········W,2.0·",
+          "< ···v,,,7.0·",
+          "> ···v,,,13.0·"
+        ]
+      },
+      "verdict": {
+        "caseId": "case-c",
+        "verdict": "broken",
+        "summary": "新では10/01と10/02の作業行が重複して出力され、同じ入力なのに合計時間が7.0から13.0に増えています。",
+        "findings": [
+          {
+            "verdict": "broken",
+            "changeIds": [
+              "C1",
+              "C2",
+              "C3"
+            ],
+            "what": "渡辺(10/01)と山本(10/02)の作業行がそれぞれ2回出力され、合計も7.0から13.0に増えました。",
+            "why": "新の合計は重複行を含めた和と一致するため、文書の中では辻褄が合っています。しかし同じ入力から旧は7.0時間を出しており、日報の作業時間が倍近くに水増しされているので、読む人の判断は確実に変わります。",
+            "evidence": [
+              "2026-10-01,渡辺,新人研修の準備,4.0",
+              "2026-10-02,山本,社内報の編集,2.0",
+              "合計,,,7.0",
+              "合計,,,13.0"
+            ],
+            "calculation": "旧: 4.0 + 2.0 + 1.0 = 7.0／新: 4.0 + 4.0 + 2.0 + 2.0 + 1.0 = 13.0 ≠ 7.0（差 6.0 = 重複した2行の4.0 + 2.0）",
+            "checkHere": "見出し行「日付,担当,作業,時間」の直後にある2026-10-01と2026-10-02の行。それぞれ同じ内容が2行続いていないか、また最終行の合計値を確認してください。",
+            "machineNotes": [
+              "計算が合いません: 7.0 = 0 + 2.0"
+            ]
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        },
+        "sent": {
+          "purpose": "judge",
+          "at": "2026-11-02T13:27:54.827Z",
+          "file": "20261102-222754-case-c-judge-d150.txt",
+          "chars": 1706,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      },
+      "cause": {
+        "kind": "found",
+        "summary": "Python 3.11 から datetime.fromisoformat が末尾「Z」の日付を読めるようになりました。そのため、旧では飛ばされていた「…T00:00:00Z」の重複行2件が新では取り込まれ、出力と合計に加わっています。",
+        "candidates": [
+          {
+            "file": "worklog.py",
+            "line": 14,
+            "code": "            day = datetime.fromisoformat(entry[\"date\"])",
+            "change": "3.10 の fromisoformat は isoformat() が出す形式しか受け付けず、「Z」で終わる文字列には ValueError を出していました。3.11 以降はほぼすべての ISO 8601 形式を受け付けるため、「Z」も「20261002」のような区切りなしの形式も読めます。",
+            "why": "case-c.json の6・7行目「2026-10-01T00:00:00Z」(4.0) と「2026-10-02T00:00:00Z」(2.0) は、旧では15〜16行目の except で飛ばされていました。新では読めるので行として出力され、合計も 7.0+4.0+2.0=13.0 になりました。",
+            "edit": {
+              "file": "worklog.py",
+              "oldText": "        try:\n            day = datetime.fromisoformat(entry[\"date\"])",
+              "newText": "        s = entry[\"date\"]\n        try:\n            # 3.10 の fromisoformat が受け付けなかった形式（末尾Z・区切りなし等）は従来どおり飛ばす\n            if s.endswith(\"Z\") or s[4:5] != \"-\" or s[7:8] != \"-\" or not s[5:7].isdigit():\n                raise ValueError(s)\n            day = datetime.fromisoformat(s)"
+            },
+            "steps": [],
+            "lineCheck": "matches",
+            "editCheck": "once"
+          }
+        ],
+        "model": "claude-opus-5-5",
+        "reads": [
+          "worklog.py",
+          "data/case-c.json"
+        ],
+        "sent": {
+          "purpose": "cause",
+          "at": "2026-11-02T13:30:48.844Z",
+          "file": "20261102-223048-case-c-cause-47ec.txt",
+          "chars": 4446,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      }
+    }
+  ]
+}
