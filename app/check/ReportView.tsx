@@ -46,8 +46,8 @@ export function ReportView({
         {
           {
             run: `${finishedAt} に実行`,
-            bundled: `同梱の結果です（${finishedAt} に作者の手元で実行し、リポジトリに入れたもの）。PHP も API キーも無しで見られます。`,
-            rejudge: `同梱の出力（作者の手元で PHP が出したもの）を、${finishedAt} にこの環境の Claude が判定し直した結果です。`,
+            bundled: `同梱の結果です（${finishedAt} に作者の手元で実行し、リポジトリに入れたもの）。プログラムを動かす環境も API キーも無しで見られます。`,
+            rejudge: `同梱の出力（作者の手元でプログラムが出したもの）を、${finishedAt} にこの環境の Claude が判定し直した結果です。`,
           }[report.origin]
         }
       </p>
@@ -67,7 +67,7 @@ export function ReportView({
       ) : open ? (
         <CaseDetail report={report} c={open} cause={cause} />
       ) : (
-        <p className={styles.hint}>行を押すと、その入力の PDF・差・判定の根拠が出ます。「並べる」に2つチェックすると、左右に並べて見られます。</p>
+        <p className={styles.hint}>行を押すと、その入力の出力・差・判定の根拠が出ます。「並べる」に2つチェックすると、左右に並べて見られます。</p>
       )}
     </div>
   );

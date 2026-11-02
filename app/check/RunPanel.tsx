@@ -183,7 +183,7 @@ export function RunPanel() {
           {!cannotRejudge && (
             <>
               <br />
-              PHP が無くても、API キーがあれば「同梱の出力を Claude に判定し直させる」で、同梱の PDF をいま判定させられます。
+              プログラムを動かせなくても、API キーがあれば「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま判定させられます。
             </>
           )}
         </p>

@@ -65,7 +65,7 @@ function UndoRow({ onUndo, busy, bundled }: { onUndo: () => void; busy: boolean;
         元に戻す
       </button>
       <span className={styles.muted}>
-        {bundled ? "当てる前の同梱の結果に戻ります（何も動かしません）" : "work/ を原本から作り直し、当てる前の結果に戻します（PHP も Claude も動かしません）"}
+        {bundled ? "当てる前の同梱の結果に戻ります（何も動かしません）" : "work/ を原本から作り直し、当てる前の結果に戻します（プログラムも Claude も動かしません）"}
       </span>
     </div>
   );

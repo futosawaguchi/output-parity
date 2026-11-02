@@ -62,7 +62,7 @@ export function CauseSection({ c, subjectId, actions }: { c: CaseReport; subject
         />
       ) : (
         <p className={styles.muted}>
-          Claude がプログラムのソースと入力データを読んで、どの行が原因かを探します（PHP は要りません）。
+          Claude がプログラムのソースと入力データを読んで、どの行が原因かを探します（プログラムを動かす環境は要りません）。
           {actions.cannot && ` いまは押せません: ${actions.cannot.message} → ${actions.cannot.nextStep}`}
         </p>
       )}
