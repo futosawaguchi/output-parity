@@ -69,3 +69,10 @@ test("a chain with a multiplication is left alone rather than half-read", () => 
 test("an x that is part of a word is not a multiplication", () => {
   assert.deepEqual(checkArithmetic("x 座標 10 + 5 = 15"), [{ text: "10 + 5 = 15", ok: true }]);
 });
+
+test("an equation that goes on about the gap is checked against the gap, not the right-hand side", () => {
+  const checks = checkArithmetic("新: 2.5 + 1.5 + 1.0 + 3.0 = 8.0 ≠ 3.5（差 4.5 = 伊藤の2行 1.5 + 3.0）");
+  assert.ok(checks.every((c) => c.ok), JSON.stringify(checks));
+  assert.ok(checks.some((c) => c.text === "4.5 = 1.5 + 3.0"));
+  assert.equal(checkArithmetic("8.0 ≠ 3.5（差 4.5 = 1.5 + 2.0）").at(-1)?.ok, false);
+});
