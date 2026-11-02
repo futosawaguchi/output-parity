@@ -50,10 +50,15 @@ const RULES: Rule[] = [
     pattern: new RegExp(String.raw`(${SECRET_NAME}["']?\s*(?:=>|:|=)\s*)(["'])([^"'\n]+)\2`, "gi"),
     replace: (_m, before, quote) => `${before}${quote}${MASK}${quote}`,
   },
-  // DB_PASSWORD=value (an .env-style line) and Password: value (a line of a document)
+  // DB_PASSWORD=value (an .env-style line) and Password: value (a line of a document). A line may
+  // carry what this tool put in front of it: a change mark ("- [C1] "), a line number ("    12| ")
+  // from read_file, or "file:12: " from search_text.
   {
     kind: "名前つきの秘密の値",
-    pattern: new RegExp(String.raw`^(\s*(?:export\s+)?${SECRET_NAME}\s*(?:=|:|：)\s*)([^\s"'#][^\s#]*)`, "gim"),
+    pattern: new RegExp(
+      String.raw`^((?:[-+]\s)?\s*(?:\[[^\]\n]*\]\s*)?(?:\d+\|\s?)?(?:[^\s:]+:\d+:\s*)?(?:export\s+)?${SECRET_NAME}\s*(?:=|:|：)\s*)([^\s"'#][^\s#]*)`,
+      "gim",
+    ),
     replace: (_m, before) => `${before}${MASK}`,
   },
 ];
