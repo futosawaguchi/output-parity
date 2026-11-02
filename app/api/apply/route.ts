@@ -38,7 +38,7 @@ export async function POST(request: Request): Promise<Response> {
     subject = await loadSubject(root, subjectId);
     adapter = adapterFor(subject.config.output);
     // Running again needs the interpreters; say so now rather than after writing to work/.
-    await preflight(subject.config, join(subject.config.source, subject.config.run.cwd));
+    await preflight(subject.config, subject.config.source);
   } catch (e) {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;

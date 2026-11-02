@@ -10,6 +10,7 @@ import type { CauseReport } from "./fix/locate-cause";
 import type { FixAttempt } from "./fix/verify";
 import type { CaseVerdict } from "./judge/verdict";
 import { preflight } from "./runner/preflight";
+import { collectCase } from "./runner/files";
 import { runCase, type CaseResult, type SlotResult } from "./runner/run-case";
 import { createRunDir } from "./runner/run-dir";
 import { sentRecorder, type SentRecorder } from "./sent-log";
@@ -94,23 +95,29 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
     report("work/ を作り直しています");
     await prepareWorkspace(config.source, opts.root, config.workspace.link);
   }
-  const cwd = join(opts.root, config.run.cwd);
-  await preflight(config, cwd);
+  await preflight(config, opts.root);
+  const runSpec = config.run;
   const startedAt = new Date();
   const run = await createRunDir(opts.runsRoot, startedAt);
 
   const checked: Checked[] = [];
-  const environments = summarizeEnvironments(config.run.environments);
+  const environments = summarizeEnvironments(config.run);
   const checkOpts: CheckOptions = { adapter, client, environments, record: sentRecorder(join(opts.runsRoot, "sent")), onProgress: opts.onProgress };
   for (const testCase of config.cases) {
     const caseId = testCase.id;
-    report(
-      opts.keepOld?.has(caseId)
-        ? `${environments.new.label} で2回実行しています（${environments.old.label} は当てる前の出力と比べます）`
-        : `${environments.old.label} で1回、${environments.new.label} で2回実行しています`,
-      caseId,
-    );
-    const result = await runCase(config, testCase, cwd, join(run.path, caseId), opts.keepOld?.get(caseId));
+    let result: CaseResult;
+    if (runSpec.type === "files") {
+      report("渡された出力のファイルを写しています", caseId);
+      result = await collectCase(config, runSpec, testCase, join(run.path, caseId));
+    } else {
+      report(
+        opts.keepOld?.has(caseId)
+          ? `${environments.new.label} で2回実行しています（${environments.old.label} は当てる前の出力と比べます）`
+          : `${environments.old.label} で1回、${environments.new.label} で2回実行しています`,
+        caseId,
+      );
+      result = await runCase(config, testCase, join(opts.root, runSpec.cwd), join(run.path, caseId), opts.keepOld?.get(caseId));
+    }
     checked.push({ result, report: await checkCase(result, testCase, { ...checkOpts, client: null }) });
   }
   const { cases, held } = await judgeWaiting(checked, checkOpts, opts.judgeLimit === undefined ? JUDGE_WITHOUT_ASKING : opts.judgeLimit);

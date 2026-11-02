@@ -99,6 +99,8 @@ async function runSlot(
 ): Promise<SlotResult> {
   await mkdir(slotDir, { recursive: true });
   const outputPath = join(slotDir, `output.${config.output.format}`);
+  // Only the command type runs anything (the files type is collected in runner/files.ts).
+  if (config.run.type !== "command") throw new Error("runCase is for the command type");
   const environment = config.run.environments[env];
   const command = environment.command;
   const args = [...environment.args, ...testCase.args.map((a) => (a === OUTPUT_PLACEHOLDER ? outputPath : a))];

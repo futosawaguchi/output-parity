@@ -1,6 +1,7 @@
 import { readdir, realpath, stat } from "node:fs/promises";
 import { isAbsolute, join, relative, sep } from "node:path";
 import { expandCaseGroups } from "./case-groups";
+import { withFileCases } from "./runner/files";
 import { loadConfig, type ParityConfig } from "./config";
 import { ConfigError } from "./errors";
 
@@ -82,14 +83,21 @@ export async function loadSubject(root: string, id: string = DEFAULT_SUBJECT): P
   const workDir = join(root, "work", id);
   const bundledDir = join(dir, "bundled");
   await checkPlaces(settings.source, join(root, "work"), bundledDir);
-  const config = await expandCaseGroups(settings);
-  if (config.fixes === "suggest-only") return { id, config, runRoot: config.source, workDir: null, bundledDir };
+  const config = await withFileCases(await expandCaseGroups(settings));
+  // Outputs given as files cannot be made again, so there is nothing to copy or to apply an edit to.
+  if (config.fixes === "suggest-only" || config.run.type === "files") return { id, config, runRoot: config.source, workDir: null, bundledDir };
   return { id, config, runRoot: workDir, workDir, bundledDir };
 }
 
 /** Why an edit cannot be applied to this subject, or null when it can. */
 export function whyNoApplying(subject: Subject): { message: string; nextStep: string } | null {
   if (subject.workDir) return null;
+  if (subject.config.run.type === "files") {
+    return {
+      message: "この題材は、旧と新の出力をファイルで渡す設定です（run.type が files）。プログラムを動かさないので、直し方を当てて流し直すことはできません",
+      nextStep: "直し方は自分のソースに当て、新しい出力を run.new のフォルダに置き直してから、もう一度実行してください",
+    };
+  }
   return {
     message: "この題材は、直し方を提案するところまでの設定です（fixes が suggest-only。写しを作らず、何も書き換えません）",
     nextStep: "当てて確かめるには、設定の fixes を apply にしてください（work/ に写しを作り、そこに当てます）",

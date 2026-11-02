@@ -21,7 +21,7 @@ export type CaseComparison = { caseId: string; runs: SlotResult[]; comparison: C
 
 /** Convert → baseline → compare, in that order (DESIGN 4-2). */
 export async function compareCase(result: CaseResult, extract: Extractor): Promise<CaseComparison> {
-  const bySlot = Object.fromEntries(result.slots.map((s) => [s.slot, s])) as Record<Slot, SlotResult>;
+  const bySlot = Object.fromEntries(result.slots.map((s) => [s.slot, s])) as Record<"old" | "new", SlotResult> & Partial<Record<Slot, SlotResult>>;
   const done = (comparison: Comparison): CaseComparison => ({ caseId: result.caseId, runs: result.slots, comparison });
 
   const missing = (["old", "new"] as const).filter((slot) => bySlot[slot].outputPath === null);
@@ -42,8 +42,11 @@ export async function compareCase(result: CaseResult, extract: Extractor): Promi
 
   let unstable = new Map<number, Unstable>();
   let baseline: Extract<Comparison, { kind: "compared" }>["baseline"] = { kind: "used" };
-  const baselinePath = bySlot.baseline.outputPath;
-  if (baselinePath === null) {
+  const baselinePath = bySlot.baseline?.outputPath;
+  if (baselinePath === undefined) {
+    // Outputs given as files may come without a second set of new outputs.
+    baseline = { kind: "unavailable", reason: "新の出力の2回目が無いので、毎回変わる値は見分けていません" };
+  } else if (baselinePath === null) {
     baseline = { kind: "unavailable", reason: "ベースライン用の2回目の実行で出力が出ませんでした" };
   } else {
     try {

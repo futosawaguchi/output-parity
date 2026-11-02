@@ -9,7 +9,9 @@ export type ExecOutcome =
   | { kind: "signaled"; signal: string }
   | { kind: "timedOut"; timeoutMs: number }
   | { kind: "outputTooLarge"; maxBufferBytes: number }
-  | { kind: "spawnFailed"; code: string; message: string };
+  | { kind: "spawnFailed"; code: string; message: string }
+  /** Nothing ran: the output was given as a file (run.type "files"), or that file was not there. */
+  | { kind: "given"; found: boolean };
 
 /** One line describing how a run ended, for people. */
 export function describeOutcome(o: ExecOutcome): string {
@@ -24,5 +26,7 @@ export function describeOutcome(o: ExecOutcome): string {
       return `出力が ${o.maxBufferBytes} バイトを超えたので打ち切り`;
     case "spawnFailed":
       return `起動できませんでした（${o.code}）`;
+    case "given":
+      return o.found ? "渡されたファイル" : "フォルダにファイルがありません";
   }
 }

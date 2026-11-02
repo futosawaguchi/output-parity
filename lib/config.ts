@@ -26,13 +26,29 @@ export type Environment = {
 export type EnvironmentSummary = Pick<Environment, "label" | "command">;
 export type EnvironmentSummaries = Record<EnvironmentName, EnvironmentSummary>;
 
-export type RunSpec = {
-  /** How the outputs are produced. Only "command" for now (DESIGN 7-4c: files and web come later). */
+/** How the outputs are produced (DESIGN 7-4c): by running the programs, or given as files. */
+export type RunSpec = CommandRun | FilesRun;
+
+export type CommandRun = {
+  /** The tool runs the old and new programs on every case. */
   type: "command";
   /** Where the programs run, relative to the source. */
   cwd: string;
   timeoutMs: number;
   environments: Record<EnvironmentName, Environment>;
+};
+
+/**
+ * The old and new outputs are already there, one folder each, the same name for the same input
+ * (the old outputs are often what was kept from the old system). Nothing runs, so an edit cannot
+ * be checked by running again; the cause can still be looked for in the source.
+ */
+export type FilesRun = {
+  type: "files";
+  /** label: shown for the side; dir: absolute (written relative to the settings file). */
+  sides: Record<EnvironmentName, { label: string; dir: string }>;
+  /** A second set of new outputs, from another run of the new environment, to learn what varies on every run. */
+  baselineDir: string | null;
 };
 
 export type OutputSpec = {
@@ -164,7 +180,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     fail("claude.neverRead は source からの相対パス（* と ** が使える）の配列にしてください");
   }
 
-  const runSpec = parseRun(run, fail);
+  const runSpec = parseRun(run, dirname(path), fail);
 
   if (!isObject(output) || typeof output.format !== "string") return fail("output.format がありません");
   if (output.from !== "file" && output.from !== "stdout") fail('output.from は "file" か "stdout" にしてください');
@@ -172,10 +188,12 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   const encoding = output.encoding ?? "utf-8";
   if (typeof encoding !== "string" || !isEncoding(encoding)) fail(`output.encoding「${String(encoding)}」は読めない文字コードです（utf-8 / shift_jis / euc-jp など）`);
 
+  if (runSpec.type === "files" && caseGroups !== undefined) fail("ファイル型（run.type が files）では caseGroups は使えません（cases を書かなければ、フォルダのファイルが全部入力になります）");
   const parsedGroups = parseCaseGroups(caseGroups, from, fail);
   if (cases !== undefined && !Array.isArray(cases)) return fail("cases が配列ではありません");
   const caseList: unknown[] = cases ?? [];
-  if (caseList.length === 0 && parsedGroups.length === 0) return fail("cases も caseGroups も空です（入力を1つ以上書いてください）");
+  // The files type finds its inputs in the folders when none are written (lib/runner/files.ts).
+  if (caseList.length === 0 && parsedGroups.length === 0 && runSpec.type !== "files") return fail("cases も caseGroups も空です（入力を1つ以上書いてください）");
   const seen = new Set<string>();
   const parsedCases = caseList.map((c, i): Case => {
     if (!isObject(c) || typeof c.id !== "string" || !CASE_ID_PATTERN.test(c.id)) {
@@ -185,7 +203,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     seen.add(c.id);
     if (!isStringArray(c.args)) fail(`cases[${i}].args が文字列の配列ではありません`);
     const args = c.args as string[];
-    if (from === "file" && !args.includes(OUTPUT_PLACEHOLDER)) {
+    if (runSpec.type === "command" && from === "file" && !args.includes(OUTPUT_PLACEHOLDER)) {
       fail(`cases[${i}].args に ${OUTPUT_PLACEHOLDER} がありません（output.from が "file" のとき必要）`);
     }
     if ((c.label !== undefined && typeof c.label !== "string") || (c.description !== undefined && typeof c.description !== "string")) {
@@ -232,9 +250,10 @@ function parseCaseGroups(groups: unknown, from: OutputSpec["from"], fail: (what:
   });
 }
 
-function parseRun(run: unknown, fail: (what: string) => never): RunSpec {
+function parseRun(run: unknown, base: string, fail: (what: string) => never): RunSpec {
   if (!isObject(run)) return fail("run がありません");
-  if (run.type !== "command") return fail(`run.type は "command" にしてください（ほかの型は未対応）`);
+  if (run.type === "files") return parseFilesRun(run, base, fail);
+  if (run.type !== "command") return fail(`run.type は "command" か "files" にしてください`);
 
   const cwd = run.cwd ?? ".";
   if (typeof cwd !== "string" || isAbsolute(cwd) || normalize(cwd).split(sep)[0] === "..") {
@@ -268,8 +287,26 @@ function parseRun(run: unknown, fail: (what: string) => never): RunSpec {
   return { type: "command", cwd: cwd as string, timeoutMs: (run.timeoutMs as number | undefined) ?? DEFAULT_TIMEOUT_MS, environments };
 }
 
-/** The part of the environments a report keeps. */
-export function summarizeEnvironments(envs: Record<EnvironmentName, Environment>): EnvironmentSummaries {
+function parseFilesRun(run: Record<string, unknown>, base: string, fail: (what: string) => never): FilesRun {
+  const side = (key: EnvironmentName) => {
+    const s = run[key];
+    if (!isObject(s) || typeof s.label !== "string" || typeof s.dir !== "string" || s.dir === "") return fail(`run.${key} に label と dir（出力のフォルダ）がありません`);
+    return { label: s.label, dir: resolve(base, s.dir) };
+  };
+  let baselineDir: string | null = null;
+  if (run.baseline !== undefined) {
+    if (!isObject(run.baseline) || typeof run.baseline.dir !== "string" || run.baseline.dir === "") return fail("run.baseline.dir（新の出力の2回目のフォルダ）が文字列ではありません");
+    baselineDir = resolve(base, run.baseline.dir);
+  }
+  return { type: "files", sides: { old: side("old"), new: side("new") }, baselineDir };
+}
+
+/** The part of the run a report keeps: each side's label, and its command or the folder its outputs came from. */
+export function summarizeEnvironments(run: RunSpec): EnvironmentSummaries {
+  if (run.type === "files") {
+    return { old: { label: run.sides.old.label, command: run.sides.old.dir }, new: { label: run.sides.new.label, command: run.sides.new.dir } };
+  }
+  const envs = run.environments;
   return {
     old: { label: envs.old.label, command: envs.old.command },
     new: { label: envs.new.label, command: envs.new.command },

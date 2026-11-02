@@ -46,7 +46,7 @@ async function main(): Promise<void> {
   for (const c of report.cases) {
     console.log(c.caseId);
     for (const s of c.runs) {
-      const label = config.run.environments[s.env].label;
+      const label = report.environments[s.env].label;
       const output = s.outputPath ? "出力あり" : "出力なし";
       console.log(`  ${s.slot.padEnd(8)} ${label.padEnd(8)} ${describeOutcome(s.outcome)}・${output}（${s.durationMs} ms）`);
     }

@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import { loadBundledFix, loadBundledReport } from "@/lib/bundled";
 import { describeScope, whyNotSending } from "@/lib/claude-scope";
 import { adapterFor } from "@/lib/compare/adapters";
-import type { ParityConfig } from "@/lib/config";
+import { summarizeEnvironments, type ParityConfig } from "@/lib/config";
 import { SetupError } from "@/lib/errors";
 import { currentJob, runningJob, startJob } from "@/lib/jobs";
 import { runPipeline } from "@/lib/pipeline";
@@ -75,7 +75,7 @@ export async function GET(request: Request): Promise<Response> {
     target = {
       name: config.name,
       description: config.description,
-      environments: { old: config.run.environments.old.label, new: config.run.environments.new.label },
+      environments: { old: summarizeEnvironments(config.run).old.label, new: summarizeEnvironments(config.run).new.label },
       cases: config.cases.map((c) => ({ id: c.id, label: c.label, description: c.description })),
       // Shown before anything is pressed (DESIGN 7-4e ④).
       claudeScope: describeScope(config),
@@ -113,7 +113,7 @@ export async function GET(request: Request): Promise<Response> {
 /** The check a run starts with (the programs can be executed), made up front for the page. */
 async function whyCannotExecute(config: ParityConfig): Promise<{ message: string; nextStep: string } | null> {
   try {
-    await preflight(config, join(config.source, config.run.cwd));
+    await preflight(config, config.source);
   } catch (e) {
     if (e instanceof SetupError) return { message: e.message, nextStep: e.nextStep };
     throw e;

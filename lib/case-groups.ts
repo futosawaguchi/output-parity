@@ -11,7 +11,8 @@ import { ConfigError } from "./errors";
  * The files are looked for in run.cwd of the original source, where the programs will run.
  */
 export async function expandCaseGroups(config: ParityConfig): Promise<ParityConfig> {
-  if (config.caseGroups.length === 0) return config;
+  // Only the command type has case groups (the settings refuse them for the files type).
+  if (config.caseGroups.length === 0 || config.run.type !== "command") return config;
   const dir = join(config.source, config.run.cwd);
   if (!(await stat(dir).catch(() => null))?.isDirectory()) {
     throw new ConfigError(
