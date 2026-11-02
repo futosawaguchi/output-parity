@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "samples": "tsx scripts/run-samples.ts"
+    "samples": "tsx scripts/run-samples.ts",
+    "test": "tsx --test \"test/**/*.test.ts\""
   },
   "dependencies": {
     "next": "16.4.3",
