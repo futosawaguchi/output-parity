@@ -21,7 +21,7 @@ export async function loadBundledReport(root: string): Promise<RunReport | null>
   const dir = bundledDir(root);
   const text = await readFile(join(dir, "report.json"), "utf8").catch(() => null);
   if (text === null) return null;
-  const report = JSON.parse(text) as RunReport;
+  const report: RunReport = { ...(JSON.parse(text) as RunReport), origin: "bundled" };
   const resolve = (p: string) => (isAbsolute(p) ? p : join(dir, p));
   for (const c of report.cases) {
     for (const r of c.runs) {

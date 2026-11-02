@@ -6,6 +6,7 @@ import { compareCase, type Comparison } from "./compare/compare-case";
 import { naiveDiff, type NaiveDiff } from "./compare/naive";
 import type { ParityConfig } from "./config";
 import { judgeCase } from "./judge/judge-case";
+import type { CauseReport } from "./fix/locate-cause";
 import type { CaseVerdict } from "./judge/verdict";
 import { preflight } from "./runner/preflight";
 import { runCase, type CaseResult, type SlotResult } from "./runner/run-case";
@@ -24,11 +25,15 @@ export type CaseReport = {
   naive: NaiveDiff | null;
   /** null when the run was made without judging. */
   verdict: CaseVerdict | null;
+  /** Where in the source the difference comes from; present once someone asked (DESIGN 7-4). */
+  cause?: CauseReport;
 };
 
 /** Everything about one run, saved as report.json: the record of what was checked and when (DESIGN 4-5). */
 export type RunReport = {
   runId: string;
+  /** run: executed here / rejudge: the bundled outputs judged again here / bundled: shipped as is. */
+  origin: "run" | "rejudge" | "bundled";
   configName: string;
   configDescription: string;
   environments: ParityConfig["environments"];
@@ -74,6 +79,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
 
   const runReport: RunReport = {
     runId: run.id,
+    origin: "run",
     configName: config.name,
     configDescription: config.description,
     environments: config.environments,

@@ -36,7 +36,7 @@ export async function rejudgeBundled(bundled: RunReport, opts: RejudgeOptions): 
     );
   }
 
-  const report: RunReport = { ...bundled, startedAt: startedAt.toISOString(), finishedAt: new Date().toISOString(), cases };
+  const report: RunReport = { ...bundled, origin: "rejudge", startedAt: startedAt.toISOString(), finishedAt: new Date().toISOString(), cases };
   await writeFile(join(run.path, "report.json"), JSON.stringify(report, null, 2) + "\n");
   opts.onProgress?.({ caseId: "", message: "終わりました" });
   return report;
