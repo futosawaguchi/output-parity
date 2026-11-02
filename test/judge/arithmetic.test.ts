@@ -60,3 +60,12 @@ test("times and dates are not read as arithmetic", () => {
   const checks = checkArithmetic("06:07:02 − 06:07:01 = 1 秒。本文の検算: 15,000 + 42,000 − 5,000 = 52,000");
   assert.deepEqual(checks.map((c) => [c.text, c.ok]), [["15,000 + 42,000 − 5,000 = 52,000", true]]);
 });
+
+test("a chain with a multiplication is left alone rather than half-read", () => {
+  assert.deepEqual(checkArithmetic("1,000 × 3 = 3,000"), []);
+  assert.deepEqual(checkArithmetic("57,000 x 1.1 = 62,700"), []);
+});
+
+test("an x that is part of a word is not a multiplication", () => {
+  assert.deepEqual(checkArithmetic("x 座標 10 + 5 = 15"), [{ text: "10 + 5 = 15", ok: true }]);
+});
