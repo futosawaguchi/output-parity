@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, realpath, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, realpath, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { ConfigError } from "../lib/errors";
-import { loadSubject, whyNoApplying } from "../lib/subject";
+import { DEFAULT_SUBJECT, listSubjects, loadSubject, subjectIdOf, whyNoApplying } from "../lib/subject";
 
 /** A repository root with one subject at <place>/<id>/, whose source is `source` (relative to its settings). */
 async function setUp(opts: { place?: string; source?: string; fixes?: string } = {}) {
@@ -75,4 +75,30 @@ test("suggest-only runs the source in place, with no copy and nothing to apply t
   assert.equal(s.workDir, null);
   assert.equal(s.runRoot, join(dir, "app"));
   assert.match(whyNoApplying(s)?.nextStep ?? "", /fixes を apply/);
+});
+
+test("the subjects to choose from: samples/ first, one entry per id, a broken one listed without a name", async () => {
+  const { root, dir } = await setUp();
+  const settings = await readFile(join(dir, "parity.config.jsonc"), "utf8");
+  const write = async (place: string, id: string, text: string | null) => {
+    await mkdir(join(root, place, id), { recursive: true });
+    if (text !== null) await writeFile(join(root, place, id, "parity.config.jsonc"), text);
+  };
+  await write("targets", "demo", settings.replace('"name":"demo"', '"name":"shadowed"'));
+  await write("targets", "mine", settings.replace('"name":"demo"', '"name":"mine"'));
+  await write("targets", "broken", "{ not json");
+  await write("targets", "empty", null);
+  await write("targets", "Bad_Name", settings);
+  assert.deepEqual(await listSubjects(root), [
+    { id: "demo", name: "demo" },
+    { id: "broken", name: null },
+    { id: "mine", name: "mine" },
+  ]);
+});
+
+test("a request that names no subject is about the default one", () => {
+  assert.equal(subjectIdOf(undefined), DEFAULT_SUBJECT);
+  assert.equal(subjectIdOf(""), DEFAULT_SUBJECT);
+  assert.equal(subjectIdOf(42), DEFAULT_SUBJECT);
+  assert.equal(subjectIdOf("tcpdf-examples"), "tcpdf-examples");
 });
