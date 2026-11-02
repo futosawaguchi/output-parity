@@ -5,10 +5,11 @@ import type { CaseReport, RunReport } from "@/lib/pipeline";
 import { CaseDetail } from "./CaseDetail";
 import { CaseTable } from "./CaseTable";
 import styles from "./check.module.css";
+import type { CauseActions } from "./CauseView";
 import { CompareView } from "./CompareView";
 
 /** The overview of one run, and below it either one case in detail or two side by side. */
-export function ReportView({ report, origin }: { report: RunReport; origin: "run" | "rejudge" | "bundled" }) {
+export function ReportView({ report, cause }: { report: RunReport; cause: CauseActions }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
 
@@ -29,14 +30,14 @@ export function ReportView({ report, origin }: { report: RunReport; origin: "run
             run: `${finishedAt} に実行`,
             bundled: `同梱の結果です（${finishedAt} に作者の手元で実行し、リポジトリに入れたもの）。PHP も API キーも無しで見られます。`,
             rejudge: `同梱の出力（作者の手元で PHP が出したもの）を、${finishedAt} にこの環境の Claude が判定し直した結果です。`,
-          }[origin]
+          }[report.origin]
         }
       </p>
       <CaseTable cases={report.cases} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
       {pair ? (
         <CompareView report={report} cases={pair} />
       ) : open ? (
-        <CaseDetail report={report} c={open} />
+        <CaseDetail report={report} c={open} cause={cause} />
       ) : (
         <p className={styles.hint}>行を押すと、その入力の PDF・差・判定の根拠が出ます。「並べる」に2つチェックすると、左右に並べて見られます。</p>
       )}

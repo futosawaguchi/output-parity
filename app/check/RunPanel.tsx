@@ -5,6 +5,7 @@ import type { JobKind, JobState } from "@/lib/jobs";
 import type { RunReport } from "@/lib/pipeline";
 import { SAME_ORIGIN_HEADER } from "@/lib/same-origin";
 import styles from "./check.module.css";
+import type { CauseActions } from "./CauseView";
 import { ReportView } from "./ReportView";
 
 type Problem = { message: string; nextStep: string };
@@ -19,8 +20,8 @@ type Target = {
 
 const POLL_MS = 1000;
 
-/** /api/runs runs the programs; /api/rejudge judges the bundled outputs again (no PHP needed). */
-const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge" };
+/** Where each kind of job is started (lib/jobs.ts says what each one does). */
+const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge", cause: "/api/cause" };
 
 /** The run button, the progress while running, and the report once done. */
 export function RunPanel() {
@@ -31,10 +32,15 @@ export function RunPanel() {
   const [target, setTarget] = useState<Target | null>(null);
   // Why this machine cannot run the samples (no PHP, no key), as checked before any click.
   const [cannotRun, setCannotRun] = useState<Problem | null>(null);
-  // The run that ships with the repository, shown until a run is made here (DESIGN 7-2b).
-  const [bundled, setBundled] = useState<RunReport | null>(null);
+  // The report on screen: the last finished job's, or the bundled one until then (DESIGN 7-2b).
+  // Kept while a cause is looked for, so the page does not go blank under the reader.
+  const [report, setReport] = useState<RunReport | null>(null);
   // Why the bundled outputs cannot be judged again here (no key, no bundle).
   const [cannotRejudge, setCannotRejudge] = useState<Problem | null>(null);
+  // Why Claude cannot be asked for a cause here (no key).
+  const [cannotAskClaude, setCannotAskClaude] = useState<Problem | null>(null);
+  // The case whose cause was asked for from this page (after a reload, the job's progress says).
+  const [askedCause, setAskedCause] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = () => {
@@ -53,6 +59,7 @@ export function RunPanel() {
         return setProblem(body);
       }
       setJob(body);
+      if (body.status === "done") setReport(body.report);
       if (body.status !== "running") stopPolling();
     };
     tick();
@@ -66,19 +73,24 @@ export function RunPanel() {
       .then((body) => {
         setTarget(body.target);
         setCannotRun(body.cannotRun);
-        setBundled(body.bundled);
+        if (body.bundled) setReport(body.bundled);
         setCannotRejudge(body.cannotRejudge);
+        setCannotAskClaude(body.cannotAskClaude);
         if (body.job) poll(body.job.jobId);
       })
       .catch(() => {});
     return stopPolling;
   }, [poll]);
 
-  const start = async (kind: JobKind) => {
+  const start = async (kind: JobKind, payload: object = {}) => {
     setStarting(kind);
     setProblem(null);
     try {
-      const res = await fetch(ENDPOINTS[kind], { method: "POST", headers: { [SAME_ORIGIN_HEADER]: "1" } });
+      const res = await fetch(ENDPOINTS[kind], {
+        method: "POST",
+        headers: { [SAME_ORIGIN_HEADER]: "1", "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
       const body = await res.json();
       // 409: already running (another tab, for example). Follow that run instead of starting one.
       if (res.status === 409 && body.jobId) return poll(body.jobId);
@@ -94,8 +106,25 @@ export function RunPanel() {
   // Disabled by state, not by a timer (DESIGN 5): from the click until the run has finished.
   const busy = starting ?? (job?.status === "running" ? job.kind : null);
   const running = busy !== null;
-  const shown = job?.status === "done" ? job.report : !job ? bundled : null;
-  const origin = job?.status === "done" ? job.kind : "bundled";
+  // A new run or rejudge replaces the report, so the old one is hidden until it is done.
+  const replacing = busy === "run" || busy === "rejudge" || (job?.status === "failed" && job.kind !== "cause");
+  const shown = replacing ? null : report;
+  const causeActions: CauseActions = {
+    busy: running,
+    cannot: cannotAskClaude,
+    find: (caseId) => {
+      setAskedCause(caseId);
+      start("cause", { caseId });
+    },
+    // The case being looked into, and what Claude is reading right now.
+    working:
+      busy === "cause"
+        ? {
+            caseId: askedCause ?? (job?.progress[0]?.caseId || null),
+            message: job?.status === "running" && job.kind === "cause" ? (job.progress.at(-1)?.message ?? "") : "",
+          }
+        : null,
+  };
 
   return (
     <section>
@@ -112,7 +141,7 @@ export function RunPanel() {
         >
           {busy === "rejudge" ? "判定し直しています…" : "同梱の出力を Claude に判定し直させる"}
         </button>
-        {job?.status === "running" && <Progress job={job} labelOf={(id) => target?.cases.find((c) => c.id === id)?.label ?? id} />}
+        {job?.status === "running" && job.kind !== "cause" && <Progress job={job} labelOf={(id) => target?.cases.find((c) => c.id === id)?.label ?? id} />}
       </div>
       {cannotRun && !job && (
         <p className={styles.notice}>
@@ -129,7 +158,7 @@ export function RunPanel() {
 
       {problem && <ProblemBox problem={problem} />}
       {job?.status === "failed" && <ProblemBox problem={job.error} />}
-      {shown && <ReportView report={shown} origin={origin} />}
+      {shown && <ReportView report={shown} cause={causeActions} />}
     </section>
   );
 }

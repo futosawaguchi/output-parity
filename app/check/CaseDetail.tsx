@@ -4,12 +4,13 @@ import type { CaseVerdict, Finding } from "@/lib/judge/verdict";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
 import { describeOutcome } from "@/lib/runner/outcome";
 import { Badge } from "./Badge";
+import { CauseSection, type CauseActions } from "./CauseView";
 import styles from "./check.module.css";
 import { NaiveDiffView } from "./NaiveDiffView";
 import { PdfView } from "./PdfView";
 
 /** Everything about one case: both outputs, the plain diff, the verdict and what was set aside. */
-export function CaseDetail({ report, c }: { report: RunReport; c: CaseReport }) {
+export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseReport; cause: CauseActions }) {
   const run = (slot: "old" | "new") => c.runs.find((r) => r.slot === slot)!;
   return (
     <article className={styles.case}>
@@ -37,6 +38,7 @@ export function CaseDetail({ report, c }: { report: RunReport; c: CaseReport }) 
       </div>
       <NaiveDiffView naive={c.naive} />
       {c.verdict ? <VerdictBlock verdict={c.verdict} /> : <p className={styles.muted}>判定していません</p>}
+      <CauseSection c={c} actions={cause} />
       <DroppedLines comparison={c.comparison} />
     </article>
   );

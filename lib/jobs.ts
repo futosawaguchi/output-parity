@@ -5,8 +5,11 @@ import type { ProgressEvent, RunReport } from "./pipeline";
 // Server-side "a run is in progress" (DESIGN 5: the second of three layers against double
 // clicks). The browser can be bypassed with another tab or a reload; this cannot.
 
-/** "run" executes the programs; "rejudge" judges the bundled outputs again without running them. */
-export type JobKind = "run" | "rejudge";
+/**
+ * run: executes the programs / rejudge: judges the bundled outputs again without running them /
+ * cause: looks for the cause of one case in the source. Each one ends in a report.
+ */
+export type JobKind = "run" | "rejudge" | "cause";
 
 type JobBase = { jobId: string; kind: JobKind; progress: ProgressEvent[] };
 

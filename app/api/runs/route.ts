@@ -75,6 +75,8 @@ export async function GET(): Promise<Response> {
     cannotRun,
     // Judging the bundled outputs again needs the key, not PHP.
     cannotRejudge: bundled === null ? NO_BUNDLE : process.env.ANTHROPIC_API_KEY ? null : NO_KEY,
+    // Looking for a cause needs the key and the source, not PHP.
+    cannotAskClaude: process.env.ANTHROPIC_API_KEY ? null : NO_KEY,
     bundled: job ? null : bundled,
   });
 }
