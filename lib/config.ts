@@ -34,7 +34,7 @@ export type ParityConfig = {
 };
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const CASE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
+export const CASE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 export async function loadConfig(path: string): Promise<ParityConfig> {
   let raw: string;

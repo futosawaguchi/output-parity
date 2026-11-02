@@ -15,6 +15,9 @@ export async function createRunDir(runsRoot: string, now = new Date()): Promise<
   return { id, path };
 }
 
+/** The shape of every run id, for checking ids that come back from the browser. */
+export const RUN_ID_PATTERN = /^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}-[0-9a-f]{4}$/;
+
 /** Local time as YYYY-MM-DD_HH-MM-SS, so a directory name reads as when the user ran it. */
 function localStamp(d: Date): string {
   const p = (n: number) => String(n).padStart(2, "0");

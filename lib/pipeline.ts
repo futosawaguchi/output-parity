@@ -3,6 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Adapter } from "./compare/adapters";
 import { compareCase, type Comparison } from "./compare/compare-case";
+import { naiveDiff, type NaiveDiff } from "./compare/naive";
 import type { ParityConfig } from "./config";
 import { judgeCase } from "./judge/judge-case";
 import type { CaseVerdict } from "./judge/verdict";
@@ -16,6 +17,8 @@ export type CaseReport = {
   caseId: string;
   runs: SlotResult[];
   comparison: Comparison;
+  /** What a plain diff of the raw files says. null when the old or new run produced no output. */
+  naive: NaiveDiff | null;
   /** null when the run was made without judging. */
   verdict: CaseVerdict | null;
 };
@@ -59,6 +62,8 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
 
     report("出力をテキストにして比べています", caseId);
     const compared = await compareCase(result, adapter.extract);
+    const [oldOut, newOut] = (["old", "new"] as const).map((slot) => result.slots.find((s) => s.slot === slot)?.outputPath);
+    const naive = oldOut && newOut ? await naiveDiff(oldOut, newOut) : null;
 
     let verdict: CaseVerdict | null = null;
     if (client) {
@@ -71,7 +76,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
         outputDescription: adapter.description,
       });
     }
-    cases.push({ caseId, runs: result.slots, comparison: compared.comparison, verdict });
+    cases.push({ caseId, runs: result.slots, comparison: compared.comparison, naive, verdict });
   }
 
   const runReport: RunReport = {

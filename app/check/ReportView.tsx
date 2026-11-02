@@ -2,6 +2,8 @@ import { VERDICT_LABEL, type CaseVerdict, type Finding, type Verdict } from "@/l
 import type { CaseReport, RunReport } from "@/lib/pipeline";
 import { describeOutcome } from "@/lib/runner/outcome";
 import styles from "./check.module.css";
+import { NaiveDiffView } from "./NaiveDiffView";
+import { PdfView } from "./PdfView";
 
 const VERDICT_CLASS: Record<Verdict, string> = {
   harmless: styles.harmless,
@@ -34,6 +36,19 @@ function CaseCard({ report, c }: { report: RunReport; c: CaseReport }) {
           {describeOutcome(run("new").outcome)}
         </span>
       </header>
+      <div className={styles.pdfs}>
+        {(["old", "new"] as const).map((slot) =>
+          run(slot).outputPath ? (
+            <PdfView key={slot} src={`/api/outputs/${report.runId}/${c.caseId}/${slot}`} label={report.environments[slot].label} />
+          ) : (
+            <figure key={slot} className={styles.pdf}>
+              <figcaption className={styles.pdfLabel}>{report.environments[slot].label}</figcaption>
+              <p className={styles.noOutput}>出力なし（{describeOutcome(run(slot).outcome)}）</p>
+            </figure>
+          ),
+        )}
+      </div>
+      <NaiveDiffView naive={c.naive} />
       {c.verdict ? <VerdictBlock verdict={c.verdict} /> : <p className={styles.muted}>判定していません</p>}
     </article>
   );

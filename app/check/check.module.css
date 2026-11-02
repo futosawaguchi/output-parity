@@ -210,3 +210,67 @@
   border-radius: 4px;
   background: var(--background);
 }
+
+/* Side-by-side outputs and the plain diff */
+
+.pdfs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 6px 0 14px;
+}
+
+.pdf {
+  min-width: 0;
+}
+
+.pdfLabel {
+  font-size: 15px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+/* Documents usually start at the top; the frame shows that part and scrolls for the rest. */
+.pdfFrame {
+  max-height: 340px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+}
+
+.pdfPage {
+  display: block;
+}
+
+.pdfPage + .pdfPage {
+  border-top: 1px solid var(--line);
+}
+
+.noOutput {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 340px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+}
+
+.naive {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.naiveHead {
+  font-size: 15px;
+}
+
+.naiveExcerpt {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  white-space: pre;
+  overflow-x: auto;
+}
