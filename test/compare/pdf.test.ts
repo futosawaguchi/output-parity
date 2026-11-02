@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { join } from "node:path";
 import { test } from "node:test";
 import { compareCase } from "../../lib/compare/compare-case";
+import { diffLines } from "../../lib/compare/line-diff";
 import { extractPdf } from "../../lib/compare/pdf";
 import type { CaseResult, Slot } from "../../lib/runner/run-case";
 
@@ -67,4 +68,12 @@ test("an unreadable output is reported as such", async () => {
   result.slots[1].outputPath = __filename; // a file that is not a PDF
   const { comparison } = await compareCase(result, extractPdf);
   assert.equal(comparison.kind, "unreadable");
+});
+
+test("an image that disappears is a difference, even when the text is the same", async () => {
+  const withImage = await extractPdf(join(__dirname, "..", "fixtures", "image", "with.pdf"));
+  const without = await extractPdf(join(__dirname, "..", "fixtures", "image", "without.pdf"));
+  const changed = diffLines(withImage.lines, without.lines).flatMap((h) => [...h.oldLines, ...h.newLines]);
+  assert.ok(changed.includes("layout page 1: 用紙 595.3×841.9・画像 1 個"));
+  assert.ok(changed.includes("layout page 1: 用紙 595.3×841.9・画像 0 個"));
 });
