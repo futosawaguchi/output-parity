@@ -18,11 +18,13 @@ export type JudgeContext = {
   outputDescription: string;
 };
 
+type Labels = Pick<JudgeContext, "oldLabel" | "newLabel">;
+
 /**
- * Turns one compared case into a verdict. Claude is asked only when judgement is needed:
- * a crash or an empty difference is decided by the machine (DESIGN 4 / 4-3).
+ * The verdicts the machine reaches on its own: no difference left, no output, unreadable output.
+ * null when only judgement can decide. Used without Claude too (the run after an edit).
  */
-export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<CaseVerdict> {
+export async function judgeByMachine(c: CaseComparison, ctx: Labels): Promise<CaseVerdict | null> {
   const cmp = c.comparison;
   const run = (slot: Slot) => c.runs.find((r) => r.slot === slot)!;
 
@@ -40,6 +42,20 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
     const note = dropped.length > 0 ? `（毎回変わる値 ${dropped.length} か所は除外）` : "";
     return machine(c.caseId, "harmless", `旧と新の出力に違いはありません${note}`, []);
   }
+  return null;
+}
+
+/**
+ * Turns one compared case into a verdict. Claude is asked only when judgement is needed:
+ * a crash or an empty difference is decided by the machine (DESIGN 4 / 4-3).
+ */
+export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<CaseVerdict> {
+  const byMachine = await judgeByMachine(c, ctx);
+  if (byMachine) return byMachine;
+  const cmp = c.comparison as Extract<CaseComparison["comparison"], { kind: "compared" }>;
+  const run = (slot: Slot) => c.runs.find((r) => r.slot === slot)!;
+  const kept = cmp.changes.filter((ch) => !ch.explainedByBaseline);
+  const dropped = cmp.changes.filter((ch) => ch.explainedByBaseline);
 
   const input: JudgeInput = {
     oldLabel: ctx.oldLabel,
@@ -129,7 +145,7 @@ async function judgeMissingOutput(
   caseId: string,
   missing: Slot[],
   run: (slot: Slot) => SlotResult,
-  ctx: JudgeContext,
+  ctx: Labels,
 ): Promise<CaseVerdict> {
   if (missing.length === 2) {
     return machine(caseId, "needs_review", "旧でも新でも出力が出ませんでした", [
@@ -170,6 +186,6 @@ async function stderrHead(r: SlotResult, lines = 3): Promise<string[]> {
   return [...new Set(text.split("\n").map((l) => l.trim().split(repo).join("")).filter(Boolean))].slice(0, lines);
 }
 
-function labelOf(slot: Slot, ctx: JudgeContext): string {
+function labelOf(slot: Slot, ctx: Labels): string {
   return slot === "old" ? ctx.oldLabel : ctx.newLabel;
 }

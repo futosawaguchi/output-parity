@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Change } from "../../lib/compare/baseline";
 import type { CaseComparison } from "../../lib/compare/compare-case";
-import { judgeCase, reviewByMachine } from "../../lib/judge/judge-case";
+import { judgeByMachine, judgeCase, reviewByMachine } from "../../lib/judge/judge-case";
 import type { JudgeResponse } from "../../lib/judge/schema";
 import type { Finding } from "../../lib/judge/verdict";
 
@@ -92,4 +92,9 @@ test("a broken finding is never lowered, only annotated", () => {
   const f = reviewByMachine({ ...harmless, verdict: "broken", evidence: ["存在しない行"] }, OLD);
   assert.equal(f.verdict, "broken");
   assert.equal(f.machineNotes!.length, 1);
+});
+
+test("without Claude, a difference that needs judgement is left unjudged, not guessed", async () => {
+  assert.equal(await judgeByMachine(compared([removed]), { oldLabel: "旧", newLabel: "新" }), null);
+  assert.equal((await judgeByMachine(compared([]), { oldLabel: "旧", newLabel: "新" }))?.verdict, "harmless");
 });

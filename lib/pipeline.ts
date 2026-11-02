@@ -5,7 +5,7 @@ import type { Adapter } from "./compare/adapters";
 import { compareCase, type Comparison } from "./compare/compare-case";
 import { naiveDiff, type NaiveDiff } from "./compare/naive";
 import type { ParityConfig } from "./config";
-import { judgeCase } from "./judge/judge-case";
+import { judgeByMachine, judgeCase } from "./judge/judge-case";
 import type { CauseReport } from "./fix/locate-cause";
 import type { FixAttempt } from "./fix/verify";
 import type { CaseVerdict } from "./judge/verdict";
@@ -128,10 +128,11 @@ export async function checkCase(
   const [oldOut, newOut] = (["old", "new"] as const).map((slot) => result.slots.find((s) => s.slot === slot)?.outputPath);
   const naive = oldOut && newOut ? await naiveDiff(oldOut, newOut) : null;
 
-  let verdict: CaseVerdict | null = null;
-  if (client) {
-    const needsClaude = compared.comparison.kind === "compared" && compared.comparison.changes.some((c) => !c.explainedByBaseline);
-    report(needsClaude ? "Claude が新しい出力の全文を読んで判定しています" : "判定しています");
+  // Without Claude, the machine still settles what it can (no difference, no output); the rest
+  // stays unjudged rather than guessed.
+  let verdict: CaseVerdict | null = await judgeByMachine(compared, { oldLabel: environments.old.label, newLabel: environments.new.label });
+  if (client && !verdict) {
+    report("Claude が新しい出力の全文を読んで判定しています");
     verdict = await judgeCase(compared, {
       client,
       oldLabel: environments.old.label,
