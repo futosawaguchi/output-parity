@@ -6,6 +6,7 @@ import type { RunReport } from "@/lib/pipeline";
 import { SAME_ORIGIN_HEADER } from "@/lib/same-origin";
 import styles from "./check.module.css";
 import type { CauseActions } from "./CauseView";
+import { MANY_CASES } from "./case-order";
 import { ReportView } from "./ReportView";
 
 type Problem = { message: string; nextStep: string };
@@ -242,12 +243,13 @@ function TargetIntro({ target, showCases }: { target: Target; showCases: boolean
       </div>
       {showCases && (
         <ul className={styles.targetCases}>
-          {target.cases.map((c) => (
+          {target.cases.slice(0, MANY_CASES).map((c) => (
             <li key={c.id}>
               <span className={styles.caseLabel}>{c.label}</span>
               <span className={styles.caseDescription}>{c.description}</span>
             </li>
           ))}
+          {target.cases.length > MANY_CASES && <li className={styles.muted}>ほか {target.cases.length - MANY_CASES} 件（全 {target.cases.length} 件）</li>}
         </ul>
       )}
     </div>

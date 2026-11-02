@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
+import { countLine, groupOf, inReadingOrder, MANY_CASES } from "./case-order";
 import { CaseDetail } from "./CaseDetail";
 import { CaseTable } from "./CaseTable";
 import styles from "./check.module.css";
@@ -23,6 +24,8 @@ export function ReportView({
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [picked, setPicked] = useState<string[]>([]);
+  // With many inputs the harmless ones are folded: the point is the few that need a look.
+  const [showHarmless, setShowHarmless] = useState(false);
 
   const byId = (id: string) => report.cases.find((c) => c.caseId === id);
   const togglePick = (id: string) =>
@@ -32,6 +35,10 @@ export function ReportView({
   const pair = picked.length === 2 ? (report.cases.filter((c) => picked.includes(c.caseId)) as [CaseReport, CaseReport]) : null;
   const open = openId ? byId(openId) : undefined;
   const finishedAt = new Date(report.finishedAt).toLocaleString("ja-JP");
+  const ordered = inReadingOrder(report.cases);
+  const folding = report.cases.length > MANY_CASES && !showHarmless;
+  const harmless = ordered.filter((c) => groupOf(c) === "harmless").length;
+  const listed = folding ? ordered.filter((c) => groupOf(c) !== "harmless" || c.caseId === openId) : ordered;
 
   return (
     <div className={styles.report}>
@@ -48,7 +55,13 @@ export function ReportView({
         <FixResult attempt={report.fixAttempt} labelOf={(id) => byId(id)?.label ?? id} onUndo={onUndo} busy={cause.busy} bundled={report.origin === "bundled"} />
       )}
       {report.judgeHeld && <HeldNotice held={report.judgeHeld} busy={cause.busy} onJudge={onJudgeHeld} />}
-      <CaseTable cases={report.cases} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
+      <p className={styles.countLine}>{countLine(report.cases)}</p>
+      <CaseTable cases={listed} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
+      {folding && harmless > 0 && (
+        <button className={styles.linkButton} onClick={() => setShowHarmless(true)}>
+          無害 {harmless} 件も表示する
+        </button>
+      )}
       {pair ? (
         <CompareView report={report} cases={pair} />
       ) : open ? (
