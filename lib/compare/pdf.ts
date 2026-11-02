@@ -51,10 +51,12 @@ export async function extractPdf(path: string): Promise<ExtractedDocument> {
         (i): i is TextItem & typeof i => "str" in i && i.str.trim() !== "",
       );
 
-      lines.push(`--- page ${n} ---`, ...groupIntoLines(items));
-      pages.push(layoutOf(n, width, height, items));
-
+      const layout = layoutOf(n, width, height, items);
       const images = (await page.getOperatorList()).fnArray.filter((op) => imageOps.has(op)).length;
+      // What the text alone cannot show is put into lines too, so that it is compared like text:
+      // a vanished logo or seal, a changed paper size, text pushed off the page.
+      lines.push(`--- page ${n} ---`, ...groupIntoLines(items), ...layoutLines(layout, images));
+      pages.push(layout);
       if (images > 0) unreadable.push(`page ${n}: 画像 ${images} 個（中の文字は比較できません）`);
     }
     return { lines, pages, unreadable };
@@ -115,6 +117,12 @@ function layoutOf(page: number, width: number, height: number, items: TextItem[]
     textBottom = Math.max(textBottom, height - item.transform[5]);
   }
   return { page, width: round(width), height: round(height), charCount, textRight: round(textRight), textBottom: round(textBottom) };
+}
+
+function layoutLines(p: PageLayout, images: number): string[] {
+  const lines = [`layout page ${p.page}: 用紙 ${p.width}×${p.height}・画像 ${images} 個`];
+  if (p.textRight > p.width || p.textBottom > p.height) lines.push(`layout page ${p.page}: 文字が用紙からはみ出している`);
+  return lines;
 }
 
 function imageOperatorCodes(ops: Record<string, number>): Set<number> {
