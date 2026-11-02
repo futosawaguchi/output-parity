@@ -43,3 +43,22 @@ test("every line of either side is accounted for exactly once", () => {
   assert.deepEqual(removed, ["a", "c", "e"]);
   assert.deepEqual(added, ["x", "g"]);
 });
+
+test("a long output with one change is diffed quickly, with correct positions", () => {
+  const old = Array.from({ length: 200_000 }, (_, i) => `row ${i}`);
+  const now = [...old];
+  now[150_000] = "row changed";
+  const started = Date.now();
+  assert.deepEqual(diffLines(old, now), [{ oldStart: 150_000, oldLines: ["row 150000"], newStart: 150_000, newLines: ["row changed"] }]);
+  assert.ok(Date.now() - started < 2000);
+});
+
+test("a middle too large to align is reported as one block, not dropped", () => {
+  const old = Array.from({ length: 6000 }, (_, i) => `a ${i}`);
+  const now = Array.from({ length: 6000 }, (_, i) => `b ${i}`);
+  const hunks = diffLines(["same", ...old, "end"], ["same", ...now, "end"]);
+  assert.equal(hunks.length, 1);
+  assert.equal(hunks[0].oldStart, 1);
+  assert.equal(hunks[0].oldLines.length, 6000);
+  assert.equal(hunks[0].newLines.length, 6000);
+});
