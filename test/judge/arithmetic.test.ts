@@ -76,3 +76,21 @@ test("an equation that goes on about the gap is checked against the gap, not the
   assert.ok(checks.some((c) => c.text === "4.5 = 1.5 + 3.0"));
   assert.equal(checkArithmetic("8.0 ≠ 3.5（差 4.5 = 1.5 + 2.0）").at(-1)?.ok, false);
 });
+
+test("a term with a note in brackets before the next one is still part of the sum", () => {
+  const checks = checkArithmetic("文字数 144 − 116 = 28 = 9（A-101出張費0）+ 10（A-102夜間割増0）+ 9（A-104値引き0）で、他に消えた文字はない");
+  assert.ok(checks.every((c) => c.ok), JSON.stringify(checks));
+  assert.ok(checks.some((c) => c.text === "28 = 9 + 10 + 9"));
+  assert.equal(checkArithmetic("15,000（基本料）+ 8,000（出張費）= 24,000").at(-1)?.ok, false);
+});
+
+test("a note is one unit: its own equation is checked, but its numbers are not taken as the other side", () => {
+  const inNote = checkArithmetic("15,000 + 42,000 = 57,000 = 合計（旧も 15,000 + 0 + 0 + 42,000 + 0 = 57,000）");
+  assert.deepEqual(inNote.map((c) => c.text), ["15,000 + 42,000 = 57,000", "15,000 + 0 + 0 + 42,000 + 0 = 57,000"]);
+  assert.ok(checkArithmetic("15,000 + 42,000 = 57,000 = 合計（旧の0円行を足しても +0 で同じ）").every((c) => c.ok));
+});
+
+test("a number written right after Japanese text is a number; one glued to Latin letters is a name", () => {
+  assert.ok(checkArithmetic("13.0 ≠ 7.0（差 6.0 = 重複した2行の4.0 + 2.0）").every((c) => c.ok));
+  assert.ok(checkArithmetic("A101 + 5 = 5").every((c) => !c.text.includes("101")));
+});
