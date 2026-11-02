@@ -107,12 +107,6 @@
   margin-bottom: 10px;
 }
 
-.caseId {
-  font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 600;
-}
-
 .runs,
 .muted,
 .judgedBy {
@@ -308,4 +302,135 @@
   font-size: 12px;
   white-space: pre-wrap;
   word-break: break-all;
+}
+
+/* What is being checked, shown before running */
+
+.target {
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border-radius: 8px;
+}
+
+.targetName {
+  font-weight: 700;
+}
+
+.targetCases {
+  list-style: none;
+  margin-top: 8px;
+}
+
+/* Overview table */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.table tbody tr {
+  cursor: pointer;
+}
+
+.table tbody tr:hover {
+  background: var(--surface);
+}
+
+.rowOpen {
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--foreground);
+}
+
+.pickCol {
+  width: 4.5em;
+  text-align: center;
+}
+
+.pickCol input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.caseLabel {
+  font-weight: 700;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.caseDescription {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.rowSummary {
+  font-size: 15px;
+}
+
+.caseTitle {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.caseTitle .caseDescription {
+  margin-left: 10px;
+}
+
+.hint {
+  margin-top: 18px;
+  color: var(--muted);
+}
+
+/* Side by side */
+
+.compare {
+  margin-top: 24px;
+}
+
+.compareTitle {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.compareColumns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.compareColumn {
+  min-width: 0;
+}
+
+.compareBlock {
+  margin-top: 12px;
+}
+
+.compareLabel {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.changedLines {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  white-space: pre-wrap;
 }

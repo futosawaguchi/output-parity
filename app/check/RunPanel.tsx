@@ -8,6 +8,14 @@ import { ReportView } from "./ReportView";
 
 type Problem = { message: string; nextStep: string };
 
+/** What GET /api/runs says will be checked. Labels only; no local paths. */
+type Target = {
+  name: string;
+  description: string;
+  environments: { old: string; new: string };
+  cases: { id: string; label: string; description: string }[];
+};
+
 const POLL_MS = 1000;
 
 /** The run button, the progress while running, and the report once done. */
@@ -15,6 +23,7 @@ export function RunPanel() {
   const [job, setJob] = useState<JobState | null>(null);
   const [starting, setStarting] = useState(false);
   const [problem, setProblem] = useState<Problem | null>(null);
+  const [target, setTarget] = useState<Target | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = () => {
@@ -43,7 +52,10 @@ export function RunPanel() {
   useEffect(() => {
     fetch("/api/runs", { cache: "no-store" })
       .then((res) => res.json())
-      .then((body) => body.job && poll(body.job.jobId))
+      .then((body) => {
+        setTarget(body.target);
+        if (body.job) poll(body.job.jobId);
+      })
       .catch(() => {});
     return stopPolling;
   }, [poll]);
@@ -70,11 +82,12 @@ export function RunPanel() {
 
   return (
     <section>
+      {target && <TargetIntro target={target} showCases={job?.status !== "done"} />}
       <div className={styles.controls}>
         <button className={styles.runButton} onClick={start} disabled={running}>
-          {running ? "実行中…" : "サンプルを実行して判定する"}
+          {running ? "実行中…" : "実行して判定する"}
         </button>
-        {job?.status === "running" && <Progress job={job} />}
+        {job?.status === "running" && <Progress job={job} labelOf={(id) => target?.cases.find((c) => c.id === id)?.label ?? id} />}
       </div>
 
       {problem && <ProblemBox problem={problem} />}
@@ -84,14 +97,33 @@ export function RunPanel() {
   );
 }
 
-function Progress({ job }: { job: Extract<JobState, { status: "running" }> }) {
+function TargetIntro({ target, showCases }: { target: Target; showCases: boolean }) {
+  return (
+    <div className={styles.target}>
+      <p className={styles.targetName}>{target.name}</p>
+      <p>{target.description}</p>
+      {showCases && (
+        <ul className={styles.targetCases}>
+          {target.cases.map((c) => (
+            <li key={c.id}>
+              <span className={styles.caseLabel}>{c.label}</span>
+              <span className={styles.caseDescription}>{c.description}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Progress({ job, labelOf }: { job: Extract<JobState, { status: "running" }>; labelOf: (caseId: string) => string }) {
   const last = job.progress.at(-1);
   return (
     <p className={styles.progress} role="status" aria-live="polite">
       <span className={styles.spinner} aria-hidden />
       {last ? (
         <>
-          {last.caseId && <span className={styles.progressCase}>{last.caseId}</span>}
+          {last.caseId && <span className={styles.progressCase}>{labelOf(last.caseId)}</span>}
           {last.message}
         </>
       ) : (

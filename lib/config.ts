@@ -21,12 +21,18 @@ export type OutputSpec = {
 
 export type Case = {
   id: string;
+  /** Name shown on screen. Neutral on purpose: it must not give away the expected verdict. */
+  label: string;
+  /** One line about the input, shown on screen. */
+  description: string;
   /** Arguments passed as an array (never through a shell). */
   args: string[];
 };
 
 export type ParityConfig = {
   name: string;
+  /** What is being checked, in a sentence or two. Shown above the results. */
+  description: string;
   environments: Record<EnvironmentName, Environment>;
   output: OutputSpec;
   timeoutMs: number;
@@ -62,9 +68,10 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   }
 
   if (!isObject(json)) return fail("中身がオブジェクトではありません");
-  const { name, environments, output, timeoutMs, cases } = json;
+  const { name, description, environments, output, timeoutMs, cases } = json;
 
   if (typeof name !== "string") fail("name が文字列ではありません");
+  if (description !== undefined && typeof description !== "string") fail("description が文字列ではありません");
   if (!isObject(environments)) return fail("environments がありません");
   const envs = {} as Record<EnvironmentName, Environment>;
   for (const key of ["old", "new"] as const) {
@@ -100,11 +107,15 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     if (source === "file" && !args.includes(OUTPUT_PLACEHOLDER)) {
       fail(`cases[${i}].args に ${OUTPUT_PLACEHOLDER} がありません（output.source が "file" のとき必要）`);
     }
-    return { id: c.id, args };
+    if ((c.label !== undefined && typeof c.label !== "string") || (c.description !== undefined && typeof c.description !== "string")) {
+      fail(`cases[${i}] の label と description は文字列にしてください`);
+    }
+    return { id: c.id, label: (c.label as string | undefined) ?? c.id, description: (c.description as string | undefined) ?? "", args };
   });
 
   return {
     name: name as string,
+    description: (description as string | undefined) ?? "",
     environments: envs,
     output: { format: output.format, source },
     timeoutMs: (timeoutMs as number | undefined) ?? DEFAULT_TIMEOUT_MS,

@@ -15,6 +15,8 @@ export type ProgressEvent = { caseId: string; message: string };
 
 export type CaseReport = {
   caseId: string;
+  label: string;
+  description: string;
   runs: SlotResult[];
   comparison: Comparison;
   /** What a plain diff of the raw files says. null when the old or new run produced no output. */
@@ -27,6 +29,7 @@ export type CaseReport = {
 export type RunReport = {
   runId: string;
   configName: string;
+  configDescription: string;
   environments: ParityConfig["environments"];
   outputFormat: string;
   startedAt: string;
@@ -76,12 +79,13 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
         outputDescription: adapter.description,
       });
     }
-    cases.push({ caseId, runs: result.slots, comparison: compared.comparison, naive, verdict });
+    cases.push({ caseId, label: testCase.label, description: testCase.description, runs: result.slots, comparison: compared.comparison, naive, verdict });
   }
 
   const runReport: RunReport = {
     runId: run.id,
     configName: config.name,
+    configDescription: config.description,
     environments: config.environments,
     outputFormat: config.output.format,
     startedAt: startedAt.toISOString(),

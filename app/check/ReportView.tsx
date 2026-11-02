@@ -1,160 +1,36 @@
-import type { Comparison } from "@/lib/compare/compare-case";
-import { checkArithmetic } from "@/lib/judge/arithmetic";
-import { VERDICT_LABEL, type CaseVerdict, type Finding, type Verdict } from "@/lib/judge/verdict";
+"use client";
+
+import { useState } from "react";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
-import { describeOutcome } from "@/lib/runner/outcome";
+import { CaseDetail } from "./CaseDetail";
+import { CaseTable } from "./CaseTable";
 import styles from "./check.module.css";
-import { NaiveDiffView } from "./NaiveDiffView";
-import { PdfView } from "./PdfView";
+import { CompareView } from "./CompareView";
 
-const VERDICT_CLASS: Record<Verdict, string> = {
-  harmless: styles.harmless,
-  needs_review: styles.review,
-  broken: styles.broken,
-};
-
-/** The judged result of every case in one run. */
+/** The overview of one run, and below it either one case in detail or two side by side. */
 export function ReportView({ report }: { report: RunReport }) {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [picked, setPicked] = useState<string[]>([]);
+
+  const byId = (id: string) => report.cases.find((c) => c.caseId === id);
+  const togglePick = (id: string) =>
+    setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length < 2 ? [...p, id] : p));
+
+  // Same order as the table, whichever box was ticked first.
+  const pair = picked.length === 2 ? (report.cases.filter((c) => picked.includes(c.caseId)) as [CaseReport, CaseReport]) : null;
+  const open = openId ? byId(openId) : undefined;
+
   return (
     <div className={styles.report}>
-      <p className={styles.reportMeta}>
-        {report.configName} ・ {new Date(report.finishedAt).toLocaleString("ja-JP")} に実行
-      </p>
-      {report.cases.map((c) => (
-        <CaseCard key={c.caseId} report={report} c={c} />
-      ))}
-    </div>
-  );
-}
-
-function CaseCard({ report, c }: { report: RunReport; c: CaseReport }) {
-  const run = (slot: "old" | "new") => c.runs.find((r) => r.slot === slot)!;
-  return (
-    <article className={styles.case}>
-      <header className={styles.caseHeader}>
-        <h2 className={styles.caseId}>{c.caseId}</h2>
-        <span className={styles.runs}>
-          {report.environments.old.label}: {describeOutcome(run("old").outcome)} ／ {report.environments.new.label}:{" "}
-          {describeOutcome(run("new").outcome)}
-        </span>
-      </header>
-      <div className={styles.pdfs}>
-        {(["old", "new"] as const).map((slot) =>
-          run(slot).outputPath ? (
-            <PdfView key={slot} src={`/api/outputs/${report.runId}/${c.caseId}/${slot}`} label={report.environments[slot].label} />
-          ) : (
-            <figure key={slot} className={styles.pdf}>
-              <figcaption className={styles.pdfLabel}>{report.environments[slot].label}</figcaption>
-              <p className={styles.noOutput}>出力なし（{describeOutcome(run(slot).outcome)}）</p>
-            </figure>
-          ),
-        )}
-      </div>
-      <NaiveDiffView naive={c.naive} />
-      {c.verdict ? <VerdictBlock verdict={c.verdict} /> : <p className={styles.muted}>判定していません</p>}
-      <DroppedLines comparison={c.comparison} />
-    </article>
-  );
-}
-
-function VerdictBlock({ verdict }: { verdict: CaseVerdict }) {
-  const by =
-    verdict.judgedBy.kind === "claude"
-      ? `Claude（${verdict.judgedBy.model}）が判定`
-      : verdict.judgedBy.kind === "machine"
-        ? "機械が判定（Claude は不要）"
-        : "判定できませんでした";
-  return (
-    <div>
-      <div className={styles.verdictLine}>
-        <Badge verdict={verdict.verdict} />
-        <p className={styles.summary}>{verdict.summary}</p>
-      </div>
-      <p className={styles.judgedBy}>
-        {by}
-        {verdict.judgedBy.kind === "failed" && ` → ${verdict.judgedBy.nextStep}`}
-      </p>
-      {verdict.findings.length > 0 && (
-        <ul className={styles.findings}>
-          {verdict.findings.map((f, i) => (
-            <FindingItem key={i} finding={f} />
-          ))}
-        </ul>
+      <p className={styles.reportMeta}>{new Date(report.finishedAt).toLocaleString("ja-JP")} に実行</p>
+      <CaseTable cases={report.cases} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
+      {pair ? (
+        <CompareView report={report} cases={pair} />
+      ) : open ? (
+        <CaseDetail report={report} c={open} />
+      ) : (
+        <p className={styles.hint}>行を押すと、その入力の PDF・差・判定の根拠が出ます。「並べる」に2つチェックすると、左右に並べて見られます。</p>
       )}
     </div>
-  );
-}
-
-function FindingItem({ finding }: { finding: Finding }) {
-  return (
-    <li className={styles.finding}>
-      <p className={styles.findingWhat}>
-        <Badge verdict={finding.verdict} small />
-        {finding.what}
-      </p>
-      <dl className={styles.facts}>
-        <dt>理由</dt>
-        <dd>{finding.why}</dd>
-        {finding.evidence.length > 0 && (
-          <>
-            <dt>根拠</dt>
-            <dd>
-              {finding.evidence.map((e, i) => (
-                <code key={i} className={styles.quote}>
-                  {e}
-                </code>
-              ))}
-            </dd>
-          </>
-        )}
-        {finding.calculation && (
-          <>
-            <dt>計算</dt>
-            <dd>
-              <code className={styles.calc}>{finding.calculation}</code>
-              <CalcCheck calculation={finding.calculation} />
-            </dd>
-          </>
-        )}
-        <dt>見る場所</dt>
-        <dd>{finding.checkHere}</dd>
-      </dl>
-    </li>
-  );
-}
-
-function Badge({ verdict, small = false }: { verdict: Verdict; small?: boolean }) {
-  return <span className={`${styles.badge} ${VERDICT_CLASS[verdict]} ${small ? styles.badgeSmall : ""}`}>{VERDICT_LABEL[verdict]}</span>;
-}
-
-/** DESIGN 8-3: the machine re-does Claude's arithmetic. Silent when there is nothing it can read. */
-function CalcCheck({ calculation }: { calculation: string }) {
-  const checks = checkArithmetic(calculation);
-  if (checks.length === 0) return null;
-  const wrong = checks.filter((c) => !c.ok);
-  if (wrong.length === 0) return <p className={styles.calcOk}>機械の検算: 合っています（{checks.length} か所）</p>;
-  return (
-    <p className={styles.calcWrong}>
-      機械の検算: 合わない式があります — {wrong.map((c) => c.text).join("、")}
-    </p>
-  );
-}
-
-/** DESIGN 4-2: what the baseline threw away is shown, never hidden. */
-function DroppedLines({ comparison }: { comparison: Comparison }) {
-  if (comparison.kind !== "compared") return null;
-  const dropped = comparison.changes.filter((c) => c.explainedByBaseline);
-  if (comparison.baseline.kind === "unavailable") {
-    return <p className={styles.muted}>ベースラインが使えなかったので、何も除外していません（{comparison.baseline.reason}）</p>;
-  }
-  if (dropped.length === 0) return null;
-  const lines = dropped.flatMap((c) => c.newLines);
-  return (
-    <details className={styles.dropped}>
-      <summary>
-        毎回変わる値として除外した {lines.length} 行（同じ環境で2回動かして違った行。判定の対象外）
-      </summary>
-      <pre className={styles.droppedLines}>{lines.join("\n")}</pre>
-    </details>
   );
 }
