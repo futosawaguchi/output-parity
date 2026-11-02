@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   agentRules: false,
   // Keep the Next.js badge out of demo recordings.
   devIndicators: false,
+  // pdfjs loads its worker and CMaps from its own package directory; bundling breaks that.
+  serverExternalPackages: ["pdfjs-dist"],
   cacheComponents: true,
   partialPrefetching: true,
 };

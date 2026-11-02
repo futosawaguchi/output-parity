@@ -1,0 +1,28 @@
+// No Node imports here: the page in the browser uses this file too.
+
+/**
+ * How one execution ended. Every outcome of the program under test is data,
+ * including crashes and timeouts (DESIGN 7-6 A): execOnce never throws for them.
+ */
+export type ExecOutcome =
+  | { kind: "exited"; exitCode: number }
+  | { kind: "signaled"; signal: string }
+  | { kind: "timedOut"; timeoutMs: number }
+  | { kind: "outputTooLarge"; maxBufferBytes: number }
+  | { kind: "spawnFailed"; code: string; message: string };
+
+/** One line describing how a run ended, for people. */
+export function describeOutcome(o: ExecOutcome): string {
+  switch (o.kind) {
+    case "exited":
+      return `終了コード ${o.exitCode}`;
+    case "signaled":
+      return `シグナル ${o.signal} で終了`;
+    case "timedOut":
+      return `${o.timeoutMs} ms で打ち切り`;
+    case "outputTooLarge":
+      return `出力が ${o.maxBufferBytes} バイトを超えたので打ち切り`;
+    case "spawnFailed":
+      return `起動できませんでした（${o.code}）`;
+  }
+}

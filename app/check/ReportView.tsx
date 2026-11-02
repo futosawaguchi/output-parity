@@ -1,0 +1,109 @@
+import { VERDICT_LABEL, type CaseVerdict, type Finding, type Verdict } from "@/lib/judge/verdict";
+import type { CaseReport, RunReport } from "@/lib/pipeline";
+import { describeOutcome } from "@/lib/runner/outcome";
+import styles from "./check.module.css";
+
+const VERDICT_CLASS: Record<Verdict, string> = {
+  harmless: styles.harmless,
+  needs_review: styles.review,
+  broken: styles.broken,
+};
+
+/** The judged result of every case in one run. */
+export function ReportView({ report }: { report: RunReport }) {
+  return (
+    <div className={styles.report}>
+      <p className={styles.reportMeta}>
+        {report.configName} ・ {new Date(report.finishedAt).toLocaleString("ja-JP")} に実行
+      </p>
+      {report.cases.map((c) => (
+        <CaseCard key={c.caseId} report={report} c={c} />
+      ))}
+    </div>
+  );
+}
+
+function CaseCard({ report, c }: { report: RunReport; c: CaseReport }) {
+  const run = (slot: "old" | "new") => c.runs.find((r) => r.slot === slot)!;
+  return (
+    <article className={styles.case}>
+      <header className={styles.caseHeader}>
+        <h2 className={styles.caseId}>{c.caseId}</h2>
+        <span className={styles.runs}>
+          {report.environments.old.label}: {describeOutcome(run("old").outcome)} ／ {report.environments.new.label}:{" "}
+          {describeOutcome(run("new").outcome)}
+        </span>
+      </header>
+      {c.verdict ? <VerdictBlock verdict={c.verdict} /> : <p className={styles.muted}>判定していません</p>}
+    </article>
+  );
+}
+
+function VerdictBlock({ verdict }: { verdict: CaseVerdict }) {
+  const by =
+    verdict.judgedBy.kind === "claude"
+      ? `Claude（${verdict.judgedBy.model}）が判定`
+      : verdict.judgedBy.kind === "machine"
+        ? "機械が判定（Claude は不要）"
+        : "判定できませんでした";
+  return (
+    <div>
+      <div className={styles.verdictLine}>
+        <Badge verdict={verdict.verdict} />
+        <p className={styles.summary}>{verdict.summary}</p>
+      </div>
+      <p className={styles.judgedBy}>
+        {by}
+        {verdict.judgedBy.kind === "failed" && ` → ${verdict.judgedBy.nextStep}`}
+      </p>
+      {verdict.findings.length > 0 && (
+        <ul className={styles.findings}>
+          {verdict.findings.map((f, i) => (
+            <FindingItem key={i} finding={f} />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function FindingItem({ finding }: { finding: Finding }) {
+  return (
+    <li className={styles.finding}>
+      <p className={styles.findingWhat}>
+        <Badge verdict={finding.verdict} small />
+        {finding.what}
+      </p>
+      <dl className={styles.facts}>
+        <dt>理由</dt>
+        <dd>{finding.why}</dd>
+        {finding.evidence.length > 0 && (
+          <>
+            <dt>根拠</dt>
+            <dd>
+              {finding.evidence.map((e, i) => (
+                <code key={i} className={styles.quote}>
+                  {e}
+                </code>
+              ))}
+            </dd>
+          </>
+        )}
+        {finding.calculation && (
+          <>
+            <dt>計算</dt>
+            <dd>
+              <code className={styles.calc}>{finding.calculation}</code>
+            </dd>
+          </>
+        )}
+        <dt>見る場所</dt>
+        <dd>{finding.checkHere}</dd>
+      </dl>
+    </li>
+  );
+}
+
+function Badge({ verdict, small = false }: { verdict: Verdict; small?: boolean }) {
+  return <span className={`${styles.badge} ${VERDICT_CLASS[verdict]} ${small ? styles.badgeSmall : ""}`}>{VERDICT_LABEL[verdict]}</span>;
+}

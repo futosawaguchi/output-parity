@@ -4,52 +4,39 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { existsSync } from "node:fs";
-import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { adapterFor } from "../lib/compare/adapters";
-import { compareCase, type Comparison } from "../lib/compare/compare-case";
+import type { Comparison } from "../lib/compare/compare-case";
 import { loadConfig } from "../lib/config";
 import { SetupError } from "../lib/errors";
-import { judgeCase } from "../lib/judge/judge-case";
 import { VERDICT_LABEL, type CaseVerdict } from "../lib/judge/verdict";
-import { describeOutcome } from "../lib/runner/exec";
-import { runAll } from "../lib/runner/run-all";
+import { describeOutcome } from "../lib/runner/outcome";
+import { runPipeline } from "../lib/pipeline";
 
 const root = process.cwd();
 const samplesDir = join(root, "samples");
+const runsRoot = join(root, "runs");
 const withJudge = process.argv.includes("--judge");
 
 async function main(): Promise<void> {
   const config = await loadConfig(join(samplesDir, "parity.config.json"));
   const adapter = adapterFor(config.output.format);
   const client = withJudge ? createClient() : null;
-  const manifest = await runAll(config, samplesDir, join(root, "runs"));
+  const report = await runPipeline({ config, adapter, cwd: samplesDir, runsRoot, client });
 
-  console.log(`${manifest.configName}`);
-  console.log(`記録: ${manifest.runDir}\n`);
-  const verdicts: CaseVerdict[] = [];
-  for (const c of manifest.cases) {
+  console.log(`${report.configName}`);
+  console.log(`記録: ${join(runsRoot, report.runId)}\n`);
+  for (const c of report.cases) {
     console.log(c.caseId);
-    for (const s of c.slots) {
+    for (const s of c.runs) {
       const label = config.environments[s.env].label;
       const output = s.outputPath ? "出力あり" : "出力なし";
       console.log(`  ${s.slot.padEnd(8)} ${label.padEnd(8)} ${describeOutcome(s.outcome)}・${output}（${s.durationMs} ms）`);
     }
-    const compared = await compareCase(c, adapter.extract);
-    printComparison(compared.comparison);
-    if (client) {
-      const verdict = await judgeCase(compared, {
-        client,
-        oldLabel: config.environments.old.label,
-        newLabel: config.environments.new.label,
-        outputDescription: adapter.description,
-      });
-      printVerdict(verdict);
-      verdicts.push(verdict);
-    }
+    printComparison(c.comparison);
+    if (c.verdict) printVerdict(c.verdict);
     console.log();
   }
-  if (client) await writeFile(join(manifest.runDir, "verdicts.json"), JSON.stringify(verdicts, null, 2) + "\n");
 }
 
 function createClient(): Anthropic {

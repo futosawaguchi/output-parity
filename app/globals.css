@@ -1,9 +1,20 @@
 /* Light only: the PDFs under comparison are white, so a dark page makes them hard to read. */
+/* Colour carries meaning only (DESIGN 5): grey = harmless, yellow = needs review, red = broken. */
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP",
-    sans-serif;
+  --muted: #5f6368;
+  --line: #e3e3e3;
+  --surface: #f7f7f7;
+
+  --harmless-fg: #4b5563;
+  --harmless-bg: #eef0f2;
+  --review-fg: #8a5a00;
+  --review-bg: #fff4cc;
+  --broken-fg: #b42318;
+  --broken-bg: #fde8e7;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -17,5 +28,11 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
 }

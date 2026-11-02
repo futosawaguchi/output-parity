@@ -1,8 +1,9 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { readFile } from "node:fs/promises";
+import { sep } from "node:path";
 import type { Change } from "../compare/baseline";
 import type { CaseComparison } from "../compare/compare-case";
-import { describeOutcome } from "../runner/exec";
+import { describeOutcome } from "../runner/outcome";
 import type { Slot, SlotResult } from "../runner/run-case";
 import { askClaude } from "./call-claude";
 import { buildUserMessage, changeId, SYSTEM_PROMPT, type JudgeInput } from "./prompt";
@@ -143,7 +144,9 @@ function finding(
 
 async function stderrHead(r: SlotResult, lines = 3): Promise<string[]> {
   const text = await readFile(r.stderrPath, "utf8").catch(() => "");
-  return [...new Set(text.split("\n").map((l) => l.trim()).filter(Boolean))].slice(0, lines);
+  // Paths are shown relative to the repository: the absolute ones carry the user's home directory.
+  const repo = process.cwd() + sep;
+  return [...new Set(text.split("\n").map((l) => l.trim().split(repo).join("")).filter(Boolean))].slice(0, lines);
 }
 
 function labelOf(slot: Slot, ctx: JudgeContext): string {

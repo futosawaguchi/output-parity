@@ -1,0 +1,111 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { JobState } from "@/lib/jobs";
+import { SAME_ORIGIN_HEADER } from "@/lib/same-origin";
+import styles from "./check.module.css";
+import { ReportView } from "./ReportView";
+
+type Problem = { message: string; nextStep: string };
+
+const POLL_MS = 1000;
+
+/** The run button, the progress while running, and the report once done. */
+export function RunPanel() {
+  const [job, setJob] = useState<JobState | null>(null);
+  const [starting, setStarting] = useState(false);
+  const [problem, setProblem] = useState<Problem | null>(null);
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopPolling = () => {
+    if (timer.current) clearInterval(timer.current);
+    timer.current = null;
+  };
+
+  const poll = useCallback((jobId: string) => {
+    stopPolling();
+    const tick = async () => {
+      const res = await fetch(`/api/runs/${jobId}`, { cache: "no-store" }).catch(() => null);
+      if (!res) return setProblem({ message: "画面のサーバに接続できません", nextStep: "npm run dev が動いているか確認してください" });
+      const body = await res.json();
+      if (!res.ok) {
+        stopPolling();
+        return setProblem(body);
+      }
+      setJob(body);
+      if (body.status !== "running") stopPolling();
+    };
+    tick();
+    timer.current = setInterval(tick, POLL_MS);
+  }, []);
+
+  // A reloaded page picks up the job that is running or finished last.
+  useEffect(() => {
+    fetch("/api/runs", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((body) => body.job && poll(body.job.jobId))
+      .catch(() => {});
+    return stopPolling;
+  }, [poll]);
+
+  const start = async () => {
+    setStarting(true);
+    setProblem(null);
+    try {
+      const res = await fetch("/api/runs", { method: "POST", headers: { [SAME_ORIGIN_HEADER]: "1" } });
+      const body = await res.json();
+      // 409: already running (another tab, for example). Follow that run instead of starting one.
+      if (res.status === 409 && body.jobId) return poll(body.jobId);
+      if (!res.ok) return setProblem(body);
+      poll(body.jobId);
+    } catch {
+      setProblem({ message: "画面のサーバに接続できません", nextStep: "npm run dev が動いているか確認してください" });
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  // Disabled by state, not by a timer (DESIGN 5): from the click until the run has finished.
+  const running = starting || job?.status === "running";
+
+  return (
+    <section>
+      <div className={styles.controls}>
+        <button className={styles.runButton} onClick={start} disabled={running}>
+          {running ? "実行中…" : "サンプルを実行して判定する"}
+        </button>
+        {job?.status === "running" && <Progress job={job} />}
+      </div>
+
+      {problem && <ProblemBox problem={problem} />}
+      {job?.status === "failed" && <ProblemBox problem={job.error} />}
+      {job?.status === "done" && <ReportView report={job.report} />}
+    </section>
+  );
+}
+
+function Progress({ job }: { job: Extract<JobState, { status: "running" }> }) {
+  const last = job.progress.at(-1);
+  return (
+    <p className={styles.progress} role="status" aria-live="polite">
+      <span className={styles.spinner} aria-hidden />
+      {last ? (
+        <>
+          {last.caseId && <span className={styles.progressCase}>{last.caseId}</span>}
+          {last.message}
+        </>
+      ) : (
+        "準備しています"
+      )}
+    </p>
+  );
+}
+
+function ProblemBox({ problem }: { problem: Problem }) {
+  return (
+    <div className={styles.problem} role="alert">
+      <p>{problem.message}</p>
+      <p className={styles.nextStep}>→ {problem.nextStep}</p>
+    </div>
+  );
+}
