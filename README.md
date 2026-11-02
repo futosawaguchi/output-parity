@@ -58,7 +58,8 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 ## 自分のシステムで試す
 
 - `targets/<名前>/parity.config.jsonc` を書きます。`targets/` は `.gitignore` 済みなので、社内のパスや名前を書いても公開されません
-- 動かすには `npm run samples -- --subject <名前>` を使います（いまの画面は同梱の見積書の題材だけを扱います）
+- 画面の上の「題材」で切り替えます（`/check?subject=<名前>`）。コマンドなら `npm run samples -- --subject <名前>` です
+- 一度に動かせる題材は1つです。別の題材を実行している間は、理由が出て押せません
 - まずは `claude.send` を `none` にして、何も送らずに比べるところから始められます
 
 ## 設定ファイル
