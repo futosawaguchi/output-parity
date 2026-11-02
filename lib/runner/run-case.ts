@@ -1,4 +1,4 @@
-import { mkdir, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { OUTPUT_PLACEHOLDER, type Case, type EnvironmentName, type ParityConfig } from "../config";
 import { execOnce, type ExecOutcome } from "./exec";
@@ -30,7 +30,9 @@ export type SlotResult = {
 
 export type CaseResult = { caseId: string; slots: SlotResult[] };
 
-const MAX_BUFFER_BYTES = 10 * 1024 * 1024;
+/** stdout may be the output itself; stderr is evidence only, so far less of it is kept. */
+const MAX_STDOUT_BYTES = 100 * 1024 * 1024;
+const MAX_STDERR_BYTES = 1024 * 1024;
 
 /** Runs one case three times, writing everything under `caseDir`. Runs sequentially. */
 export async function runCase(
@@ -73,19 +75,23 @@ async function runSlot(
   const command = config.environments[env].command;
   const args = testCase.args.map((a) => (a === OUTPUT_PLACEHOLDER ? outputPath : a));
 
+  const stdoutPath = join(slotDir, "stdout.txt");
+  const stderrPath = join(slotDir, "stderr.txt");
   const result = await execOnce({
     command,
     args,
     cwd,
     timeoutMs: config.timeoutMs,
-    maxBufferBytes: MAX_BUFFER_BYTES,
+    stdoutPath,
+    stderrPath,
+    maxStdoutBytes: MAX_STDOUT_BYTES,
+    maxStderrBytes: MAX_STDERR_BYTES,
   });
-
-  const stdoutPath = join(slotDir, "stdout.txt");
-  const stderrPath = join(slotDir, "stderr.txt");
-  await writeFile(stdoutPath, result.stdout);
-  await writeFile(stderrPath, result.stderr);
-  if (config.output.source === "stdout") await writeFile(outputPath, result.stdout);
+  // Byte for byte: stdout can be binary (a PDF written to stdout). Nothing on stdout is no
+  // output, not an empty one: a program that crashed before printing produced nothing.
+  if (config.output.source === "stdout" && result.outcome.kind !== "outputTooLarge" && (await stat(stdoutPath)).size > 0) {
+    await copyFile(stdoutPath, outputPath);
+  }
 
   const slotResult: SlotResult = {
     slot,
