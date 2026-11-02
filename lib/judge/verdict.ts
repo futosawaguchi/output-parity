@@ -46,4 +46,6 @@ export type CaseVerdict = {
   judgedBy: JudgedBy;
   /** What was sent to Claude for this verdict (after redaction). Absent when the machine decided. */
   sent?: SentRecord;
+  /** Set when the output was too long to send whole: Claude read only `around` lines on each side of the changes. */
+  excerpt?: { around: number; totalLines: number };
 };

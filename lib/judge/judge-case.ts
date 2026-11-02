@@ -9,7 +9,7 @@ import type { Slot, SlotResult } from "../runner/run-case";
 import type { SentRecorder } from "../sent-log";
 import { checkArithmetic } from "./arithmetic";
 import { askClaude } from "./call-claude";
-import { buildUserMessage, changeId, SYSTEM_PROMPT, type JudgeInput } from "./prompt";
+import { buildUserMessage, changeId, excerptFor, SYSTEM_PROMPT, type JudgeInput } from "./prompt";
 import type { JudgeResponse } from "./schema";
 import { worstOf, type CaseVerdict, type Finding } from "./verdict";
 
@@ -74,7 +74,10 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
     oldPages: cmp.old.pages,
     newPages: cmp.new.pages,
     unreadable: [...cmp.old.unreadable.map((u) => `旧 ${u}`), ...cmp.new.unreadable.map((u) => `新 ${u}`)],
+    excerpt: excerptFor(cmp.new.lines),
   };
+  // Said on the page with the verdict: Claude did not read the whole output (DESIGN 3-②).
+  const excerpt = input.excerpt === null ? {} : { excerpt: { around: input.excerpt, totalLines: cmp.new.lines.length } };
   // Secrets are masked before anything leaves the machine, and what leaves is kept (DESIGN 7-4e ③④).
   const message = redactSecrets(buildUserMessage(input));
   const sent = await ctx.record?.({
@@ -99,6 +102,7 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
       ),
       judgedBy: { kind: "failed", reason, nextStep },
       sent,
+      ...excerpt,
     };
   }
 
@@ -113,6 +117,7 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
     findings,
     judgedBy: { kind: "claude", model: answer.model },
     sent,
+    ...excerpt,
   };
 }
 

@@ -27,6 +27,20 @@ export const SYSTEM_PROMPT = `あなたは、プログラムの実行環境を�
 - 「毎回変わる値として除外した行」は判定の対象外です。ただし、除外が誤っている（本当の違いを隠している）と考えた場合は、change_ids を空にして needs_review の項目として指摘してください。
 - 文章は日本語で、短く書いてください。人が数秒で確かめられることを目指してください。`;
 
+/**
+ * Above this many characters the new output is too long to send whole (a log of a busy day, a
+ * large export): only the lines around each change go, and the message says so (DESIGN 3-②: the
+ * one exception to sending the whole output, always stated in the prompt and on the page).
+ */
+export const MAX_FULL_CHARS = 100_000;
+/** How many lines before and after each change an excerpt keeps. */
+export const EXCERPT_CONTEXT = 30;
+
+/** Whether the new output is sent as an excerpt, and how many lines around each change it keeps. */
+export function excerptFor(newLines: string[]): number | null {
+  return newLines.reduce((n, l) => n + l.length + 1, 0) > MAX_FULL_CHARS ? EXCERPT_CONTEXT : null;
+}
+
 export type JudgeInput = {
   oldLabel: string;
   newLabel: string;
@@ -42,6 +56,8 @@ export type JudgeInput = {
   oldPages: PageLayout[];
   newPages: PageLayout[];
   unreadable: string[];
+  /** Lines kept around each change when the output is too long to send whole; null sends it whole. */
+  excerpt: number | null;
 };
 
 export function changeId(index: number): string {
@@ -52,10 +68,14 @@ export function buildUserMessage(input: JudgeInput): string {
   const sections = [
     `## 環境\n旧: ${input.oldLabel}（${input.oldExit}）\n新: ${input.newLabel}（${input.newExit}）`,
     `## 出力の形式\n${input.outputDescription}`,
-    `## 新しい出力の全文（変更の印つき）\n` +
+    (input.excerpt === null
+      ? `## 新しい出力の全文（変更の印つき）\n`
+      : `## 新しい出力の抜粋（変更の印つき）\n` +
+        `⚠️ 出力が長い（全 ${input.newLines.length} 行）ので、全文ではなく、変更の前後 ${input.excerpt} 行ずつだけを渡します。` +
+        `省いた部分は「…（N 行省略）」の行です。省いた部分を読まないと決められないことは needs_review にしてください。\n`) +
       `行頭の記号: 「  」旧と新で同じ行／「-」旧にだけある行／「+」新にだけある行。\n` +
       `[C1] などは判定してほしい変更の ID、[除外] は毎回変わる値として除外した変更。\n\n` +
-      renderMarked(input),
+      (input.excerpt === null ? renderMarked(input) : excerptAround(renderMarked(input).split("\n"), input.excerpt).join("\n")),
     `## 判定してほしい変更\n${input.kept.map((c, i) => `${changeId(i)}: ${describeChange(c)}`).join("\n")}`,
     `## 毎回変わる値として除外した行（参考。同じ環境で2回動かして違った行）\n` +
       (input.dropped.length === 0 ? "なし" : input.dropped.flatMap((c) => c.newLines.map((l) => `- ${l}`)).join("\n")),
@@ -88,6 +108,25 @@ export function renderMarked(input: Pick<JudgeInput, "newLines" | "kept" | "drop
     j++;
   }
   return out.join("\n");
+}
+
+/** The marked lines near a change (they start with "-" or "+"), the rest counted where it was left out. */
+export function excerptAround(marked: string[], around: number): string[] {
+  const near = new Set<number>();
+  marked.forEach((line, i) => {
+    if (line.startsWith("  ")) return;
+    for (let k = i - around; k <= i + around; k++) near.add(k);
+  });
+  const out: string[] = [];
+  let skipped = 0;
+  marked.forEach((line, i) => {
+    if (!near.has(i)) return void skipped++;
+    if (skipped > 0) out.push(`…（${skipped} 行省略）`);
+    skipped = 0;
+    out.push(line);
+  });
+  if (skipped > 0) out.push(`…（${skipped} 行省略）`);
+  return out;
 }
 
 function describeChange(c: Change): string {

@@ -62,6 +62,11 @@ export function VerdictBlock({ verdict, subjectId }: { verdict: CaseVerdict; sub
         {by}
         {verdict.judgedBy.kind === "failed" && ` → ${verdict.judgedBy.nextStep}`}
       </p>
+      {verdict.excerpt && (
+        <p className={styles.sentLine}>
+          ⚠️ 出力が長い（全 {verdict.excerpt.totalLines.toLocaleString()} 行）ので、Claude には全文ではなく、変わった行の前後 {verdict.excerpt.around} 行ずつだけを送りました
+        </p>
+      )}
       {verdict.sent && <SentLine sent={verdict.sent} subjectId={subjectId} />}
       {verdict.findings.length > 0 && (
         <ul className={styles.findings}>
