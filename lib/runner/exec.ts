@@ -59,3 +59,19 @@ function toOutcome(error: ExecFileException | null, req: ExecRequest): ExecOutco
   if (error.signal) return { kind: "signaled", signal: error.signal };
   return { kind: "spawnFailed", code: String(code ?? "UNKNOWN"), message: error.message };
 }
+
+/** One line describing how a run ended, for people. */
+export function describeOutcome(o: ExecOutcome): string {
+  switch (o.kind) {
+    case "exited":
+      return `終了コード ${o.exitCode}`;
+    case "signaled":
+      return `シグナル ${o.signal} で終了`;
+    case "timedOut":
+      return `${o.timeoutMs} ms で打ち切り`;
+    case "outputTooLarge":
+      return `出力が ${o.maxBufferBytes} バイトを超えたので打ち切り`;
+    case "spawnFailed":
+      return `起動できませんでした（${o.code}）`;
+  }
+}
