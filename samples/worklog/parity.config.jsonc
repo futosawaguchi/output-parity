@@ -1,0 +1,31 @@
+// 言語も形式も変わる題材。架空の作業日報を集計して CSV（Shift_JIS）で出す Python のスクリプトを、Python 3.10 と 3.12 で同じ入力から動かして比べる。
+// 書き方は README の「設定ファイル」。パスはこのファイルからの相対で書く。
+{
+  "version": 1,
+  "name": "作業日報の集計 worklog.py（Python 3.10 → 3.12）",
+  "description": "架空の作業日報を集計して CSV（Shift_JIS）で出す小さな Python のスクリプト（samples/worklog/app/worklog.py）を、Python 3.10 と Python 3.12 で同じ入力から動かして比べます。日報は今回作った架空のものです。",
+
+  "source": "app",
+  "fixes": "apply",
+  // 架空のサンプルなので、出力もソースも送ってよい
+  "claude": { "send": "output-and-source" },
+
+  "run": {
+    "type": "command",
+    "timeoutMs": 30000,
+    "environments": {
+      "old": { "label": "Python 3.10", "command": "/opt/homebrew/bin/python3.10" },
+      "new": { "label": "Python 3.12", "command": "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12" }
+    }
+  },
+
+  // 標準出力に CSV を書く。文字コードは Shift_JIS
+  "output": { "format": "text", "encoding": "shift_jis", "from": "stdout" },
+
+  // id・label・description・入力のファイル名は、画面に出たり Claude に渡ったりする。期待する判定が分からない名前にする
+  "cases": [
+    { "id": "case-a", "label": "入力 A", "description": "4件の日報", "args": ["worklog.py", "data/case-a.json"] },
+    { "id": "case-b", "label": "入力 B", "description": "4件の日報（日付の書き方が混ざっている）", "args": ["worklog.py", "data/case-b.json"] },
+    { "id": "case-c", "label": "入力 C", "description": "5件の日報（別のシステムから取り込んだ行を含む）", "args": ["worklog.py", "data/case-c.json"] }
+  ]
+}
