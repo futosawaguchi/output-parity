@@ -1,20 +1,54 @@
 .page {
-  max-width: 1120px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
+  padding: 28px 32px 80px;
 }
 
-.header {
-  margin-bottom: 28px;
+/* The band at the top: where the tool starts. */
+.appBar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--background);
+  border-bottom: 1px solid var(--line);
 }
 
-.title {
-  font-size: 28px;
+.appBarInner {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 14px 32px;
+}
+
+.appName {
+  font-size: 19px;
   font-weight: 700;
+  color: var(--foreground);
+  text-decoration: none;
 }
 
-.lead {
+.appLead {
   color: var(--muted);
+  font-size: 14px;
+}
+
+/* Subjects on the left, results on the right. */
+.shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 36px;
+  align-items: start;
+}
+
+.main {
+  min-width: 0;
+}
+
+.loading {
+  color: var(--muted);
+  padding: 40px 0;
 }
 
 /* Run button and progress */
@@ -119,10 +153,6 @@
   margin-bottom: 12px;
 }
 
-.case {
-  padding: 22px 0;
-  border-top: 1px solid var(--line);
-}
 
 .caseHeader {
   display: flex;
@@ -288,7 +318,7 @@
 .naiveExcerpt {
   margin-top: 8px;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   color: var(--muted);
   white-space: pre;
@@ -325,7 +355,7 @@
 .droppedLines {
   margin-top: 6px;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -456,7 +486,6 @@
 
 .compareTitle {
   font-size: 18px;
-  margin-bottom: 12px;
 }
 
 .compareColumns {
@@ -557,48 +586,53 @@
   margin: 8px 0;
 }
 
-/* The subjects, side by side; the one shown has the dark border. */
+/* The subjects down the left; the one shown is filled in. */
 .subjects {
-  margin-bottom: 20px;
+  position: sticky;
+  top: 84px;
 }
 
 .subjectsTitle {
   color: var(--muted);
-  font-size: 15px;
-  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
-.subjectCards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
-}
-
-.subjectCard {
+.subjectList {
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
+}
+
+.subjectItem {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
   padding: 12px 14px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--background);
   color: var(--foreground);
   text-align: left;
   cursor: pointer;
 }
 
-.subjectCard:hover:not(:disabled) {
+.subjectItem:hover:not(:disabled) {
   border-color: var(--muted);
 }
 
-.subjectCard:disabled {
+.subjectItem:disabled {
   color: #9a9a9a;
   cursor: not-allowed;
 }
 
-.subjectCardSelected {
-  border: 2px solid var(--foreground);
-  padding: 11px 13px;
+.subjectItemSelected {
+  border-color: var(--foreground);
+  background: var(--selected);
+  box-shadow: inset 4px 0 0 var(--foreground);
   cursor: default;
 }
 
@@ -608,29 +642,108 @@
 }
 
 .subjectEnvs {
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .subjectKind {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
+}
+
+.subjectLatest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.subjectCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.dotBroken {
+  background: var(--broken-fg);
+}
+
+.dotReview {
+  background: #d9a400;
+}
+
+.dotUnjudged {
+  border: 1.5px solid var(--muted);
+}
+
+.dotHarmless {
+  background: #b8bec6;
 }
 
 .notice button {
   margin-top: 8px;
 }
 
+/* The answer of a run: how many, and how many in each group, large and in their colours. */
+.countBand {
+  margin: 4px 0 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
 .countLine {
-  margin: 8px 0 4px;
+  font-size: 24px;
   font-weight: 700;
+}
+
+.countTotal {
+  color: var(--foreground);
+}
+
+.countBroken {
+  color: var(--broken-fg);
+}
+
+.countReview {
+  color: var(--review-fg);
+}
+
+.countUnjudged,
+.countHarmless {
+  color: var(--harmless-fg);
 }
 
 .recordLinks {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 10px;
+  gap: 8px 16px;
   align-items: center;
-  margin: 4px 0 12px;
+  margin-top: 8px;
+}
+
+/* Opens another page: blue, underlined, with an arrow (the roles of what can be pressed, DESIGN 5). */
+.pageLink {
+  color: var(--link);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.pageLink::after {
+  content: " ↗";
+  text-decoration: none;
+  display: inline-block;
+  margin-left: 2px;
 }
 
 /* A link that does something in the tool (open a page, save a file): looks like the tool's small buttons. */
@@ -737,5 +850,54 @@
   display: block;
   margin-top: 2px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
+}
+
+/* One case, or two side by side: a framed panel under the list, with its own title bar. */
+.panel {
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.panelBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.panelBody {
+  padding: 18px 20px 22px;
+}
+
+.closeButton {
+  flex: none;
+  padding: 5px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  border-color: var(--foreground);
+}
+
+.scope summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  cursor: pointer;
+}
+
+.scope[open] summary {
+  margin-bottom: 6px;
 }

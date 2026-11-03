@@ -8,7 +8,7 @@ import styles from "./check.module.css";
 import type { CauseActions } from "./CauseView";
 import { MANY_CASES } from "./case-order";
 import { ReportView } from "./ReportView";
-import { SubjectPicker } from "./SubjectPicker";
+import { SubjectPicker, type ListedSubject } from "./SubjectPicker";
 import { recordUrls } from "./urls";
 
 type Problem = { message: string; nextStep: string };
@@ -23,9 +23,6 @@ type Target = {
   claudeScope: string[];
 };
 
-/** A subject to choose from (lib/subject.ts). name is null when its settings cannot be read. */
-type SubjectEntry = { id: string; name: string | null };
-
 const POLL_MS = 1000;
 
 /** Where each kind of job is started (lib/jobs.ts says what each one does). */
@@ -33,7 +30,7 @@ const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/re
 
 /**
  * The subject in the address (?subject=), or none for the default one. Read when needed rather
- * than kept: choosing another subject loads the page again, so nothing of the last one stays.
+ * than kept: choosing another subject changes the address (without loading the page again).
  */
 function subjectInAddress(): string | null {
   return new URLSearchParams(window.location.search).get("subject");
@@ -41,7 +38,9 @@ function subjectInAddress(): string | null {
 
 /** The run button, the progress while running, and the report once done. */
 export function RunPanel() {
-  const [subjects, setSubjects] = useState<SubjectEntry[]>([]);
+  const [subjects, setSubjects] = useState<ListedSubject[]>([]);
+  // From choosing a subject until what it checks has arrived: the results area shows it is loading.
+  const [loading, setLoading] = useState(true);
   const [subjectId, setSubjectId] = useState<string | null>(null);
   const [job, setJob] = useState<JobState | null>(null);
   // Which button was pressed, until the server has answered with a job.
@@ -88,12 +87,18 @@ export function RunPanel() {
     timer.current = setInterval(tick, POLL_MS);
   }, []);
 
-  // A reloaded page picks up the job that is running or finished last.
-  useEffect(() => {
+  // Answers to an earlier choice of subject are dropped when a later one was made meanwhile.
+  const loads = useRef(0);
+
+  /** Everything about the subject in the address. */
+  const load = useCallback(() => {
     const subject = subjectInAddress();
+    const mine = ++loads.current;
     fetch(subject ? `/api/runs?subject=${encodeURIComponent(subject)}` : "/api/runs", { cache: "no-store" })
       .then((res) => res.json())
       .then((body) => {
+        if (mine !== loads.current) return;
+        setLoading(false);
         setSubjects(body.subjects);
         setSubjectId(body.subjectId);
         setTarget(body.target);
@@ -105,9 +110,41 @@ export function RunPanel() {
         setCannotApply(body.cannotApply);
         if (body.job) poll(body.job.jobId);
       })
-      .catch(() => {});
-    return stopPolling;
+      .catch(() => {
+        if (mine !== loads.current) return;
+        setLoading(false);
+        setProblem({ message: "画面のサーバに接続できません", nextStep: "npm run dev が動いているか確認してください" });
+      });
   }, [poll]);
+
+  /** Another subject: the last one's results go at once, and the area says it is loading. */
+  const switchTo = useCallback(() => {
+    stopPolling();
+    setLoading(true);
+    setJob(null);
+    setReport(null);
+    setTarget(null);
+    setProblem(null);
+    setCannotRun(null);
+    setBundledFix(null);
+    setAskedCause(null);
+    load();
+  }, [load]);
+
+  // A reloaded page picks up the job that is running or finished last; back and forward show that subject.
+  useEffect(() => {
+    load();
+    window.addEventListener("popstate", switchTo);
+    return () => {
+      window.removeEventListener("popstate", switchTo);
+      stopPolling();
+    };
+  }, [load, switchTo]);
+
+  const choose = (id: string) => {
+    window.history.pushState(null, "", `?${new URLSearchParams({ subject: id })}`);
+    switchTo();
+  };
 
   const start = async (kind: JobKind, payload: object = {}) => {
     setStarting(kind);
@@ -161,50 +198,55 @@ export function RunPanel() {
   };
 
   return (
-    <section>
-      {subjectId && (subjects.length > 1 || !subjects.some((s) => s.id === subjectId)) && <SubjectPicker subjects={subjects} current={subjectId} disabled={running} />}
-      {target && <TargetIntro target={target} showCases={!shown} />}
-      <div className={styles.controls}>
-        <button className={styles.runButton} onClick={() => start("run")} disabled={running || cannotRun !== null}>
-          {busy === "run" ? "実行中…" : "実行して判定する"}
-        </button>
-        <button
-          className={styles.subButton}
-          onClick={() => start("rejudge")}
-          disabled={running || cannotRejudge !== null}
-          title={cannotRejudge ? `${cannotRejudge.message} → ${cannotRejudge.nextStep}` : undefined}
-        >
-          {busy === "rejudge" ? "判定し直しています…" : "同梱の出力を Claude に判定し直させる"}
-        </button>
-        {job?.status === "running" && job.kind !== "cause" && <Progress job={job} labelOf={(id) => target?.cases.find((c) => c.id === id)?.label ?? id} />}
-      </div>
-      {cannotRun && !job && (
-        <p className={styles.notice}>
-          この環境ではまだ実行できません: {cannotRun.message}
-          <br />→ {cannotRun.nextStep}
-          {!cannotRejudge && (
-            <>
-              <br />
-              プログラムを動かせなくても、API キーがあれば「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま判定させられます。
-            </>
-          )}
-        </p>
-      )}
+    <div className={subjects.length > 1 ? styles.shell : undefined}>
+      {subjects.length > 1 && <SubjectPicker subjects={subjects} current={subjectId ?? ""} disabled={running} onChoose={choose} />}
+      <main className={styles.main}>
+        {loading && <p className={styles.loading} role="status">読み込んでいます…</p>}
+        {target && <TargetIntro target={target} showCases={!shown} />}
+        {!loading && (
+          <div className={styles.controls}>
+            <button className={styles.runButton} onClick={() => start("run")} disabled={running || cannotRun !== null}>
+              {busy === "run" ? "実行中…" : "実行して判定する"}
+            </button>
+            <button
+              className={styles.subButton}
+              onClick={() => start("rejudge")}
+              disabled={running || cannotRejudge !== null}
+              title={cannotRejudge ? `${cannotRejudge.message} → ${cannotRejudge.nextStep}` : undefined}
+            >
+              {busy === "rejudge" ? "判定し直しています…" : "同梱の出力を Claude に判定し直させる"}
+            </button>
+            {job?.status === "running" && job.kind !== "cause" && <Progress job={job} labelOf={(id) => target?.cases.find((c) => c.id === id)?.label ?? id} />}
+          </div>
+        )}
+        {cannotRun && !job && (
+          <p className={styles.notice}>
+            この環境ではまだ実行できません: {cannotRun.message}
+            <br />→ {cannotRun.nextStep}
+            {!cannotRejudge && (
+              <>
+                <br />
+                プログラムを動かせなくても、API キーがあれば「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま判定させられます。
+              </>
+            )}
+          </p>
+        )}
 
-      {problem && <ProblemBox problem={problem} />}
-      {job?.status === "failed" && <ProblemBox problem={job.error} />}
-      {shown && (
-        <ReportView
-          report={shown}
-          // The job's own report, or a bundled one shown in its place (before any job, or replayed).
-          record={running ? null : recordUrls(shown, job?.status === "done" && job.report === shown ? job.jobId : null)}
-          cause={causeActions}
-          // A shipped result is only being looked at: going back is showing the bundled report again.
-          onUndo={() => (shown.origin === "bundled" && shown.fixAttempt ? setReport(shown.fixAttempt.original) : start("undo"))}
-          onJudgeHeld={() => start("judge")}
-        />
-      )}
-    </section>
+        {problem && <ProblemBox problem={problem} />}
+        {job?.status === "failed" && <ProblemBox problem={job.error} />}
+        {shown && (
+          <ReportView
+            report={shown}
+            // The job's own report, or a bundled one shown in its place (before any job, or replayed).
+            record={running ? null : recordUrls(shown, job?.status === "done" && job.report === shown ? job.jobId : null)}
+            cause={causeActions}
+            // A shipped result is only being looked at: going back is showing the bundled report again.
+            onUndo={() => (shown.origin === "bundled" && shown.fixAttempt ? setReport(shown.fixAttempt.original) : start("undo"))}
+            onJudgeHeld={() => start("judge")}
+          />
+        )}
+      </main>
+    </div>
   );
 }
 
@@ -213,15 +255,18 @@ function TargetIntro({ target, showCases }: { target: Target; showCases: boolean
     <div className={styles.target}>
       <p className={styles.targetName}>{target.name}</p>
       <p>{target.description}</p>
-      <div className={styles.scope}>
-        <p className={styles.scopeTitle}>Claude に送るもの</p>
+      <details className={styles.scope}>
+        <summary>
+          <span className={styles.scopeTitle}>Claude に送るもの</span>
+          <span className={styles.muted}>送る前に鍵などに見える値を *** にし、送った全文は残します</span>
+        </summary>
         <ul>
           {target.claudeScope.map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>
         <p className={styles.muted}>パスワード・鍵・トークンに見える値は *** にしてから送ります。送ったものは実行ごとに残り、各入力の詳細で見られます</p>
-      </div>
+      </details>
       {showCases && (
         <ul className={styles.targetCases}>
           {target.cases.slice(0, MANY_CASES).map((c) => (

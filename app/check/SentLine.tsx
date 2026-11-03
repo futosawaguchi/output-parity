@@ -8,7 +8,7 @@ export function SentLine({ sent, subjectId }: { sent: SentRecord; subjectId: str
     <p className={styles.sentLine}>
       Claude に送ったもの: {sent.chars.toLocaleString()} 字
       {sent.masked > 0 ? `（${sent.maskedKinds.join("・")} を ${sent.masked} か所 *** にして送った）` : "（*** にした値はなし）"}{" "}
-      <a className={styles.inlineAction} href={sentUrl(subjectId, sent.file)} target="_blank" rel="noreferrer">
+      <a className={styles.pageLink} href={sentUrl(subjectId, sent.file)} target="_blank" rel="noreferrer">
         送った全文を見る
       </a>
     </p>

@@ -9,9 +9,10 @@ import { SetupError } from "@/lib/errors";
 import { currentJob, runningJob, startJob } from "@/lib/jobs";
 import { runPipeline } from "@/lib/pipeline";
 import { preflight } from "@/lib/runner/preflight";
-import { listSubjects, loadSubject, subjectIdOf, whyNoApplying } from "@/lib/subject";
+import { listSubjects, loadSubject, subjectIdOf, whyNoApplying, type SubjectEntry } from "@/lib/subject";
 import { isFromOurPage } from "@/lib/same-origin";
 import { alreadyRunning, busyWithAnother, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses";
+import { tally } from "@/app/check/case-order";
 
 // With the other routes that call Claude (rejudge, cause, judge), the only places in the app that read the API key (CLAUDE.md).
 // The key never leaves the server: it is not in any response, and errors are reported by type
@@ -95,7 +96,7 @@ export async function GET(request: Request): Promise<Response> {
   }
   return Response.json({
     subjectId,
-    subjects: await listSubjects(root),
+    subjects: await withLatest(await listSubjects(root)),
     job: job ? { jobId: job.jobId, status: job.status } : null,
     target,
     cannotRun,
@@ -108,6 +109,20 @@ export async function GET(request: Request): Promise<Response> {
     // machine cannot run the programs, so the round trip can still be followed (DESIGN 7-2b).
     bundledFix: job ? null : await loadBundledFix(root, subjectId),
   });
+}
+
+/**
+ * Each subject with the counts of its latest result: the finished job of this server when there is
+ * one, the bundled run otherwise, nothing for a subject that has neither (shown as "not run yet").
+ */
+async function withLatest(subjects: SubjectEntry[]) {
+  return Promise.all(
+    subjects.map(async (s) => {
+      const job = currentJob(s.id);
+      const latest = job?.status === "done" ? job.report : await loadBundledReport(root, s.id);
+      return { ...s, latest: latest ? tally(latest.cases) : null };
+    }),
+  );
 }
 
 /** The check a run starts with (the programs can be executed), made up front for the page. */

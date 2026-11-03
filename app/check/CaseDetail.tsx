@@ -15,22 +15,26 @@ import { OutputView, type HtmlView } from "./OutputView";
 import { SentLine } from "./SentLine";
 
 /** Everything about one case: both outputs, the plain diff, the verdict and what was set aside. */
-export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseReport; cause: CauseActions }) {
+export function CaseDetail({ report, c, cause, onClose }: { report: RunReport; c: CaseReport; cause: CauseActions; onClose: () => void }) {
   const run = (slot: "old" | "new") => c.runs.find((r) => r.slot === slot)!;
   const [view, setView] = useState<HtmlView>("page");
   return (
-    <article className={styles.case}>
-      <header className={styles.caseHeader}>
+    <article className={styles.panel}>
+      <header className={styles.panelBar}>
         <h2 className={styles.caseTitle}>
           {c.label}
           <span className={styles.caseDescription}>{c.description}</span>
         </h2>
-        <span className={styles.runs}>
-          {run("new").request && <code className={styles.request}>{run("new").request}</code>}
-          {report.environments.old.label}: {describeOutcome(run("old").outcome)} ／ {report.environments.new.label}:{" "}
-          {describeOutcome(run("new").outcome)}
-        </span>
+        <button type="button" className={styles.closeButton} onClick={onClose}>
+          閉じる
+        </button>
       </header>
+      <div className={styles.panelBody}>
+      <p className={styles.runs}>
+        {run("new").request && <code className={styles.request}>{run("new").request}</code>}
+        {report.environments.old.label}: {describeOutcome(run("old").outcome)} ／ {report.environments.new.label}:{" "}
+        {describeOutcome(run("new").outcome)}
+      </p>
       {outputKindOf(report, c).format === "html" && (
         <div className={styles.viewSwitch} role="group" aria-label="出力の見せ方">
           {(["page", "lines"] as const).map((v) => (
@@ -66,6 +70,7 @@ export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseRep
       <CauseSection c={c} subjectId={report.subjectId} actions={cause} />
       <DroppedLines comparison={c.comparison} />
       <NotCompared comparison={c.comparison} labels={[report.environments.old.label, report.environments.new.label]} />
+      </div>
     </article>
   );
 }

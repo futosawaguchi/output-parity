@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
-import { countLine, groupOf, inReadingOrder, MANY_CASES } from "./case-order";
+import { GROUP_LABEL, groupOf, inReadingOrder, MANY_CASES, tally } from "./case-order";
 import { CaseDetail } from "./CaseDetail";
 import { CaseTable } from "./CaseTable";
 import styles from "./check.module.css";
@@ -58,18 +58,20 @@ export function ReportView({
         <FixResult attempt={report.fixAttempt} labelOf={(id) => byId(id)?.label ?? id} onUndo={onUndo} busy={cause.busy} bundled={report.origin === "bundled"} />
       )}
       {report.judgeHeld && <HeldNotice held={report.judgeHeld} busy={cause.busy} onJudge={onJudgeHeld} />}
-      <p className={styles.countLine}>{countLine(report.cases)}</p>
-      {record && (
-        <p className={styles.recordLinks}>
-          <a className={styles.smallAction} href={record.page} target="_blank" rel="noreferrer">
-            確かめた記録を見る
-          </a>
-          <a className={styles.smallAction} href={record.markdown} download>
-            Markdown で保存
-          </a>
-          <span className={styles.muted}>どの入力で何を確かめたか・言えないことを1枚に</span>
-        </p>
-      )}
+      <div className={styles.countBand}>
+        <CountLine cases={report.cases} />
+        {record && (
+          <p className={styles.recordLinks}>
+            <a className={styles.pageLink} href={record.page} target="_blank" rel="noreferrer">
+              確かめた記録を見る
+            </a>
+            <a className={styles.smallAction} href={record.markdown} download>
+              Markdown で保存
+            </a>
+            <span className={styles.muted}>どの入力で何を確かめたか・言えないことを1枚に</span>
+          </p>
+        )}
+      </div>
       <CaseTable cases={listed} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
       {folding && harmless > 0 && (
         <button className={styles.linkButton} onClick={() => setShowHarmless(true)}>
@@ -77,13 +79,33 @@ export function ReportView({
         </button>
       )}
       {pair ? (
-        <CompareView report={report} cases={pair} />
+        <CompareView report={report} cases={pair} onClose={() => setPicked([])} />
       ) : open ? (
-        <CaseDetail report={report} c={open} cause={cause} />
+        <CaseDetail report={report} c={open} cause={cause} onClose={() => setOpenId(null)} />
       ) : (
         <p className={styles.hint}>行を押すと、その入力の出力・差・判定の根拠が出ます。「並べる」に2つチェックすると、左右に並べて見られます。</p>
       )}
     </div>
+  );
+}
+
+const COUNT_CLASS: Record<string, string> = { broken: styles.countBroken, needs_review: styles.countReview, unjudged: styles.countUnjudged, harmless: styles.countHarmless };
+
+/** "32 件: 壊れている 3・無害 29", each group in its colour. The words stay the plain line (the checks read it). */
+function CountLine({ cases }: { cases: CaseReport[] }) {
+  const { total, groups } = tally(cases);
+  return (
+    <p className={styles.countLine}>
+      <span className={styles.countTotal}>{total} 件: </span>
+      {groups.map((g, i) => (
+        <span key={g.group}>
+          {i > 0 && "・"}
+          <span className={COUNT_CLASS[g.group]}>
+            {GROUP_LABEL[g.group]} {g.count}
+          </span>
+        </span>
+      ))}
+    </p>
   );
 }
 

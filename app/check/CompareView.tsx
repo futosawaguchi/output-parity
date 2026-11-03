@@ -8,13 +8,18 @@ import { OutputView } from "./OutputView";
  * Two cases side by side (DESIGN 6): the new outputs, the text that changed and the verdicts.
  * Works for any two cases, so it is a way of reading results, not a view built for one pair.
  */
-export function CompareView({ report, cases }: { report: RunReport; cases: [CaseReport, CaseReport] }) {
+export function CompareView({ report, cases, onClose }: { report: RunReport; cases: [CaseReport, CaseReport]; onClose: () => void }) {
   return (
-    <section className={styles.compare}>
-      <h2 className={styles.compareTitle}>
-        {cases[0].label} と {cases[1].label} を並べて見る（{report.environments.new.label} の出力）
-      </h2>
-      <div className={styles.compareColumns}>
+    <section className={styles.panel}>
+      <header className={styles.panelBar}>
+        <h2 className={styles.compareTitle}>
+          {cases[0].label} と {cases[1].label} を並べて見る（{report.environments.new.label} の出力）
+        </h2>
+        <button type="button" className={styles.closeButton} onClick={onClose}>
+          閉じる
+        </button>
+      </header>
+      <div className={`${styles.panelBody} ${styles.compareColumns}`}>
         {cases.map((c) => (
           <CompareColumn key={c.caseId} report={report} c={c} />
         ))}

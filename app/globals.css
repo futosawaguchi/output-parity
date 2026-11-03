@@ -6,6 +6,8 @@
   --muted: #5f6368;
   --line: #e3e3e3;
   --surface: #f7f7f7;
+  --link: #1a5fd0;
+  --selected: #eef2f8;
 
   --harmless-fg: #4b5563;
   --harmless-bg: #eef0f2;
@@ -28,7 +30,7 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-sans);
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
