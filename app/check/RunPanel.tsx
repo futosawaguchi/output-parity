@@ -8,6 +8,7 @@ import styles from "./check.module.css";
 import type { CauseActions } from "./CauseView";
 import { MANY_CASES } from "./case-order";
 import { ReportView } from "./ReportView";
+import { recordUrl } from "./urls";
 
 type Problem = { message: string; nextStep: string };
 
@@ -194,6 +195,8 @@ export function RunPanel() {
       {shown && (
         <ReportView
           report={shown}
+          // The job's own report, or a bundled one shown in its place (before any job, or replayed).
+          recordUrl={running ? null : recordUrl(shown, job?.status === "done" && job.report === shown ? job.jobId : null)}
           cause={causeActions}
           // A shipped result is only being looked at: going back is showing the bundled report again.
           onUndo={() => (shown.origin === "bundled" && shown.fixAttempt ? setReport(shown.fixAttempt.original) : start("undo"))}

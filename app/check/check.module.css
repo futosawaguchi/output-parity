@@ -577,6 +577,15 @@
   font-weight: 700;
 }
 
+.recordLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  align-items: baseline;
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
 .linkButton {
   margin-top: 8px;
   padding: 0;

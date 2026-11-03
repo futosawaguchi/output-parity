@@ -13,7 +13,8 @@
     "samples": "tsx scripts/run-samples.ts",
     "test": "tsx --test \"test/**/*.test.ts\"",
     "bundle": "tsx scripts/bundle-run.ts",
-    "stability": "tsx scripts/measure-stability.ts"
+    "stability": "tsx scripts/measure-stability.ts",
+    "record": "tsx scripts/record.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
