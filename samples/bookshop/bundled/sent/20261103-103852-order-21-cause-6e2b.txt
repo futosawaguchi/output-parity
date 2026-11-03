@@ -1,0 +1,261 @@
+あなたは、プログラムの実行環境を移行したとき（言語やライブラリの版上げなど）に出力が変わった原因を、ソースコードから探す担当です。
+移行前の環境（旧）と移行後の環境（新）で同じプログラムを同じ入力で動かした結果と、出力の違いについての判定が渡されます。
+道具（list_files・read_file・search_text）でプログラムのソースと入力データを読み、原因の箇所を特定してください。
+
+進め方:
+- 推測で答えないでください。原因として挙げる行は、必ず read_file で実際に読んでから挙げてください。行番号は read_file が示した番号を使ってください。
+- 実行に使われた入力データも読み、どの値がどう扱われて出力が変わったのかで説明してください。
+- 旧と新で何が違うのか（言語の仕様・標準関数の挙動・ライブラリの版など）を具体的に書いてください。
+- 確信が持てないときは候補を複数挙げ、断定しないでください。
+
+直し方:
+- 目標は「新しい環境で、旧環境と同じ出力になる」ことです。新しい環境で動くだけでは足りません。
+- 直し方を決める前に、入力データにある値のすべてについて、旧環境と同じ結果になるかを確かめてください。
+- 1か所の書き換えで直せるなら edit に書いてください。old_text はファイルの中にそのまま1回だけ現れる文字列にしてください（必要なら前後を含めて一意にする）。
+- 書き換えるのはプログラム本体です。依存ライブラリ（vendor/ や node_modules/ の中）は書き換えないでください。
+- 依存ライブラリの版上げなど、1か所の書き換えで直せないものは edit を null にし、steps に人がやる手順を具体的に書いてください。
+
+文章は日本語で、短く書いてください。人が数秒で確かめられることを目指してください。
+
+--- 最初のメッセージ
+## 環境
+旧: PHP 7.4
+新: PHP 8.5
+
+## 実行のしかた（作業ディレクトリはソースのディレクトリ）
+PHP 7.4: GET /order.php?id=21（php のサーバに問い合わせ） → HTTP 200
+サーバの記録の先頭:
+[Tue Nov  3 10:36:22 2026] 127.0.0.1:51451 Accepted
+[Tue Nov  3 10:36:22 2026] 127.0.0.1:51451 [200]: GET /order.php?id=21
+[Tue Nov  3 10:36:22 2026] 127.0.0.1:51451 Closing
+
+PHP 8.5: GET /order.php?id=21（php のサーバに問い合わせ） → HTTP 200
+サーバの記録の先頭:
+[Tue Nov  3 10:36:22 2026] 127.0.0.1:51452 Accepted
+[Tue Nov  3 10:36:22 2026] 127.0.0.1:51452 [200]: GET /order.php?id=21
+[Tue Nov  3 10:36:22 2026] 127.0.0.1:51452 Closing
+
+## 出力の違い（旧 → 新）
+- 小さな庭の育て方 | 2,200 円 | 1 | 2,200 円 | 在庫切れ（お取り寄せ 1〜2週間）
++ 小さな庭の育て方 | 2,200 円 | 1 | 2,200 円 | 残りわずか
+
+## 判定
+同じ注文データなのに、1冊目の在庫表示が「在庫切れ（お取り寄せ 1〜2週間）」から「残りわずか」に変わり、発送判断が逆になる。
+- 「小さな庭の育て方」の在庫欄が「在庫切れ（お取り寄せ 1〜2週間）」から「残りわずか」に変わった。
+  理由: 入力は同じなので在庫の実態は変わらないはずだが、表示の意味が「すぐ出せない」から「すぐ出せる」に反転している。読む人の発送判断やお客様への案内が確実に変わる。
+
+--- list_files .
+data/
+lib/
+public/
+
+--- search_text 「残りわずか」 .
+lib/orders.php:72: return '残りわずか';
+
+--- read_file lib/orders.php 1-
+     1| <?php
+     2| // 注文の読み出しと金額の計算
+     3| 
+     4| require_once __DIR__ . '/db.php';
+     5| 
+     6| const FREE_SHIPPING_FROM = 3000;
+     7| const SHIPPING_FEE = 500;
+     8| 
+     9| function all_orders()
+    10| {
+    11|     return db()->query('SELECT * FROM orders ORDER BY id')->fetchAll();
+    12| }
+    13| 
+    14| function find_order($id)
+    15| {
+    16|     $st = db()->prepare('SELECT * FROM orders WHERE id = ?');
+    17|     $st->execute(array($id));
+    18|     return $st->fetch();
+    19| }
+    20| 
+    21| function order_items($orderId)
+    22| {
+    23|     $st = db()->prepare(
+    24|         'SELECT books.title, books.price, books.stock, items.qty
+    25|            FROM items JOIN books ON books.id = items.book_id
+    26|           WHERE items.order_id = ? ORDER BY items.id'
+    27|     );
+    28|     $st->execute(array($orderId));
+    29|     return $st->fetchAll();
+    30| }
+    31| 
+    32| // 開いた回数を数える
+    33| function count_view($orderId)
+    34| {
+    35|     db()->prepare('UPDATE orders SET views = views + 1 WHERE id = ?')->execute(array($orderId));
+    36| }
+    37| 
+    38| function record_payment($orderId, $date)
+    39| {
+    40|     db()->prepare('UPDATE orders SET paid_on = ? WHERE id = ?')->execute(array($date, $orderId));
+    41| }
+    42| 
+    43| // 小計・割引・送料・合計・冊数
+    44| function order_totals($order, $items)
+    45| {
+    46|     $subtotal = 0;
+    47|     $books = 0;
+    48|     foreach ($items as $item) {
+    49|         $subtotal += $item['price'] * $item['qty'];
+    50|         $books += $item['qty'];
+    51|     }
+    52|     $discount = 0;
+    53|     if ($order['coupon_rate'] !== null) {
+    54|         $discount = (int) floor($subtotal * $order['coupon_rate'] / 100);
+    55|     }
+    56|     $shipping = ($subtotal - $discount >= FREE_SHIPPING_FROM) ? 0 : SHIPPING_FEE;
+    57|     return array(
+    58|         'subtotal' => $subtotal,
+    59|         'discount' => $discount,
+    60|         'shipping' => $shipping,
+    61|         'total' => $subtotal - $discount + $shipping,
+    62|         'books' => $books,
+    63|     );
+    64| }
+    65| 
+    66| function stock_label($stock)
+    67| {
+    68|     if ($stock === '0') {
+    69|         return '在庫切れ（お取り寄せ 1〜2週間）';
+    70|     }
+    71|     if ($stock < 3) {
+    72|         return '残りわずか';
+    73|     }
+    74|     return '在庫あり';
+    75| }
+    76| 
+
+--- read_file lib/db.php 1-
+     1| <?php
+     2| // 注文のデータベース（SQLite）につなぐ
+     3| 
+     4| function db()
+     5| {
+     6|     static $pdo = null;
+     7|     if ($pdo === null) {
+     8|         $pdo = new PDO('sqlite:' . __DIR__ . '/../data/shop.sqlite');
+     9|         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    10|         $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    11|     }
+    12|     return $pdo;
+    13| }
+    14| 
+
+--- list_files data
+seed.sql
+shop.sqlite
+
+--- search_text 「stock」 data/seed.sql
+data/seed.sql:8: stock INTEGER NOT NULL
+data/seed.sql:28: INSERT INTO books (id, title, price, stock) VALUES
+
+--- read_file data/seed.sql 1-
+     1| -- 架空書店の注文。shop.sqlite はこのファイルから作る: sqlite3 data/shop.sqlite < data/seed.sql
+     2| -- 書名・お客様の名前は、今回作った架空のもの
+     3| 
+     4| CREATE TABLE books (
+     5|   id    INTEGER PRIMARY KEY,
+     6|   title TEXT    NOT NULL,
+     7|   price INTEGER NOT NULL,
+     8|   stock INTEGER NOT NULL
+     9| );
+    10| 
+    11| CREATE TABLE orders (
+    12|   id          INTEGER PRIMARY KEY,
+    13|   ordered_on  TEXT    NOT NULL,
+    14|   customer    TEXT    NOT NULL,
+    15|   paid_on     TEXT,
+    16|   coupon_rate REAL,
+    17|   gift        INTEGER NOT NULL DEFAULT 0,
+    18|   views       INTEGER NOT NULL DEFAULT 0
+    19| );
+    20| 
+    21| CREATE TABLE items (
+    22|   id       INTEGER PRIMARY KEY,
+    23|   order_id INTEGER NOT NULL REFERENCES orders(id),
+    24|   book_id  INTEGER NOT NULL REFERENCES books(id),
+    25|   qty      INTEGER NOT NULL
+    26| );
+    27| 
+    28| INSERT INTO books (id, title, price, stock) VALUES
+    29|   (1, 'はじめての家計簿', 1200, 12),
+    30|   (2, 'Let''s はじめての英会話', 1500, 5),
+    31|   (3, '週末の作りおき', 1800, 2),
+    32|   (4, '小さな庭の育て方', 2200, 0),
+    33|   (5, '星空の観察ノート', 1600, 8),
+    34|   (6, '旅のスケッチ帳', 2000, 4),
+    35|   (7, 'やさしい統計のはなし', 2400, 1),
+    36|   (8, 'ことばの散歩道', 1400, 20);
+    37| 
+    38| INSERT INTO orders (id, ordered_on, customer, paid_on, coupon_rate, gift) VALUES
+    39|   (1,  '2026-10-01', '山田',   '2026-10-03', NULL, 0),
+    40|   (2,  '2026-10-01', '佐藤',   '2026-10-02', NULL, 0),
+    41|   (3,  '2026-10-02', '鈴木',   NULL,         NULL, 0),
+    42|   (4,  '2026-10-03', '高橋',   '2026-10-04', 10.0, 0),
+    43|   (5,  '2026-10-03', '伊藤',   '2026-10-05', NULL, 0),
+    44|   (6,  '2026-10-03', '渡辺',   NULL,         NULL, 0),
+    45|   (7,  '2026-10-04', '中村',   '2026-10-06', NULL, 0),
+    46|   (8,  '2026-10-05', '小林',   '2026-10-06', NULL, 1),
+    47|   (9,  '2026-10-05', '加藤',   '2026-10-07', NULL, 0),
+    48|   (10, '2026-10-06', '吉田',   NULL,         NULL, 0),
+    49|   (11, '2026-10-07', '山本',   '2026-10-08', NULL, 0),
+    50|   (12, '2026-10-07', '松本',   '2026-10-09', 5.0,  0),
+    51|   (13, '2026-10-08', '井上',   '2026-10-10', NULL, 0),
+    52|   (14, '2026-10-09', '木村',   NULL,         NULL, 0),
+    53|   (15, '2026-10-10', '林',     '2026-10-11', NULL, 0),
+    54|   (16, '2026-10-10', '清水',   '2026-10-12', NULL, 0),
+    55|   (17, '2026-10-11', '山崎',   '2026-10-12', NULL, 0),
+    56|   (18, '2026-10-12', '森',     NULL,         NULL, 0),
+    57|   (19, '2026-10-13', '池田',   '2026-10-14', 15.0, 0),
+    58|   (20, '2026-10-13', '橋本',   '2026-10-15', NULL, 0),
+    59|   (21, '2026-10-14', '石川',   NULL,         NULL, 0),
+    60|   (22, '2026-10-15', '前田',   '2026-10-16', NULL, 0),
+    61|   (23, '2026-10-15', '藤田',   '2026-10-17', NULL, 0),
+    62|   (24, '2026-10-16', '岡田',   NULL,         NULL, 0),
+    63|   (25, '2026-10-17', '後藤',   '2026-10-18', 10.0, 0),
+    64|   (26, '2026-10-18', '長谷川', '2026-10-19', NULL, 0),
+    65|   (27, '2026-10-18', '村上',   NULL,         NULL, 0),
+    66|   (28, '2026-10-19', '近藤',   '2026-10-20', NULL, 0),
+    67|   (29, '2026-10-20', '坂本',   NULL,         NULL, 0),
+    68|   (30, '2026-10-20', '遠藤',   '2026-10-21', NULL, 0);
+    69| 
+    70| INSERT INTO items (order_id, book_id, qty) VALUES
+    71|   (1, 1, 1), (1, 8, 1),
+    72|   (2, 2, 1),
+    73|   (3, 5, 2),
+    74|   (4, 6, 1), (4, 7, 1),
+    75|   (5, 3, 1),
+    76|   (6, 8, 3),
+    77|   (7, 1, 2),
+    78|   (8, 5, 1), (8, 6, 1),
+    79|   (9, 2, 2),
+    80|   (10, 7, 1),
+    81|   (11, 3, 1), (11, 8, 1),
+    82|   (12, 1, 1), (12, 5, 1), (12, 6, 1),
+    83|   (13, 8, 1),
+    84|   (14, 6, 2),
+    85|   (15, 2, 1), (15, 3, 1),
+    86|   (16, 5, 1),
+    87|   (17, 1, 1),
+    88|   (18, 7, 2),
+    89|   (19, 6, 1), (19, 3, 1),
+    90|   (20, 8, 2),
+    91|   (21, 4, 1), (21, 1, 1),
+    92|   (22, 5, 1),
+    93|   (23, 2, 1),
+    94|   (24, 3, 2),
+    95|   (25, 7, 1), (25, 8, 1),
+    96|   (26, 1, 1), (26, 2, 1),
+    97|   (28, 6, 1),
+    98|   (29, 5, 1), (29, 8, 1),
+    99|   (30, 3, 1);
+   100| 
+
+--- search_text 「stock_label」 .
+lib/orders.php:66: function stock_label($stock)
+public/order.php:48: echo '<td>' . stock_label($item['stock']) . '</td>';

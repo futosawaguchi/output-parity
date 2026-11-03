@@ -1,0 +1,5818 @@
+{
+  "runId": "bundled-fix",
+  "origin": "run",
+  "subjectId": "bookshop",
+  "configName": "架空書店の注文管理 Web アプリ（PHP 7.4 → 8.5）",
+  "configDescription": "架空の書店の注文管理画面（samples/bookshop/app/。PHP・SQLite）を、道具が PHP 7.4 と PHP 8.5 の内蔵サーバで手元（127.0.0.1）に立て、注文の一覧と注文 30 件の画面を開いて比べます。注文・書名・お客様は今回作った架空のものです。",
+  "environments": {
+    "old": {
+      "label": "PHP 7.4",
+      "command": "/opt/homebrew/opt/php@7.4/bin/php"
+    },
+    "new": {
+      "label": "PHP 8.5",
+      "command": "/opt/homebrew/bin/php"
+    }
+  },
+  "outputFormat": "html",
+  "outputEncoding": "utf-8",
+  "startedAt": "2026-11-03T01:38:58.590Z",
+  "finishedAt": "2026-11-03T01:39:40.338Z",
+  "cases": [
+    {
+      "caseId": "list",
+      "label": "注文の一覧",
+      "description": "注文 30 件の一覧（注文日の順）",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 57,
+          "outputPath": "list/old/output.html",
+          "stdoutPath": "list/old/stdout.txt",
+          "stderrPath": "list/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 6,
+          "outputPath": "list/new/output.html",
+          "stdoutPath": "list/new/stdout.txt",
+          "stderrPath": "list/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 6,
+          "outputPath": "list/baseline/output.html",
+          "stdoutPath": "list/baseline/stdout.txt",
+          "stderrPath": "list/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文の一覧 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文の一覧",
+            "注文番号 | 注文日 | お客様 | 冊数 | 合計",
+            "1 | 2026-10-01 | 山田 様 | 2 | 3,100 円",
+            "2 | 2026-10-01 | 佐藤 様 | 1 | 2,000 円",
+            "3 | 2026-10-02 | 鈴木 様 | 2 | 3,200 円",
+            "4 | 2026-10-03 | 高橋 様 | 2 | 3,960 円",
+            "5 | 2026-10-03 | 伊藤 様 | 1 | 2,300 円",
+            "6 | 2026-10-03 | 渡辺 様 | 3 | 4,200 円",
+            "7 | 2026-10-04 | 中村 様 | 2 | 2,900 円",
+            "8 | 2026-10-05 | 小林 様 | 2 | 3,600 円",
+            "9 | 2026-10-05 | 加藤 様 | 2 | 3,000 円",
+            "10 | 2026-10-06 | 吉田 様 | 1 | 2,900 円",
+            "11 | 2026-10-07 | 山本 様 | 2 | 3,200 円",
+            "12 | 2026-10-07 | 松本 様 | 3 | 4,560 円",
+            "13 | 2026-10-08 | 井上 様 | 1 | 1,900 円",
+            "14 | 2026-10-09 | 木村 様 | 2 | 4,000 円",
+            "16 | 2026-10-10 | 清水 様 | 1 | 2,100 円",
+            "15 | 2026-10-10 | 林 様 | 2 | 3,300 円",
+            "17 | 2026-10-11 | 山崎 様 | 1 | 1,700 円",
+            "18 | 2026-10-12 | 森 様 | 2 | 4,800 円",
+            "19 | 2026-10-13 | 池田 様 | 2 | 3,230 円",
+            "20 | 2026-10-13 | 橋本 様 | 2 | 3,300 円",
+            "21 | 2026-10-14 | 石川 様 | 2 | 3,400 円",
+            "22 | 2026-10-15 | 前田 様 | 1 | 2,100 円",
+            "23 | 2026-10-15 | 藤田 様 | 1 | 2,000 円",
+            "24 | 2026-10-16 | 岡田 様 | 2 | 3,600 円",
+            "25 | 2026-10-17 | 後藤 様 | 2 | 3,420 円",
+            "26 | 2026-10-18 | 長谷川 様 | 2 | 3,200 円",
+            "27 | 2026-10-18 | 村上 様 | 0 | 500 円",
+            "28 | 2026-10-19 | 近藤 様 | 1 | 2,500 円",
+            "29 | 2026-10-20 | 坂本 様 | 2 | 3,000 円",
+            "30 | 2026-10-20 | 遠藤 様 | 1 | 2,300 円",
+            "表示 2026-11-03 10:35:53"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文の一覧 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文の一覧",
+            "注文番号 | 注文日 | お客様 | 冊数 | 合計",
+            "1 | 2026-10-01 | 山田 様 | 2 | 3,100 円",
+            "2 | 2026-10-01 | 佐藤 様 | 1 | 2,000 円",
+            "3 | 2026-10-02 | 鈴木 様 | 2 | 3,200 円",
+            "4 | 2026-10-03 | 高橋 様 | 2 | 3,960 円",
+            "5 | 2026-10-03 | 伊藤 様 | 1 | 2,300 円",
+            "6 | 2026-10-03 | 渡辺 様 | 3 | 4,200 円",
+            "7 | 2026-10-04 | 中村 様 | 2 | 2,900 円",
+            "8 | 2026-10-05 | 小林 様 | 2 | 3,600 円",
+            "9 | 2026-10-05 | 加藤 様 | 2 | 3,000 円",
+            "10 | 2026-10-06 | 吉田 様 | 1 | 2,900 円",
+            "11 | 2026-10-07 | 山本 様 | 2 | 3,200 円",
+            "12 | 2026-10-07 | 松本 様 | 3 | 4,560 円",
+            "13 | 2026-10-08 | 井上 様 | 1 | 1,900 円",
+            "14 | 2026-10-09 | 木村 様 | 2 | 4,000 円",
+            "15 | 2026-10-10 | 林 様 | 2 | 3,300 円",
+            "16 | 2026-10-10 | 清水 様 | 1 | 2,100 円",
+            "17 | 2026-10-11 | 山崎 様 | 1 | 1,700 円",
+            "18 | 2026-10-12 | 森 様 | 2 | 4,800 円",
+            "19 | 2026-10-13 | 池田 様 | 2 | 3,230 円",
+            "20 | 2026-10-13 | 橋本 様 | 2 | 3,300 円",
+            "21 | 2026-10-14 | 石川 様 | 2 | 3,400 円",
+            "22 | 2026-10-15 | 前田 様 | 1 | 2,100 円",
+            "23 | 2026-10-15 | 藤田 様 | 1 | 2,000 円",
+            "24 | 2026-10-16 | 岡田 様 | 2 | 3,600 円",
+            "25 | 2026-10-17 | 後藤 様 | 2 | 3,420 円",
+            "26 | 2026-10-18 | 長谷川 様 | 2 | 3,200 円",
+            "27 | 2026-10-18 | 村上 様 | 0 | 500 円",
+            "28 | 2026-10-19 | 近藤 様 | 1 | 2,500 円",
+            "29 | 2026-10-20 | 坂本 様 | 2 | 3,000 円",
+            "30 | 2026-10-20 | 遠藤 様 | 1 | 2,300 円",
+            "表示 2026-11-03 10:38:58"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 19,
+            "oldLines": [],
+            "newStart": 19,
+            "newLines": [
+              "15 | 2026-10-10 | 林 様 | 2 | 3,300 円"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 20,
+            "oldLines": [
+              "15 | 2026-10-10 | 林 様 | 2 | 3,300 円"
+            ],
+            "newStart": 21,
+            "newLines": [],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 35,
+            "oldLines": [
+              "表示 2026-11-03 10:35:53"
+            ],
+            "newStart": 35,
+            "newLines": [
+              "表示 2026-11-03 10:38:58"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 6190,
+        "newBytes": 6190,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": null,
+      "carried": {
+        "caseId": "list",
+        "verdict": "harmless",
+        "summary": "注文15と16（同じ注文日 2026-10-10）の並び順だけが入れ替わり、内容に変化はない。",
+        "findings": [
+          {
+            "verdict": "harmless",
+            "changeIds": [
+              "C1",
+              "C2"
+            ],
+            "what": "注文15の行が注文16の後ろから前へ移り、注文番号の昇順になった。",
+            "why": "行の内容は一字も変わっておらず、2行は注文日が同じ 2026-10-10 なので日付順は保たれている。他の同日の組（1・2、4〜6 など）も番号の昇順なので、新の並びのほうが一覧全体と揃っている。",
+            "evidence": [
+              "15 | 2026-10-10 | 林 様 | 2 | 3,300 円",
+              "16 | 2026-10-10 | 清水 様 | 1 | 2,100 円",
+              "4 | 2026-10-03 | 高橋 様 | 2 | 3,960 円",
+              "5 | 2026-10-03 | 伊藤 様 | 1 | 2,300 円",
+              "6 | 2026-10-03 | 渡辺 様 | 3 | 4,200 円"
+            ],
+            "calculation": null,
+            "checkHere": "表の注文番号14〜17の行（2026-10-10 の2件の並び）"
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        },
+        "sent": {
+          "purpose": "judge",
+          "at": "2026-11-03T01:36:35.605Z",
+          "file": "20261103-103635-list-judge-df7e.txt",
+          "chars": 2909,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      }
+    },
+    {
+      "caseId": "order-1",
+      "label": "注文 1",
+      "description": "注文 1 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=1",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 7,
+          "outputPath": "order-1/old/output.html",
+          "stdoutPath": "order-1/old/stdout.txt",
+          "stderrPath": "order-1/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=1",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 26,
+          "outputPath": "order-1/new/output.html",
+          "stdoutPath": "order-1/new/stdout.txt",
+          "stderrPath": "order-1/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=1",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 4,
+          "outputPath": "order-1/baseline/output.html",
+          "stdoutPath": "order-1/baseline/stdout.txt",
+          "stderrPath": "order-1/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 1 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 1",
+            "注文日",
+            "2026-10-01",
+            "お客様",
+            "山田 様",
+            "入金",
+            "2026-10-03 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 2,600 円",
+            "送料 | 500 円",
+            "合計 | 3,100 円",
+            "1冊あたり | 1,550 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:35:54"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 1 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 1",
+            "注文日",
+            "2026-10-01",
+            "お客様",
+            "山田 様",
+            "入金",
+            "2026-10-03 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 2,600 円",
+            "送料 | 500 円",
+            "合計 | 3,100 円",
+            "1冊あたり | 1,550 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:00"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "表示 2026-11-03 10:35:54"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "表示 2026-11-03 10:39:00"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2649,
+        "newBytes": 2649,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-1",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-2",
+      "label": "注文 2",
+      "description": "注文 2 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=2",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 16,
+          "outputPath": "order-2/old/output.html",
+          "stdoutPath": "order-2/old/stdout.txt",
+          "stderrPath": "order-2/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=2",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 3,
+          "outputPath": "order-2/new/output.html",
+          "stdoutPath": "order-2/new/stdout.txt",
+          "stderrPath": "order-2/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=2",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 15,
+          "outputPath": "order-2/baseline/output.html",
+          "stdoutPath": "order-2/baseline/stdout.txt",
+          "stderrPath": "order-2/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 2 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 2",
+            "注文日",
+            "2026-10-01",
+            "お客様",
+            "佐藤 様",
+            "入金",
+            "2026-10-02 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "Let's はじめての英会話 | 1,500 円 | 1 | 1,500 円 | 在庫あり",
+            "小計 | 1,500 円",
+            "送料 | 500 円",
+            "合計 | 2,000 円",
+            "1冊あたり | 2,000 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:35:56"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 2 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 2",
+            "注文日",
+            "2026-10-01",
+            "お客様",
+            "佐藤 様",
+            "入金",
+            "2026-10-02 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "Let's はじめての英会話 | 1,500 円 | 1 | 1,500 円 | 在庫あり",
+            "小計 | 1,500 円",
+            "送料 | 500 円",
+            "合計 | 2,000 円",
+            "1冊あたり | 2,000 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:01"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:35:56"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:01"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2513,
+        "newBytes": 2518,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-2",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-3",
+      "label": "注文 3",
+      "description": "注文 3 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=3",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 12,
+          "outputPath": "order-3/old/output.html",
+          "stdoutPath": "order-3/old/stdout.txt",
+          "stderrPath": "order-3/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=3",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 9,
+          "outputPath": "order-3/new/output.html",
+          "stdoutPath": "order-3/new/stdout.txt",
+          "stderrPath": "order-3/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=3",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 13,
+          "outputPath": "order-3/baseline/output.html",
+          "stdoutPath": "order-3/baseline/stdout.txt",
+          "stderrPath": "order-3/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 3 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 3",
+            "注文日",
+            "2026-10-02",
+            "お客様",
+            "鈴木 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 2 | 3,200 円 | 在庫あり",
+            "小計 | 3,200 円",
+            "送料 | 無料",
+            "合計 | 3,200 円",
+            "1冊あたり | 1,600 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 3]",
+            "[input hidden token: 6bf391d6a9b916be9979a8190243dc40]",
+            "入金を記録する",
+            "表示 2026-11-03 10:35:57"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 3 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 3",
+            "注文日",
+            "2026-10-02",
+            "お客様",
+            "鈴木 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 2 | 3,200 円 | 在庫あり",
+            "小計 | 3,200 円",
+            "送料 | 無料",
+            "合計 | 3,200 円",
+            "1冊あたり | 1,600 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 3]",
+            "[input hidden token: 9f3bba2a6462ee83fb5b9d82311f56a4]",
+            "入金を記録する",
+            "表示 2026-11-03 10:39:02"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "[input hidden token: 6bf391d6a9b916be9979a8190243dc40]"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "[input hidden token: 9f3bba2a6462ee83fb5b9d82311f56a4]"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 20,
+            "oldLines": [
+              "表示 2026-11-03 10:35:57"
+            ],
+            "newStart": 20,
+            "newLines": [
+              "表示 2026-11-03 10:39:02"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2713,
+        "newBytes": 2713,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-3",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 2 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-4",
+      "label": "注文 4",
+      "description": "注文 4 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=4",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 9,
+          "outputPath": "order-4/old/output.html",
+          "stdoutPath": "order-4/old/stdout.txt",
+          "stderrPath": "order-4/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=4",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 17,
+          "outputPath": "order-4/new/output.html",
+          "stdoutPath": "order-4/new/stdout.txt",
+          "stderrPath": "order-4/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=4",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 13,
+          "outputPath": "order-4/baseline/output.html",
+          "stdoutPath": "order-4/baseline/stdout.txt",
+          "stderrPath": "order-4/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 4 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 4",
+            "注文日",
+            "2026-10-03",
+            "お客様",
+            "高橋 様",
+            "入金",
+            "2026-10-04 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "やさしい統計のはなし | 2,400 円 | 1 | 2,400 円 | 残りわずか",
+            "小計 | 4,400 円",
+            "クーポン割引 10.0% | -440 円",
+            "送料 | 無料",
+            "合計 | 3,960 円",
+            "1冊あたり | 1,980 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:35:58"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 4 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 4",
+            "注文日",
+            "2026-10-03",
+            "お客様",
+            "高橋 様",
+            "入金",
+            "2026-10-04 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "やさしい統計のはなし | 2,400 円 | 1 | 2,400 円 | 残りわずか",
+            "小計 | 4,400 円",
+            "クーポン割引 10% | -440 円",
+            "送料 | 無料",
+            "合計 | 3,960 円",
+            "1冊あたり | 1,980 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:04"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 14,
+            "oldLines": [
+              "クーポン割引 10.0% | -440 円"
+            ],
+            "newStart": 14,
+            "newLines": [
+              "クーポン割引 10% | -440 円"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 19,
+            "oldLines": [
+              "表示 2026-11-03 10:35:58"
+            ],
+            "newStart": 19,
+            "newLines": [
+              "表示 2026-11-03 10:39:04"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2716,
+        "newBytes": 2714,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": null,
+      "carried": {
+        "caseId": "order-4",
+        "verdict": "harmless",
+        "summary": "差はクーポン割引率の表記（10.0%→10%）だけで、値は同じで金額とも合っており無害。",
+        "findings": [
+          {
+            "verdict": "harmless",
+            "changeIds": [
+              "C1"
+            ],
+            "what": "クーポン割引率の表示が「10.0%」から「10%」に変わった。",
+            "why": "どちらも同じ10%を表しています。割引額-440円、合計3,960円とも矛盾せず、読む人の判断は変わりません。",
+            "evidence": [
+              "クーポン割引 10% | -440 円",
+              "小計 | 4,400 円",
+              "合計 | 3,960 円"
+            ],
+            "calculation": "4,400 × 10% = 440、4,400 − 440 = 3,960（合計と一致）",
+            "checkHere": "金額表のクーポン割引の行"
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        },
+        "sent": {
+          "purpose": "judge",
+          "at": "2026-11-03T01:36:45.640Z",
+          "file": "20261103-103645-order-4-judge-d95c.txt",
+          "chars": 2015,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      }
+    },
+    {
+      "caseId": "order-5",
+      "label": "注文 5",
+      "description": "注文 5 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=5",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 21,
+          "outputPath": "order-5/old/output.html",
+          "stdoutPath": "order-5/old/stdout.txt",
+          "stderrPath": "order-5/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=5",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 8,
+          "outputPath": "order-5/new/output.html",
+          "stdoutPath": "order-5/new/stdout.txt",
+          "stderrPath": "order-5/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=5",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-5/baseline/output.html",
+          "stdoutPath": "order-5/baseline/stdout.txt",
+          "stderrPath": "order-5/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 5 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 5",
+            "注文日",
+            "2026-10-03",
+            "お客様",
+            "伊藤 様",
+            "入金",
+            "2026-10-05 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "小計 | 1,800 円",
+            "送料 | 500 円",
+            "合計 | 2,300 円",
+            "1冊あたり | 2,300 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:00"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 5 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 5",
+            "注文日",
+            "2026-10-03",
+            "お客様",
+            "伊藤 様",
+            "入金",
+            "2026-10-05 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "小計 | 1,800 円",
+            "送料 | 500 円",
+            "合計 | 2,300 円",
+            "1冊あたり | 2,300 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:05"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:00"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:05"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2507,
+        "newBytes": 2507,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-5",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-6",
+      "label": "注文 6",
+      "description": "注文 6 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=6",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 17,
+          "outputPath": "order-6/old/output.html",
+          "stdoutPath": "order-6/old/stdout.txt",
+          "stderrPath": "order-6/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=6",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 68,
+          "outputPath": "order-6/new/output.html",
+          "stdoutPath": "order-6/new/stdout.txt",
+          "stderrPath": "order-6/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=6",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 15,
+          "outputPath": "order-6/baseline/output.html",
+          "stdoutPath": "order-6/baseline/stdout.txt",
+          "stderrPath": "order-6/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 6 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 6",
+            "注文日",
+            "2026-10-03",
+            "お客様",
+            "渡辺 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "ことばの散歩道 | 1,400 円 | 3 | 4,200 円 | 在庫あり",
+            "小計 | 4,200 円",
+            "送料 | 無料",
+            "合計 | 4,200 円",
+            "1冊あたり | 1,400 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 6]",
+            "[input hidden token: e355ce1a69e05ddeb9ac1f2e2a2fe560]",
+            "入金を記録する",
+            "表示 2026-11-03 10:36:01"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 6 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 6",
+            "注文日",
+            "2026-10-03",
+            "お客様",
+            "渡辺 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "ことばの散歩道 | 1,400 円 | 3 | 4,200 円 | 在庫あり",
+            "小計 | 4,200 円",
+            "送料 | 無料",
+            "合計 | 4,200 円",
+            "1冊あたり | 1,400 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 6]",
+            "[input hidden token: 930f6111ad1d5935321a46d9846c1a46]",
+            "入金を記録する",
+            "表示 2026-11-03 10:39:06"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "[input hidden token: e355ce1a69e05ddeb9ac1f2e2a2fe560]"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "[input hidden token: 930f6111ad1d5935321a46d9846c1a46]"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 20,
+            "oldLines": [
+              "表示 2026-11-03 10:36:01"
+            ],
+            "newStart": 20,
+            "newLines": [
+              "表示 2026-11-03 10:39:06"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2710,
+        "newBytes": 2710,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-6",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 2 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-7",
+      "label": "注文 7",
+      "description": "注文 7 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=7",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 17,
+          "outputPath": "order-7/old/output.html",
+          "stdoutPath": "order-7/old/stdout.txt",
+          "stderrPath": "order-7/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=7",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 11,
+          "outputPath": "order-7/new/output.html",
+          "stdoutPath": "order-7/new/stdout.txt",
+          "stderrPath": "order-7/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=7",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 15,
+          "outputPath": "order-7/baseline/output.html",
+          "stdoutPath": "order-7/baseline/stdout.txt",
+          "stderrPath": "order-7/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 7 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 7",
+            "注文日",
+            "2026-10-04",
+            "お客様",
+            "中村 様",
+            "入金",
+            "2026-10-06 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 2 | 2,400 円 | 在庫あり",
+            "小計 | 2,400 円",
+            "送料 | 500 円",
+            "合計 | 2,900 円",
+            "1冊あたり | 1,450 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:03"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 7 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 7",
+            "注文日",
+            "2026-10-04",
+            "お客様",
+            "中村 様",
+            "入金",
+            "2026-10-06 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 2 | 2,400 円 | 在庫あり",
+            "小計 | 2,400 円",
+            "送料 | 500 円",
+            "合計 | 2,900 円",
+            "1冊あたり | 1,450 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:08"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:03"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:08"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2507,
+        "newBytes": 2507,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-7",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-8",
+      "label": "注文 8",
+      "description": "注文 8 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=8",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 8,
+          "outputPath": "order-8/old/output.html",
+          "stdoutPath": "order-8/old/stdout.txt",
+          "stderrPath": "order-8/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=8",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 28,
+          "outputPath": "order-8/new/output.html",
+          "stdoutPath": "order-8/new/stdout.txt",
+          "stderrPath": "order-8/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=8",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 22,
+          "outputPath": "order-8/baseline/output.html",
+          "stdoutPath": "order-8/baseline/stdout.txt",
+          "stderrPath": "order-8/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 8 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 8",
+            "注文日",
+            "2026-10-05",
+            "お客様",
+            "小林 様",
+            "入金",
+            "2026-10-06 に入金済み",
+            "ギフト包装",
+            "する（のし付き）",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "小計 | 3,600 円",
+            "送料 | 無料",
+            "合計 | 3,600 円",
+            "1冊あたり | 1,800 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:04"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 8 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 8",
+            "注文日",
+            "2026-10-05",
+            "お客様",
+            "小林 様",
+            "入金",
+            "2026-10-06 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "小計 | 3,600 円",
+            "送料 | 無料",
+            "合計 | 3,600 円",
+            "1冊あたり | 1,800 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:09"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 10,
+            "oldLines": [
+              "ギフト包装",
+              "する（のし付き）"
+            ],
+            "newStart": 10,
+            "newLines": [],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 20,
+            "oldLines": [
+              "表示 2026-11-03 10:36:04"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "表示 2026-11-03 10:39:09"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2705,
+        "newBytes": 2648,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": null,
+      "carried": {
+        "caseId": "order-8",
+        "verdict": "broken",
+        "summary": "注文8の詳細画面から「ギフト包装 する（のし付き）」の表示が新で消えており、包装の指示が読めなくなっています。",
+        "findings": [
+          {
+            "verdict": "broken",
+            "changeIds": [
+              "C1"
+            ],
+            "what": "「ギフト包装」の見出しと値「する（のし付き）」の2行が、新では表示されていません。",
+            "why": "同じ入力で旧は包装ありと表示していたので、この注文は包装の指定があります。新の画面にはその指示がどこにもなく、読む人は包装なしで発送すると判断します。",
+            "evidence": [
+              "ギフト包装",
+              "する（のし付き）",
+              "2026-10-06 に入金済み",
+              "書名 | 単価 | 冊数 | 小計 | 在庫"
+            ],
+            "calculation": null,
+            "checkHere": "新の画面で「入金」欄と書名の表の間に、ギフト包装の欄があるか"
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        },
+        "sent": {
+          "purpose": "judge",
+          "at": "2026-11-03T01:36:52.159Z",
+          "file": "20261103-103652-order-8-judge-872a.txt",
+          "chars": 1924,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      }
+    },
+    {
+      "caseId": "order-9",
+      "label": "注文 9",
+      "description": "注文 9 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=9",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 13,
+          "outputPath": "order-9/old/output.html",
+          "stdoutPath": "order-9/old/stdout.txt",
+          "stderrPath": "order-9/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=9",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 8,
+          "outputPath": "order-9/new/output.html",
+          "stdoutPath": "order-9/new/stdout.txt",
+          "stderrPath": "order-9/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=9",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 9,
+          "outputPath": "order-9/baseline/output.html",
+          "stdoutPath": "order-9/baseline/stdout.txt",
+          "stderrPath": "order-9/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 9 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 9",
+            "注文日",
+            "2026-10-05",
+            "お客様",
+            "加藤 様",
+            "入金",
+            "2026-10-07 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "Let's はじめての英会話 | 1,500 円 | 2 | 3,000 円 | 在庫あり",
+            "小計 | 3,000 円",
+            "送料 | 無料",
+            "合計 | 3,000 円",
+            "1冊あたり | 1,500 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:06"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 9 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 9",
+            "注文日",
+            "2026-10-05",
+            "お客様",
+            "加藤 様",
+            "入金",
+            "2026-10-07 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "Let's はじめての英会話 | 1,500 円 | 2 | 3,000 円 | 在庫あり",
+            "小計 | 3,000 円",
+            "送料 | 無料",
+            "合計 | 3,000 円",
+            "1冊あたり | 1,500 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:11"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:06"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:11"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2512,
+        "newBytes": 2517,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-9",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-10",
+      "label": "注文 10",
+      "description": "注文 10 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=10",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 12,
+          "outputPath": "order-10/old/output.html",
+          "stdoutPath": "order-10/old/stdout.txt",
+          "stderrPath": "order-10/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=10",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 15,
+          "outputPath": "order-10/new/output.html",
+          "stdoutPath": "order-10/new/stdout.txt",
+          "stderrPath": "order-10/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=10",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 28,
+          "outputPath": "order-10/baseline/output.html",
+          "stdoutPath": "order-10/baseline/stdout.txt",
+          "stderrPath": "order-10/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 10 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 10",
+            "注文日",
+            "2026-10-06",
+            "お客様",
+            "吉田 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "やさしい統計のはなし | 2,400 円 | 1 | 2,400 円 | 残りわずか",
+            "小計 | 2,400 円",
+            "送料 | 500 円",
+            "合計 | 2,900 円",
+            "1冊あたり | 2,900 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 10]",
+            "[input hidden token: 4229708a6a152ea25278b9b6a45fb6ac]",
+            "入金を記録する",
+            "表示 2026-11-03 10:36:07"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 10 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 10",
+            "注文日",
+            "2026-10-06",
+            "お客様",
+            "吉田 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "やさしい統計のはなし | 2,400 円 | 1 | 2,400 円 | 残りわずか",
+            "小計 | 2,400 円",
+            "送料 | 500 円",
+            "合計 | 2,900 円",
+            "1冊あたり | 2,900 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 10]",
+            "[input hidden token: d6addb36801a48d8e25f605ee6e673bc]",
+            "入金を記録する",
+            "表示 2026-11-03 10:39:12"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "[input hidden token: 4229708a6a152ea25278b9b6a45fb6ac]"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "[input hidden token: d6addb36801a48d8e25f605ee6e673bc]"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 20,
+            "oldLines": [
+              "表示 2026-11-03 10:36:07"
+            ],
+            "newStart": 20,
+            "newLines": [
+              "表示 2026-11-03 10:39:12"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2726,
+        "newBytes": 2726,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-10",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 2 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-11",
+      "label": "注文 11",
+      "description": "注文 11 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=11",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 14,
+          "outputPath": "order-11/old/output.html",
+          "stdoutPath": "order-11/old/stdout.txt",
+          "stderrPath": "order-11/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=11",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 18,
+          "outputPath": "order-11/new/output.html",
+          "stdoutPath": "order-11/new/stdout.txt",
+          "stderrPath": "order-11/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=11",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 34,
+          "outputPath": "order-11/baseline/output.html",
+          "stdoutPath": "order-11/baseline/stdout.txt",
+          "stderrPath": "order-11/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 11 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 11",
+            "注文日",
+            "2026-10-07",
+            "お客様",
+            "山本 様",
+            "入金",
+            "2026-10-08 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 3,200 円",
+            "送料 | 無料",
+            "合計 | 3,200 円",
+            "1冊あたり | 1,600 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:08"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 11 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 11",
+            "注文日",
+            "2026-10-07",
+            "お客様",
+            "山本 様",
+            "入金",
+            "2026-10-08 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 3,200 円",
+            "送料 | 無料",
+            "合計 | 3,200 円",
+            "1冊あたり | 1,600 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:13"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "表示 2026-11-03 10:36:08"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "表示 2026-11-03 10:39:13"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2650,
+        "newBytes": 2650,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-11",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-12",
+      "label": "注文 12",
+      "description": "注文 12 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=12",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 16,
+          "outputPath": "order-12/old/output.html",
+          "stdoutPath": "order-12/old/stdout.txt",
+          "stderrPath": "order-12/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=12",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-12/new/output.html",
+          "stdoutPath": "order-12/new/stdout.txt",
+          "stderrPath": "order-12/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=12",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 9,
+          "outputPath": "order-12/baseline/output.html",
+          "stdoutPath": "order-12/baseline/stdout.txt",
+          "stderrPath": "order-12/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 12 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 12",
+            "注文日",
+            "2026-10-07",
+            "お客様",
+            "松本 様",
+            "入金",
+            "2026-10-09 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "小計 | 4,800 円",
+            "クーポン割引 5.0% | -240 円",
+            "送料 | 無料",
+            "合計 | 4,560 円",
+            "1冊あたり | 1,520 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:10"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 12 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 12",
+            "注文日",
+            "2026-10-07",
+            "お客様",
+            "松本 様",
+            "入金",
+            "2026-10-09 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "小計 | 4,800 円",
+            "クーポン割引 5% | -240 円",
+            "送料 | 無料",
+            "合計 | 4,560 円",
+            "1冊あたり | 1,520 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:15"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 15,
+            "oldLines": [
+              "クーポン割引 5.0% | -240 円"
+            ],
+            "newStart": 15,
+            "newLines": [
+              "クーポン割引 5% | -240 円"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 20,
+            "oldLines": [
+              "表示 2026-11-03 10:36:10"
+            ],
+            "newStart": 20,
+            "newLines": [
+              "表示 2026-11-03 10:39:15"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2853,
+        "newBytes": 2851,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": null,
+      "carried": {
+        "caseId": "order-12",
+        "verdict": "harmless",
+        "summary": "クーポン割引率の表示が「5.0%」から「5%」に変わっただけで、値と金額の計算は変わっておらず無害です。",
+        "findings": [
+          {
+            "verdict": "harmless",
+            "changeIds": [
+              "C1"
+            ],
+            "what": "クーポン割引率の表示が「5.0%」から「5%」に変わった。",
+            "why": "5.0% と 5% は同じ値で、割引額・合計・1冊あたりの金額とも矛盾しません。読む人の判断には影響しません。",
+            "evidence": [
+              "クーポン割引 5% | -240 円",
+              "小計 | 4,800 円",
+              "合計 | 4,560 円",
+              "1冊あたり | 1,520 円"
+            ],
+            "calculation": "4,800 × 5% = 240、4,800 − 240 = 4,560、4,560 ÷ 3 = 1,520",
+            "checkHere": "表の「クーポン割引」行"
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        },
+        "sent": {
+          "purpose": "judge",
+          "at": "2026-11-03T01:37:00.096Z",
+          "file": "20261103-103700-order-12-judge-f4a4.txt",
+          "chars": 1997,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      }
+    },
+    {
+      "caseId": "order-13",
+      "label": "注文 13",
+      "description": "注文 13 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=13",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-13/old/output.html",
+          "stdoutPath": "order-13/old/stdout.txt",
+          "stderrPath": "order-13/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=13",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-13/new/output.html",
+          "stdoutPath": "order-13/new/stdout.txt",
+          "stderrPath": "order-13/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=13",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 16,
+          "outputPath": "order-13/baseline/output.html",
+          "stdoutPath": "order-13/baseline/stdout.txt",
+          "stderrPath": "order-13/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 13 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 13",
+            "注文日",
+            "2026-10-08",
+            "お客様",
+            "井上 様",
+            "入金",
+            "2026-10-10 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 1,400 円",
+            "送料 | 500 円",
+            "合計 | 1,900 円",
+            "1冊あたり | 1,900 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:11"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 13 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 13",
+            "注文日",
+            "2026-10-08",
+            "お客様",
+            "井上 様",
+            "入金",
+            "2026-10-10 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 1,400 円",
+            "送料 | 500 円",
+            "合計 | 1,900 円",
+            "1冊あたり | 1,900 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:16"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:11"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:16"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2506,
+        "newBytes": 2506,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-13",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-14",
+      "label": "注文 14",
+      "description": "注文 14 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=14",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-14/old/output.html",
+          "stdoutPath": "order-14/old/stdout.txt",
+          "stderrPath": "order-14/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=14",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 36,
+          "outputPath": "order-14/new/output.html",
+          "stdoutPath": "order-14/new/stdout.txt",
+          "stderrPath": "order-14/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=14",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 20,
+          "outputPath": "order-14/baseline/output.html",
+          "stdoutPath": "order-14/baseline/stdout.txt",
+          "stderrPath": "order-14/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 14 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 14",
+            "注文日",
+            "2026-10-09",
+            "お客様",
+            "木村 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "旅のスケッチ帳 | 2,000 円 | 2 | 4,000 円 | 在庫あり",
+            "小計 | 4,000 円",
+            "送料 | 無料",
+            "合計 | 4,000 円",
+            "1冊あたり | 2,000 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 14]",
+            "[input hidden token: d16bc66de528af855df94fd30ec2e56b]",
+            "入金を記録する",
+            "表示 2026-11-03 10:36:13"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 14 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 14",
+            "注文日",
+            "2026-10-09",
+            "お客様",
+            "木村 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "旅のスケッチ帳 | 2,000 円 | 2 | 4,000 円 | 在庫あり",
+            "小計 | 4,000 円",
+            "送料 | 無料",
+            "合計 | 4,000 円",
+            "1冊あたり | 2,000 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 14]",
+            "[input hidden token: 628e8590809a21c494b60e71ad65762f]",
+            "入金を記録する",
+            "表示 2026-11-03 10:39:17"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "[input hidden token: d16bc66de528af855df94fd30ec2e56b]"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "[input hidden token: 628e8590809a21c494b60e71ad65762f]"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 20,
+            "oldLines": [
+              "表示 2026-11-03 10:36:13"
+            ],
+            "newStart": 20,
+            "newLines": [
+              "表示 2026-11-03 10:39:17"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2713,
+        "newBytes": 2713,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-14",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 2 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-15",
+      "label": "注文 15",
+      "description": "注文 15 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=15",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 7,
+          "outputPath": "order-15/old/output.html",
+          "stdoutPath": "order-15/old/stdout.txt",
+          "stderrPath": "order-15/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=15",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 14,
+          "outputPath": "order-15/new/output.html",
+          "stdoutPath": "order-15/new/stdout.txt",
+          "stderrPath": "order-15/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=15",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 13,
+          "outputPath": "order-15/baseline/output.html",
+          "stdoutPath": "order-15/baseline/stdout.txt",
+          "stderrPath": "order-15/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 15 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 15",
+            "注文日",
+            "2026-10-10",
+            "お客様",
+            "林 様",
+            "入金",
+            "2026-10-11 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "Let's はじめての英会話 | 1,500 円 | 1 | 1,500 円 | 在庫あり",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "小計 | 3,300 円",
+            "送料 | 無料",
+            "合計 | 3,300 円",
+            "1冊あたり | 1,650 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:14"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 15 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 15",
+            "注文日",
+            "2026-10-10",
+            "お客様",
+            "林 様",
+            "入金",
+            "2026-10-11 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "Let's はじめての英会話 | 1,500 円 | 1 | 1,500 円 | 在庫あり",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "小計 | 3,300 円",
+            "送料 | 無料",
+            "合計 | 3,300 円",
+            "1冊あたり | 1,650 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:19"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "表示 2026-11-03 10:36:14"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "表示 2026-11-03 10:39:19"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2656,
+        "newBytes": 2661,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-15",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-16",
+      "label": "注文 16",
+      "description": "注文 16 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=16",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-16/old/output.html",
+          "stdoutPath": "order-16/old/stdout.txt",
+          "stderrPath": "order-16/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=16",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 6,
+          "outputPath": "order-16/new/output.html",
+          "stdoutPath": "order-16/new/stdout.txt",
+          "stderrPath": "order-16/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=16",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 12,
+          "outputPath": "order-16/baseline/output.html",
+          "stdoutPath": "order-16/baseline/stdout.txt",
+          "stderrPath": "order-16/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 16 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 16",
+            "注文日",
+            "2026-10-10",
+            "お客様",
+            "清水 様",
+            "入金",
+            "2026-10-12 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "小計 | 1,600 円",
+            "送料 | 500 円",
+            "合計 | 2,100 円",
+            "1冊あたり | 2,100 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:16"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 16 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 16",
+            "注文日",
+            "2026-10-10",
+            "お客様",
+            "清水 様",
+            "入金",
+            "2026-10-12 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "小計 | 1,600 円",
+            "送料 | 500 円",
+            "合計 | 2,100 円",
+            "1冊あたり | 2,100 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:20"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:16"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:20"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2509,
+        "newBytes": 2509,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-16",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-17",
+      "label": "注文 17",
+      "description": "注文 17 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=17",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 7,
+          "outputPath": "order-17/old/output.html",
+          "stdoutPath": "order-17/old/stdout.txt",
+          "stderrPath": "order-17/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=17",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-17/new/output.html",
+          "stdoutPath": "order-17/new/stdout.txt",
+          "stderrPath": "order-17/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=17",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 34,
+          "outputPath": "order-17/baseline/output.html",
+          "stdoutPath": "order-17/baseline/stdout.txt",
+          "stderrPath": "order-17/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 17 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 17",
+            "注文日",
+            "2026-10-11",
+            "お客様",
+            "山崎 様",
+            "入金",
+            "2026-10-12 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "小計 | 1,200 円",
+            "送料 | 500 円",
+            "合計 | 1,700 円",
+            "1冊あたり | 1,700 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:17"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 17 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 17",
+            "注文日",
+            "2026-10-11",
+            "お客様",
+            "山崎 様",
+            "入金",
+            "2026-10-12 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "小計 | 1,200 円",
+            "送料 | 500 円",
+            "合計 | 1,700 円",
+            "1冊あたり | 1,700 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:21"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:17"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:21"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2509,
+        "newBytes": 2509,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-17",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-18",
+      "label": "注文 18",
+      "description": "注文 18 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=18",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 6,
+          "outputPath": "order-18/old/output.html",
+          "stdoutPath": "order-18/old/stdout.txt",
+          "stderrPath": "order-18/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=18",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 63,
+          "outputPath": "order-18/new/output.html",
+          "stdoutPath": "order-18/new/stdout.txt",
+          "stderrPath": "order-18/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=18",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 17,
+          "outputPath": "order-18/baseline/output.html",
+          "stdoutPath": "order-18/baseline/stdout.txt",
+          "stderrPath": "order-18/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 18 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 18",
+            "注文日",
+            "2026-10-12",
+            "お客様",
+            "森 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "やさしい統計のはなし | 2,400 円 | 2 | 4,800 円 | 残りわずか",
+            "小計 | 4,800 円",
+            "送料 | 無料",
+            "合計 | 4,800 円",
+            "1冊あたり | 2,400 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 18]",
+            "[input hidden token: df7a9f1c70b8160e3763a07c3085c5e7]",
+            "入金を記録する",
+            "表示 2026-11-03 10:36:18"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 18 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 18",
+            "注文日",
+            "2026-10-12",
+            "お客様",
+            "森 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "やさしい統計のはなし | 2,400 円 | 2 | 4,800 円 | 残りわずか",
+            "小計 | 4,800 円",
+            "送料 | 無料",
+            "合計 | 4,800 円",
+            "1冊あたり | 2,400 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 18]",
+            "[input hidden token: 76143543321bce98632bc5d9ec8329b1]",
+            "入金を記録する",
+            "表示 2026-11-03 10:39:23"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "[input hidden token: df7a9f1c70b8160e3763a07c3085c5e7]"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "[input hidden token: 76143543321bce98632bc5d9ec8329b1]"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 20,
+            "oldLines": [
+              "表示 2026-11-03 10:36:18"
+            ],
+            "newStart": 20,
+            "newLines": [
+              "表示 2026-11-03 10:39:23"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2722,
+        "newBytes": 2722,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-18",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 2 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-19",
+      "label": "注文 19",
+      "description": "注文 19 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=19",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 4,
+          "outputPath": "order-19/old/output.html",
+          "stdoutPath": "order-19/old/stdout.txt",
+          "stderrPath": "order-19/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=19",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-19/new/output.html",
+          "stdoutPath": "order-19/new/stdout.txt",
+          "stderrPath": "order-19/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=19",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 59,
+          "outputPath": "order-19/baseline/output.html",
+          "stdoutPath": "order-19/baseline/stdout.txt",
+          "stderrPath": "order-19/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 19 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 19",
+            "注文日",
+            "2026-10-13",
+            "お客様",
+            "池田 様",
+            "入金",
+            "2026-10-14 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "小計 | 3,800 円",
+            "クーポン割引 15.0% | -570 円",
+            "送料 | 無料",
+            "合計 | 3,230 円",
+            "1冊あたり | 1,615 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:20"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 19 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 19",
+            "注文日",
+            "2026-10-13",
+            "お客様",
+            "池田 様",
+            "入金",
+            "2026-10-14 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "小計 | 3,800 円",
+            "クーポン割引 15% | -570 円",
+            "送料 | 無料",
+            "合計 | 3,230 円",
+            "1冊あたり | 1,615 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:24"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 14,
+            "oldLines": [
+              "クーポン割引 15.0% | -570 円"
+            ],
+            "newStart": 14,
+            "newLines": [
+              "クーポン割引 15% | -570 円"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 19,
+            "oldLines": [
+              "表示 2026-11-03 10:36:20"
+            ],
+            "newStart": 19,
+            "newLines": [
+              "表示 2026-11-03 10:39:24"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2709,
+        "newBytes": 2707,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": null,
+      "carried": {
+        "caseId": "order-19",
+        "verdict": "harmless",
+        "summary": "差は割引率の表記「15.0%」→「15%」の1か所だけで、値は同じで金額計算も整合しており無害です。",
+        "findings": [
+          {
+            "verdict": "harmless",
+            "changeIds": [
+              "C1"
+            ],
+            "what": "クーポン割引率の表記が「15.0%」から「15%」に変わった。",
+            "why": "率の値は同じ15%で、表記の桁が変わっただけです。割引額・合計・1冊あたりの金額は新しい出力の中で矛盾がありません。",
+            "evidence": [
+              "クーポン割引 15% | -570 円",
+              "小計 | 3,800 円",
+              "合計 | 3,230 円",
+              "1冊あたり | 1,615 円"
+            ],
+            "calculation": "3,800 × 0.15 = 570; 3,800 − 570 + 0（送料無料） = 3,230; 3,230 ÷ 2冊 = 1,615",
+            "checkHere": "「クーポン割引 15% | -570 円」の行"
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        },
+        "sent": {
+          "purpose": "judge",
+          "at": "2026-11-03T01:37:06.118Z",
+          "file": "20261103-103706-order-19-judge-e6f2.txt",
+          "chars": 1957,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      }
+    },
+    {
+      "caseId": "order-20",
+      "label": "注文 20",
+      "description": "注文 20 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=20",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 6,
+          "outputPath": "order-20/old/output.html",
+          "stdoutPath": "order-20/old/stdout.txt",
+          "stderrPath": "order-20/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=20",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 16,
+          "outputPath": "order-20/new/output.html",
+          "stdoutPath": "order-20/new/stdout.txt",
+          "stderrPath": "order-20/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=20",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 8,
+          "outputPath": "order-20/baseline/output.html",
+          "stdoutPath": "order-20/baseline/stdout.txt",
+          "stderrPath": "order-20/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 20 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 20",
+            "注文日",
+            "2026-10-13",
+            "お客様",
+            "橋本 様",
+            "入金",
+            "2026-10-15 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "ことばの散歩道 | 1,400 円 | 2 | 2,800 円 | 在庫あり",
+            "小計 | 2,800 円",
+            "送料 | 500 円",
+            "合計 | 3,300 円",
+            "1冊あたり | 1,650 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:21"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 20 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 20",
+            "注文日",
+            "2026-10-13",
+            "お客様",
+            "橋本 様",
+            "入金",
+            "2026-10-15 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "ことばの散歩道 | 1,400 円 | 2 | 2,800 円 | 在庫あり",
+            "小計 | 2,800 円",
+            "送料 | 500 円",
+            "合計 | 3,300 円",
+            "1冊あたり | 1,650 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:25"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:21"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:25"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2506,
+        "newBytes": 2506,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-20",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-21",
+      "label": "注文 21",
+      "description": "注文 21 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=21",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 8,
+          "outputPath": "order-21/old/output.html",
+          "stdoutPath": "order-21/old/stdout.txt",
+          "stderrPath": "order-21/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=21",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 20,
+          "outputPath": "order-21/new/output.html",
+          "stdoutPath": "order-21/new/stdout.txt",
+          "stderrPath": "order-21/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=21",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 17,
+          "outputPath": "order-21/baseline/output.html",
+          "stdoutPath": "order-21/baseline/stdout.txt",
+          "stderrPath": "order-21/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 21 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 21",
+            "注文日",
+            "2026-10-14",
+            "お客様",
+            "石川 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "小さな庭の育て方 | 2,200 円 | 1 | 2,200 円 | 在庫切れ（お取り寄せ 1〜2週間）",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "小計 | 3,400 円",
+            "送料 | 無料",
+            "合計 | 3,400 円",
+            "1冊あたり | 1,700 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 21]",
+            "[input hidden token: 508c2e19733e041152f4468063a376ea]",
+            "入金を記録する",
+            "表示 2026-11-03 10:36:22"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 21 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 21",
+            "注文日",
+            "2026-10-14",
+            "お客様",
+            "石川 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "小さな庭の育て方 | 2,200 円 | 1 | 2,200 円 | 在庫切れ（お取り寄せ 1〜2週間）",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "小計 | 3,400 円",
+            "送料 | 無料",
+            "合計 | 3,400 円",
+            "1冊あたり | 1,700 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 21]",
+            "[input hidden token: b23a0a76ed8c3dee211a25ce62013553]",
+            "入金を記録する",
+            "表示 2026-11-03 10:39:27"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 19,
+            "oldLines": [
+              "[input hidden token: 508c2e19733e041152f4468063a376ea]"
+            ],
+            "newStart": 19,
+            "newLines": [
+              "[input hidden token: b23a0a76ed8c3dee211a25ce62013553]"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 21,
+            "oldLines": [
+              "表示 2026-11-03 10:36:22"
+            ],
+            "newStart": 21,
+            "newLines": [
+              "表示 2026-11-03 10:39:27"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2894,
+        "newBytes": 2894,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-21",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 2 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-22",
+      "label": "注文 22",
+      "description": "注文 22 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=22",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 3,
+          "outputPath": "order-22/old/output.html",
+          "stdoutPath": "order-22/old/stdout.txt",
+          "stderrPath": "order-22/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=22",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 7,
+          "outputPath": "order-22/new/output.html",
+          "stdoutPath": "order-22/new/stdout.txt",
+          "stderrPath": "order-22/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=22",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 16,
+          "outputPath": "order-22/baseline/output.html",
+          "stdoutPath": "order-22/baseline/stdout.txt",
+          "stderrPath": "order-22/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 22 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 22",
+            "注文日",
+            "2026-10-15",
+            "お客様",
+            "前田 様",
+            "入金",
+            "2026-10-16 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "小計 | 1,600 円",
+            "送料 | 500 円",
+            "合計 | 2,100 円",
+            "1冊あたり | 2,100 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:24"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 22 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 22",
+            "注文日",
+            "2026-10-15",
+            "お客様",
+            "前田 様",
+            "入金",
+            "2026-10-16 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "小計 | 1,600 円",
+            "送料 | 500 円",
+            "合計 | 2,100 円",
+            "1冊あたり | 2,100 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:28"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:24"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:28"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2509,
+        "newBytes": 2509,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-22",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-23",
+      "label": "注文 23",
+      "description": "注文 23 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=23",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 4,
+          "outputPath": "order-23/old/output.html",
+          "stdoutPath": "order-23/old/stdout.txt",
+          "stderrPath": "order-23/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=23",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 9,
+          "outputPath": "order-23/new/output.html",
+          "stdoutPath": "order-23/new/stdout.txt",
+          "stderrPath": "order-23/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=23",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 45,
+          "outputPath": "order-23/baseline/output.html",
+          "stdoutPath": "order-23/baseline/stdout.txt",
+          "stderrPath": "order-23/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 23 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 23",
+            "注文日",
+            "2026-10-15",
+            "お客様",
+            "藤田 様",
+            "入金",
+            "2026-10-17 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "Let's はじめての英会話 | 1,500 円 | 1 | 1,500 円 | 在庫あり",
+            "小計 | 1,500 円",
+            "送料 | 500 円",
+            "合計 | 2,000 円",
+            "1冊あたり | 2,000 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:25"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 23 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 23",
+            "注文日",
+            "2026-10-15",
+            "お客様",
+            "藤田 様",
+            "入金",
+            "2026-10-17 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "Let's はじめての英会話 | 1,500 円 | 1 | 1,500 円 | 在庫あり",
+            "小計 | 1,500 円",
+            "送料 | 500 円",
+            "合計 | 2,000 円",
+            "1冊あたり | 2,000 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:29"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:25"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:29"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2515,
+        "newBytes": 2520,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-23",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-24",
+      "label": "注文 24",
+      "description": "注文 24 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=24",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 4,
+          "outputPath": "order-24/old/output.html",
+          "stdoutPath": "order-24/old/stdout.txt",
+          "stderrPath": "order-24/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=24",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 13,
+          "outputPath": "order-24/new/output.html",
+          "stdoutPath": "order-24/new/stdout.txt",
+          "stderrPath": "order-24/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=24",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 11,
+          "outputPath": "order-24/baseline/output.html",
+          "stdoutPath": "order-24/baseline/stdout.txt",
+          "stderrPath": "order-24/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 24 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 24",
+            "注文日",
+            "2026-10-16",
+            "お客様",
+            "岡田 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "週末の作りおき | 1,800 円 | 2 | 3,600 円 | 残りわずか",
+            "小計 | 3,600 円",
+            "送料 | 無料",
+            "合計 | 3,600 円",
+            "1冊あたり | 1,800 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 24]",
+            "[input hidden token: 239de67ff96f9be970a4bb46aa3042b2]",
+            "入金を記録する",
+            "表示 2026-11-03 10:36:26"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 24 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 24",
+            "注文日",
+            "2026-10-16",
+            "お客様",
+            "岡田 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "週末の作りおき | 1,800 円 | 2 | 3,600 円 | 残りわずか",
+            "小計 | 3,600 円",
+            "送料 | 無料",
+            "合計 | 3,600 円",
+            "1冊あたり | 1,800 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 24]",
+            "[input hidden token: 6324a27f5beb8f515ef09ec2bf16eb49]",
+            "入金を記録する",
+            "表示 2026-11-03 10:39:31"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "[input hidden token: 239de67ff96f9be970a4bb46aa3042b2]"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "[input hidden token: 6324a27f5beb8f515ef09ec2bf16eb49]"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 20,
+            "oldLines": [
+              "表示 2026-11-03 10:36:26"
+            ],
+            "newStart": 20,
+            "newLines": [
+              "表示 2026-11-03 10:39:31"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2716,
+        "newBytes": 2716,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-24",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 2 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-25",
+      "label": "注文 25",
+      "description": "注文 25 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=25",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 8,
+          "outputPath": "order-25/old/output.html",
+          "stdoutPath": "order-25/old/stdout.txt",
+          "stderrPath": "order-25/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=25",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 13,
+          "outputPath": "order-25/new/output.html",
+          "stdoutPath": "order-25/new/stdout.txt",
+          "stderrPath": "order-25/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=25",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 8,
+          "outputPath": "order-25/baseline/output.html",
+          "stdoutPath": "order-25/baseline/stdout.txt",
+          "stderrPath": "order-25/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 25 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 25",
+            "注文日",
+            "2026-10-17",
+            "お客様",
+            "後藤 様",
+            "入金",
+            "2026-10-18 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "やさしい統計のはなし | 2,400 円 | 1 | 2,400 円 | 残りわずか",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 3,800 円",
+            "クーポン割引 10.0% | -380 円",
+            "送料 | 無料",
+            "合計 | 3,420 円",
+            "1冊あたり | 1,710 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:27"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 25 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 25",
+            "注文日",
+            "2026-10-17",
+            "お客様",
+            "後藤 様",
+            "入金",
+            "2026-10-18 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "やさしい統計のはなし | 2,400 円 | 1 | 2,400 円 | 残りわずか",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 3,800 円",
+            "クーポン割引 10% | -380 円",
+            "送料 | 無料",
+            "合計 | 3,420 円",
+            "1冊あたり | 1,710 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:32"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 14,
+            "oldLines": [
+              "クーポン割引 10.0% | -380 円"
+            ],
+            "newStart": 14,
+            "newLines": [
+              "クーポン割引 10% | -380 円"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 19,
+            "oldLines": [
+              "表示 2026-11-03 10:36:27"
+            ],
+            "newStart": 19,
+            "newLines": [
+              "表示 2026-11-03 10:39:32"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2718,
+        "newBytes": 2716,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": null,
+      "carried": {
+        "caseId": "order-25",
+        "verdict": "harmless",
+        "summary": "変更はクーポン割引率の表記「10.0%」が「10%」になった1件だけで、値は同じで金額計算とも合うため無害です。",
+        "findings": [
+          {
+            "verdict": "harmless",
+            "changeIds": [
+              "C1"
+            ],
+            "what": "クーポン割引率の表記が「10.0%」から「10%」に変わった。",
+            "why": "率の値は同じで、割引額・合計・1冊あたりの金額は旧と同じまま、計算とも合っています。",
+            "evidence": [
+              "クーポン割引 10% | -380 円",
+              "小計 | 3,800 円",
+              "合計 | 3,420 円",
+              "1冊あたり | 1,710 円"
+            ],
+            "calculation": "3,800 × 10% = 380、3,800 − 380 = 3,420、3,420 ÷ 2冊 = 1,710",
+            "checkHere": "表の「クーポン割引」行"
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        },
+        "sent": {
+          "purpose": "judge",
+          "at": "2026-11-03T01:37:19.257Z",
+          "file": "20261103-103719-order-25-judge-e1d2.txt",
+          "chars": 1960,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      }
+    },
+    {
+      "caseId": "order-26",
+      "label": "注文 26",
+      "description": "注文 26 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=26",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 3,
+          "outputPath": "order-26/old/output.html",
+          "stdoutPath": "order-26/old/stdout.txt",
+          "stderrPath": "order-26/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=26",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 18,
+          "outputPath": "order-26/new/output.html",
+          "stdoutPath": "order-26/new/stdout.txt",
+          "stderrPath": "order-26/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=26",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 11,
+          "outputPath": "order-26/baseline/output.html",
+          "stdoutPath": "order-26/baseline/stdout.txt",
+          "stderrPath": "order-26/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 26 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 26",
+            "注文日",
+            "2026-10-18",
+            "お客様",
+            "長谷川 様",
+            "入金",
+            "2026-10-19 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "Let's はじめての英会話 | 1,500 円 | 1 | 1,500 円 | 在庫あり",
+            "小計 | 2,700 円",
+            "送料 | 500 円",
+            "合計 | 3,200 円",
+            "1冊あたり | 1,600 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:29"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 26 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 26",
+            "注文日",
+            "2026-10-18",
+            "お客様",
+            "長谷川 様",
+            "入金",
+            "2026-10-19 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "はじめての家計簿 | 1,200 円 | 1 | 1,200 円 | 在庫あり",
+            "Let's はじめての英会話 | 1,500 円 | 1 | 1,500 円 | 在庫あり",
+            "小計 | 2,700 円",
+            "送料 | 500 円",
+            "合計 | 3,200 円",
+            "1冊あたり | 1,600 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:33"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 18,
+            "oldLines": [
+              "表示 2026-11-03 10:36:29"
+            ],
+            "newStart": 18,
+            "newLines": [
+              "表示 2026-11-03 10:39:33"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2663,
+        "newBytes": 2668,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-26",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-27",
+      "label": "注文 27",
+      "description": "注文 27 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=27",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 5,
+          "outputPath": "order-27/old/output.html",
+          "stdoutPath": "order-27/old/stdout.txt",
+          "stderrPath": "order-27/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=27",
+          "outcome": {
+            "kind": "http",
+            "status": 500,
+            "location": null
+          },
+          "durationMs": 8,
+          "outputPath": null,
+          "stdoutPath": "order-27/new/stdout.txt",
+          "stderrPath": "order-27/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=27",
+          "outcome": {
+            "kind": "http",
+            "status": 500,
+            "location": null
+          },
+          "durationMs": 18,
+          "outputPath": null,
+          "stdoutPath": "order-27/baseline/stdout.txt",
+          "stderrPath": "order-27/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "missingOutput",
+        "missing": [
+          "new"
+        ]
+      },
+      "naive": null,
+      "verdict": {
+        "caseId": "order-27",
+        "verdict": "broken",
+        "summary": "PHP 8.5 では出力が出ませんでした（HTTP 500）",
+        "findings": [
+          {
+            "verdict": "broken",
+            "changeIds": [],
+            "what": "PHP 8.5 では出力が出ませんでした（HTTP 500）",
+            "why": "PHP 7.4 では出力が出ていたので、移行で動かなくなっています",
+            "evidence": [
+              "[Tue Nov  3 10:39:35 2026] 127.0.0.1:51621 Accepted",
+              "[Tue Nov  3 10:39:35 2026] PHP Fatal error:  Uncaught DivisionByZeroError: Division by zero in work/bookshop/public/order.php:61",
+              "Stack trace:"
+            ],
+            "calculation": null,
+            "checkHere": "実行の記録（stderr）"
+          }
+        ],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-28",
+      "label": "注文 28",
+      "description": "注文 28 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=28",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 4,
+          "outputPath": "order-28/old/output.html",
+          "stdoutPath": "order-28/old/stdout.txt",
+          "stderrPath": "order-28/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=28",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-28/new/output.html",
+          "stdoutPath": "order-28/new/stdout.txt",
+          "stderrPath": "order-28/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=28",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 36,
+          "outputPath": "order-28/baseline/output.html",
+          "stdoutPath": "order-28/baseline/stdout.txt",
+          "stderrPath": "order-28/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 28 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 28",
+            "注文日",
+            "2026-10-19",
+            "お客様",
+            "近藤 様",
+            "入金",
+            "2026-10-20 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "小計 | 2,000 円",
+            "送料 | 500 円",
+            "合計 | 2,500 円",
+            "1冊あたり | 2,500 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:31"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 28 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 28",
+            "注文日",
+            "2026-10-19",
+            "お客様",
+            "近藤 様",
+            "入金",
+            "2026-10-20 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "旅のスケッチ帳 | 2,000 円 | 1 | 2,000 円 | 在庫あり",
+            "小計 | 2,000 円",
+            "送料 | 500 円",
+            "合計 | 2,500 円",
+            "1冊あたり | 2,500 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:36"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:31"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:36"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2506,
+        "newBytes": 2506,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-28",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-29",
+      "label": "注文 29",
+      "description": "注文 29 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=29",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 3,
+          "outputPath": "order-29/old/output.html",
+          "stdoutPath": "order-29/old/stdout.txt",
+          "stderrPath": "order-29/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=29",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 9,
+          "outputPath": "order-29/new/output.html",
+          "stdoutPath": "order-29/new/stdout.txt",
+          "stderrPath": "order-29/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=29",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 10,
+          "outputPath": "order-29/baseline/output.html",
+          "stdoutPath": "order-29/baseline/stdout.txt",
+          "stderrPath": "order-29/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 29 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 29",
+            "注文日",
+            "2026-10-20",
+            "お客様",
+            "坂本 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 3,000 円",
+            "送料 | 無料",
+            "合計 | 3,000 円",
+            "1冊あたり | 1,500 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 29]",
+            "[input hidden token: 95cf454c8d8498b1e5c2ace1429f18c6]",
+            "入金を記録する",
+            "表示 2026-11-03 10:36:33"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 29 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 29",
+            "注文日",
+            "2026-10-20",
+            "お客様",
+            "坂本 様",
+            "入金",
+            "未入金",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "星空の観察ノート | 1,600 円 | 1 | 1,600 円 | 在庫あり",
+            "ことばの散歩道 | 1,400 円 | 1 | 1,400 円 | 在庫あり",
+            "小計 | 3,000 円",
+            "送料 | 無料",
+            "合計 | 3,000 円",
+            "1冊あたり | 1,500 円",
+            "この注文を開いた回数: 1",
+            "[input hidden id: 29]",
+            "[input hidden token: d8db271ab0b5b4a115c1a91d134c10e8]",
+            "入金を記録する",
+            "表示 2026-11-03 10:39:37"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 19,
+            "oldLines": [
+              "[input hidden token: 95cf454c8d8498b1e5c2ace1429f18c6]"
+            ],
+            "newStart": 19,
+            "newLines": [
+              "[input hidden token: d8db271ab0b5b4a115c1a91d134c10e8]"
+            ],
+            "explainedByBaseline": true
+          },
+          {
+            "oldStart": 21,
+            "oldLines": [
+              "表示 2026-11-03 10:36:33"
+            ],
+            "newStart": 21,
+            "newLines": [
+              "表示 2026-11-03 10:39:37"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2858,
+        "newBytes": 2858,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-29",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 2 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    },
+    {
+      "caseId": "order-30",
+      "label": "注文 30",
+      "description": "注文 30 の詳細",
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51369",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=30",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 6,
+          "outputPath": "order-30/old/output.html",
+          "stdoutPath": "order-30/old/stdout.txt",
+          "stderrPath": "order-30/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=30",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 7,
+          "outputPath": "order-30/new/output.html",
+          "stdoutPath": "order-30/new/stdout.txt",
+          "stderrPath": "order-30/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:51561",
+            "-t",
+            "public"
+          ],
+          "request": "GET /order.php?id=30",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 16,
+          "outputPath": "order-30/baseline/output.html",
+          "stdoutPath": "order-30/baseline/stdout.txt",
+          "stderrPath": "order-30/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "title: 注文 30 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 30",
+            "注文日",
+            "2026-10-20",
+            "お客様",
+            "遠藤 様",
+            "入金",
+            "2026-10-21 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "小計 | 1,800 円",
+            "送料 | 500 円",
+            "合計 | 2,300 円",
+            "1冊あたり | 2,300 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:36:34"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "new": {
+          "lines": [
+            "title: 注文 30 - 架空書店 注文管理",
+            "架空書店 注文管理",
+            "注文の一覧",
+            "注文 30",
+            "注文日",
+            "2026-10-20",
+            "お客様",
+            "遠藤 様",
+            "入金",
+            "2026-10-21 に入金済み",
+            "書名 | 単価 | 冊数 | 小計 | 在庫",
+            "週末の作りおき | 1,800 円 | 1 | 1,800 円 | 残りわずか",
+            "小計 | 1,800 円",
+            "送料 | 500 円",
+            "合計 | 2,300 円",
+            "1冊あたり | 2,300 円",
+            "この注文を開いた回数: 1",
+            "表示 2026-11-03 10:39:39"
+          ],
+          "pages": [],
+          "unreadable": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 17,
+            "oldLines": [
+              "表示 2026-11-03 10:36:34"
+            ],
+            "newStart": 17,
+            "newLines": [
+              "表示 2026-11-03 10:39:39"
+            ],
+            "explainedByBaseline": true
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 2509,
+        "newBytes": 2509,
+        "differingLines": 2,
+        "totalLines": 20,
+        "excerpt": [
+          "< footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…",
+          "> footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }</style></head><body…"
+        ]
+      },
+      "verdict": {
+        "caseId": "order-30",
+        "verdict": "harmless",
+        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "findings": [],
+        "judgedBy": {
+          "kind": "machine"
+        }
+      }
+    }
+  ],
+  "fixAttempt": {
+    "caseId": "order-21",
+    "edit": {
+      "file": "lib/orders.php",
+      "oldText": "    if ($stock === '0') {",
+      "newText": "    if ((int) $stock === 0) {"
+    },
+    "applied": {
+      "kind": "applied",
+      "file": "lib/orders.php",
+      "line": 68
+    },
+    "verification": {
+      "outcome": "fixed",
+      "deltas": [
+        {
+          "caseId": "list",
+          "label": "注文の一覧",
+          "before": {
+            "kind": "lines",
+            "count": 2
+          },
+          "after": {
+            "kind": "lines",
+            "count": 2
+          }
+        },
+        {
+          "caseId": "order-1",
+          "label": "注文 1",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-2",
+          "label": "注文 2",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-3",
+          "label": "注文 3",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-4",
+          "label": "注文 4",
+          "before": {
+            "kind": "lines",
+            "count": 1
+          },
+          "after": {
+            "kind": "lines",
+            "count": 1
+          }
+        },
+        {
+          "caseId": "order-5",
+          "label": "注文 5",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-6",
+          "label": "注文 6",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-7",
+          "label": "注文 7",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-8",
+          "label": "注文 8",
+          "before": {
+            "kind": "lines",
+            "count": 2
+          },
+          "after": {
+            "kind": "lines",
+            "count": 2
+          }
+        },
+        {
+          "caseId": "order-9",
+          "label": "注文 9",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-10",
+          "label": "注文 10",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-11",
+          "label": "注文 11",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-12",
+          "label": "注文 12",
+          "before": {
+            "kind": "lines",
+            "count": 1
+          },
+          "after": {
+            "kind": "lines",
+            "count": 1
+          }
+        },
+        {
+          "caseId": "order-13",
+          "label": "注文 13",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-14",
+          "label": "注文 14",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-15",
+          "label": "注文 15",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-16",
+          "label": "注文 16",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-17",
+          "label": "注文 17",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-18",
+          "label": "注文 18",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-19",
+          "label": "注文 19",
+          "before": {
+            "kind": "lines",
+            "count": 1
+          },
+          "after": {
+            "kind": "lines",
+            "count": 1
+          }
+        },
+        {
+          "caseId": "order-20",
+          "label": "注文 20",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-21",
+          "label": "注文 21",
+          "before": {
+            "kind": "lines",
+            "count": 1
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-22",
+          "label": "注文 22",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-23",
+          "label": "注文 23",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-24",
+          "label": "注文 24",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-25",
+          "label": "注文 25",
+          "before": {
+            "kind": "lines",
+            "count": 1
+          },
+          "after": {
+            "kind": "lines",
+            "count": 1
+          }
+        },
+        {
+          "caseId": "order-26",
+          "label": "注文 26",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-27",
+          "label": "注文 27",
+          "before": {
+            "kind": "noOutput"
+          },
+          "after": {
+            "kind": "noOutput"
+          }
+        },
+        {
+          "caseId": "order-28",
+          "label": "注文 28",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-29",
+          "label": "注文 29",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        },
+        {
+          "caseId": "order-30",
+          "label": "注文 30",
+          "before": {
+            "kind": "lines",
+            "count": 0
+          },
+          "after": {
+            "kind": "lines",
+            "count": 0
+          }
+        }
+      ]
+    }
+  }
+}

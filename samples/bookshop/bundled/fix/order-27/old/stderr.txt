@@ -1,0 +1,4 @@
+[Tue Nov  3 10:36:30 2026] 127.0.0.1:51469 Accepted
+[Tue Nov  3 10:36:30 2026] PHP Warning:  Division by zero in work/bookshop/public/order.php on line 61
+[Tue Nov  3 10:36:30 2026] 127.0.0.1:51469 [200]: GET /order.php?id=27
+[Tue Nov  3 10:36:30 2026] 127.0.0.1:51469 Closing
