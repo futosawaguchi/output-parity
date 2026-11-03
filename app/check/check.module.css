@@ -15,7 +15,7 @@
 
 .appName {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 10px;
   flex: none;
   font-size: 18px;
@@ -1075,4 +1075,24 @@
 
 .rowHover {
   background: var(--surface);
+}
+
+/* The name: kana first, the romaji small beside it, then the one line. */
+.brandKana {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.brandRoman {
+  color: var(--muted);
+  font-size: 14px;
+  font-family: var(--font-mono);
+}
+
+.brandLine {
+  margin-left: 14px;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 500;
 }

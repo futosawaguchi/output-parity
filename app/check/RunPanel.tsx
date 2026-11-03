@@ -27,6 +27,7 @@ type Target = {
 
 const POLL_MS = 1000;
 
+
 /** Where each kind of job is started (lib/jobs.ts says what each one does). */
 const ENDPOINTS: Record<JobKind, string> = { run: "/api/runs", rejudge: "/api/rejudge", cause: "/api/cause", verify: "/api/apply", undo: "/api/undo", judge: "/api/judge" };
 
@@ -204,7 +205,9 @@ export function RunPanel() {
       <header className={styles.top}>
         <p className={styles.appName}>
           <span className={styles.appMark} aria-hidden />
-          output-parity
+          <span className={styles.brandKana}>かわりめ</span>
+          <span className={styles.brandRoman}>kawarime</span>
+          <span className={styles.brandLine}>バージョンの変わり目で、見落とさない。</span>
         </p>
         <SubjectPicker
           // The subject shown counts what is on the page: after an edit was applied or undone, that result.

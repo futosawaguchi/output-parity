@@ -5,7 +5,7 @@ export function DocHeader({ subjectId, kind }: { subjectId: string; kind: string
   return (
     <header className={styles.top}>
       <a className={styles.home} href={`/check?subject=${encodeURIComponent(subjectId)}`}>
-        output-parity
+        かわりめ
       </a>
       <span className={styles.kind}>{kind}</span>
     </header>
