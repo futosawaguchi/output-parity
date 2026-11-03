@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { newOnlyDeprecations } from "../../lib/record/deprecations";
+import { STDERR_CUT_MARK } from "../../lib/runner/exec";
 
 // Deprecations only the new environment printed, for reference (R14). Never part of a verdict.
 
 test("a deprecation the old run printed too is not new, even at another line number", () => {
-  const found = newOnlyDeprecations([
+  const { deprecations: found } = newOnlyDeprecations([
     { caseId: "a", slot: "old", text: "PHP Deprecated:  f(): old style in lib/x.php on line 10\n" },
     { caseId: "a", slot: "new", text: "PHP Deprecated:  f(): old style in lib/x.php on line 12\nPHP Deprecated:  g(): optional before required in lib/y.php on line 3\n" },
   ]);
@@ -16,7 +17,7 @@ test("a deprecation the old run printed too is not new, even at another line num
 });
 
 test("other warnings are not counted: their wording changes between versions", () => {
-  const found = newOnlyDeprecations([
+  const { deprecations: found } = newOnlyDeprecations([
     { caseId: "a", slot: "old", text: "PHP Warning:  Invalid argument supplied for foreach() in x.php on line 5" },
     { caseId: "a", slot: "new", text: "PHP Warning:  foreach() argument must be of type array|object, null given in x.php on line 5\nPHP Notice:  Undefined index: k" },
   ]);
@@ -25,7 +26,7 @@ test("other warnings are not counted: their wording changes between versions", (
 
 test("the same deprecation in many cases is one item that lists the cases once each", () => {
   const line = "PHP Deprecated:  h() is deprecated in z.php on line 1";
-  const found = newOnlyDeprecations([
+  const { deprecations: found } = newOnlyDeprecations([
     { caseId: "a", slot: "new", text: `${line}\n${line}` },
     { caseId: "b", slot: "new", text: line },
   ]);
@@ -34,7 +35,7 @@ test("the same deprecation in many cases is one item that lists the cases once e
 });
 
 test("a server log's timestamp is dropped, and Python and Node deprecations are found too", () => {
-  const found = newOnlyDeprecations([
+  const { deprecations: found } = newOnlyDeprecations([
     {
       caseId: "a",
       slot: "new",
@@ -54,4 +55,14 @@ test("a server log's timestamp is dropped, and Python and Node deprecations are 
       ["(node", null],
     ],
   );
+});
+
+test("a stderr cut at its limit: the line cut part-way is not a deprecation, and the case is named as cut", () => {
+  const cut = `PHP Deprecated:  f() is deprecated in a.php on line 1\nPHP Deprecated:  g() is depr\n${STDERR_CUT_MARK} 1048576 バイトを超えたので、以降を省きました）\n`;
+  const result = newOnlyDeprecations([{ caseId: "a", slot: "new", text: cut }]);
+  assert.deepEqual(
+    result.deprecations.map((d) => d.message),
+    ["PHP Deprecated:  f() is deprecated in a.php on line 1"],
+  );
+  assert.deepEqual(result.cutCaseIds, ["a"]);
 });

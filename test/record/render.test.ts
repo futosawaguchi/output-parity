@@ -63,7 +63,7 @@ function reportOf(cases: CaseReport[], extra: Partial<RunReport> = {}): RunRepor
   };
 }
 
-const opts = { createdAt: new Date("2026-11-03T02:00:00.000Z"), deprecations: [] };
+const opts = { createdAt: new Date("2026-11-03T02:00:00.000Z"), deprecations: { deprecations: [], cutCaseIds: [] } };
 
 test("every case is in the record, the unjudged ones too, and the conclusion does not let it through", () => {
   const md = renderRecord(reportOf([caseOf("a", [date], harmless), caseOf("b", [lost], broken), caseOf("c", [lost], null)], { judgeHeld: { count: 11, limit: 10 } }), opts);
