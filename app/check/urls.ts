@@ -8,9 +8,9 @@ export function outputUrl(report: RunReport, caseId: string, slot: string): stri
   return `/api/outputs/${report.runId}/${caseId}/${slot}?subject=${encodeURIComponent(report.subjectId)}`;
 }
 
-/** An HTML output as a page to draw, in the encoding it was read in (the route locks it down). */
+/** An HTML output as a page to draw, in the encoding it was read in, its changed lines framed (the route locks it down). */
 export function pageUrl(report: RunReport, c: CaseReport, slot: string): string {
-  return `${outputUrl(report, c.caseId, slot)}&view=page&charset=${encodeURIComponent(outputKindOf(report, c).encoding)}`;
+  return `${outputUrl(report, c.caseId, slot)}&view=page&charset=${encodeURIComponent(outputKindOf(report, c).encoding)}&marks=1`;
 }
 
 /**

@@ -1,7 +1,10 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { connection } from "next/server";
-import { BUNDLED_FIX_DIR, BUNDLED_FIX_RUN_ID, BUNDLED_RUN_ID, bundledDir } from "@/lib/bundled";
+import { BUNDLED_FIX_DIR, BUNDLED_FIX_RUN_ID, BUNDLED_RUN_ID, bundledDir, loadBundledFix, loadBundledReport } from "@/lib/bundled";
+import { marksOf } from "@/lib/case-marks";
+import { markLines } from "@/lib/compare/html";
+import type { RunReport } from "@/lib/pipeline";
 import { CASE_ID_PATTERN } from "@/lib/config";
 import { RUN_ID_PATTERN } from "@/lib/runner/run-dir";
 import { insideRoot } from "@/lib/safe-path";
@@ -50,9 +53,15 @@ export async function GET(request: Request, ctx: RouteContext<"/api/outputs/[run
     if (ext !== "html") return notFound();
     const charset = params.get("charset") ?? "utf-8";
     if (!/^[A-Za-z0-9_-]{1,40}$/.test(charset) || !isEncoding(charset)) return notFound();
-    return new Response(data, {
+    // ?marks=1: the changed lines framed in red, read from the run's report (sent as UTF-8 then).
+    const side = slot === "old" || slot === "new" ? slot : null;
+    const report = params.get("marks") === "1" && side ? await reportOf(root, runId, subjectIdOf(params.get("subject"))) : null;
+    const c = report?.cases.find((x) => x.caseId === caseId);
+    const marks = c && side ? marksOf(c, side) : [];
+    const body = marks.length > 0 ? markLines(new TextDecoder(charset).decode(data), marks) : data;
+    return new Response(body, {
       headers: {
-        "content-type": `text/html; charset=${charset}`,
+        "content-type": `text/html; charset=${marks.length > 0 ? "utf-8" : charset}`,
         "content-security-policy": PAGE_POLICY,
         "x-content-type-options": "nosniff",
         "referrer-policy": "no-referrer",
@@ -63,6 +72,17 @@ export async function GET(request: Request, ctx: RouteContext<"/api/outputs/[run
   return new Response(data, {
     headers: { "content-type": CONTENT_TYPES[ext] ?? "text/plain; charset=utf-8", "cache-control": "no-store" },
   });
+}
+
+/** The report of a run, or of the bundled run (and the run after its edit). null when there is none. */
+async function reportOf(root: string, runId: string, subjectId: string): Promise<RunReport | null> {
+  if (runId === BUNDLED_RUN_ID) return loadBundledReport(root, subjectId);
+  if (runId === BUNDLED_FIX_RUN_ID) return loadBundledFix(root, subjectId);
+  const file = insideRoot(join(root, "runs"), runId, "report.json");
+  if (!file) return null;
+  return readFile(file, "utf-8")
+    .then((text) => JSON.parse(text) as RunReport)
+    .catch(() => null);
 }
 
 function isEncoding(label: string): boolean {

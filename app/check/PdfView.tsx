@@ -2,16 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./check.module.css";
+import { normalizeLine, type LineMark } from "@/lib/case-marks";
 import { groupIntoRows, type TextItem } from "@/lib/compare/pdf-lines";
 import { loadPdfjs } from "./pdfjs-client";
 
-/**
- * What to mark on this side, by the text of a line as the comparison read it: a changed line is
- * framed in red; where lines went missing, a red rule is drawn under the line before them.
- */
-export type PdfMark = { kind: "changed"; text: string } | { kind: "goneAfter"; text: string; count: number };
-
-type Props = { src: string; label: string; marks?: PdfMark[] };
+type Props = { src: string; label: string; marks?: LineMark[] };
 
 /** Draws every page of one PDF into canvases sized to the column, with the changed lines framed. */
 export function PdfView(props: Props) {
@@ -26,7 +21,7 @@ function PdfCanvas({ src, label, marks = [] }: Props) {
   const key = JSON.stringify(marks);
   useEffect(() => {
     let cancelled = false;
-    const wanted = JSON.parse(key) as PdfMark[];
+    const wanted = JSON.parse(key) as LineMark[];
     let destroy: (() => Promise<void>) | null = null;
     const el = holder.current;
     if (!el) return;
@@ -78,23 +73,19 @@ function PdfCanvas({ src, label, marks = [] }: Props) {
   );
 }
 
-function normalize(line: string): string {
-  return line.replace(/\s+/g, " ").trim();
-}
-
 /**
  * Frames, over the drawn page, each line whose text is one of the changed lines. The page's text
  * is grouped exactly as the comparison grouped it (lib/compare/pdf-lines), so the same text is the same line.
  */
-function markRows(box: HTMLElement, page: { width: number; height: number }, content: { items: object[] }, wanted: PdfMark[]) {
+function markRows(box: HTMLElement, page: { width: number; height: number }, content: { items: object[] }, wanted: LineMark[]) {
   const items = content.items.filter((i): i is TextItem => "str" in i && (i as TextItem).str.trim() !== "");
   const pct = (n: number, of: number) => `${(n / of) * 100}%`;
   for (const row of groupIntoRows(items)) {
-    const text = normalize(row.text);
+    const text = normalizeLine(row.text);
     const pad = row.size * 0.3;
     const left = pct(row.left - pad, page.width);
     const width = pct(row.right - row.left + pad * 2, page.width);
-    for (const m of wanted.filter((w) => normalize(w.text) === text)) {
+    for (const m of wanted.filter((w) => normalizeLine(w.text) === text)) {
       const mark = document.createElement("span");
       if (m.kind === "changed") {
         mark.className = styles.pdfMark;

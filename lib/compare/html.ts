@@ -1,5 +1,6 @@
-import { parse } from "parse5";
+import { defaultTreeAdapter, parse, serialize } from "parse5";
 import type { DefaultTreeAdapterTypes as T } from "parse5";
+import { normalizeLine, type LineMark } from "../case-marks";
 import type { ExtractedDocument } from "./document";
 import { decode, readBytes } from "./text";
 
@@ -79,6 +80,85 @@ function walk(node: T.ParentNode, lines: Lines): void {
       lines.flush();
     } else walk(el, lines);
   }
+}
+
+/** How a changed line and the place of missing lines look on the page (the tool's red). */
+const CHANGED_STYLE = "outline: 3px solid #b42318; outline-offset: 1px; background-color: rgba(180, 35, 24, 0.1);";
+const GONE_STYLE = "grid-column: 1 / -1; border-top: 3px solid #b42318; color: #b42318; font: bold 12px sans-serif; text-align: right; padding: 0 4px;";
+
+/**
+ * The page with its changed lines framed in red, and a red rule saying how many lines went missing
+ * under the line before them, for drawing it in the tool. Lines are found as extractHtml reads
+ * them: a table row, or a block with no block inside it. Nothing is added that runs.
+ */
+export function markLines(html: string, marks: LineMark[]): string {
+  if (marks.length === 0) return html;
+  const changed = new Set(marks.filter((m) => m.kind === "changed").map((m) => normalizeLine(m.text)));
+  const gone = new Map(marks.flatMap((m) => (m.kind === "goneAfter" ? [[normalizeLine(m.text), m.count] as const] : [])));
+  const doc = parse(html);
+  markIn(doc, changed, gone);
+  return serialize(doc);
+}
+
+function markIn(node: T.ParentNode, changed: Set<string>, gone: Map<string, number>): void {
+  for (const child of [...node.childNodes]) {
+    if (!("tagName" in child)) continue;
+    const el = child as T.Element;
+    if (SKIP.has(el.tagName)) continue;
+    const line = el.tagName === "tr" ? rowLine(el) : BLOCK.has(el.tagName) && !hasBlockInside(el) ? textOf(el) : null;
+    if (line !== null) {
+      const key = normalizeLine(line);
+      if (changed.has(key)) addStyle(el, CHANGED_STYLE);
+      const count = gone.get(key);
+      if (count !== undefined) insertAfter(el, goneMarker(el, count));
+      if (el.tagName === "tr") continue;
+    }
+    markIn(el, changed, gone);
+  }
+}
+
+/** A table row as one line: its cells joined, as extractHtml reads it. */
+function rowLine(tr: T.Element): string {
+  return tr.childNodes
+    .filter(isCell)
+    .map((cell) => textOf(cell))
+    .join(" | ");
+}
+
+function hasBlockInside(el: T.Element): boolean {
+  return collect(el, (n) => BLOCK.has(n.tagName) || n.tagName === "tr" || n.tagName === "br").length > 0;
+}
+
+function addStyle(el: T.Element, style: string): void {
+  const existing = el.attrs.find((a) => a.name === "style");
+  if (existing) existing.value = `${existing.value}; ${style}`;
+  else el.attrs.push({ name: "style", value: style });
+}
+
+/** Under a row, a row of its own across the table; under anything else, a line of its own. */
+function goneMarker(after: T.Element, count: number): T.Element {
+  const text = `ここにあった ${count} 行が消えています`;
+  if (after.tagName === "tr") {
+    const row = defaultTreeAdapter.createElement("tr", after.namespaceURI, []);
+    const cell = defaultTreeAdapter.createElement("td", after.namespaceURI, [
+      { name: "colspan", value: String(Math.max(1, after.childNodes.filter(isCell).length)) },
+      { name: "style", value: GONE_STYLE },
+    ]);
+    defaultTreeAdapter.insertText(cell, text);
+    defaultTreeAdapter.appendChild(row, cell);
+    return row;
+  }
+  const line = defaultTreeAdapter.createElement("div", after.namespaceURI, [{ name: "style", value: GONE_STYLE }]);
+  defaultTreeAdapter.insertText(line, text);
+  return line;
+}
+
+function insertAfter(el: T.Element, added: T.Element): void {
+  const parent = el.parentNode;
+  if (!parent) return;
+  const next = parent.childNodes[parent.childNodes.indexOf(el) + 1];
+  if (next) defaultTreeAdapter.insertBefore(parent, added, next);
+  else defaultTreeAdapter.appendChild(parent, added);
 }
 
 /** A form field as a line: its kind, name and value, so a changed or emptied value shows up. */
