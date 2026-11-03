@@ -71,8 +71,8 @@ test("run.cwd must stay inside the source", () => {
   assert.equal(commandRun(parseConfig({ ...minimal(), run: { ...(minimal().run as object), cwd: "public/..//bin" } }, PATH)).cwd, "public/..//bin");
 });
 
-test("only the command type is accepted for now", () => {
-  rejects({ ...minimal(), run: { ...(minimal().run as object), type: "web" } }, /run\.type は "command"/);
+test("an unknown run.type is refused", () => {
+  rejects({ ...minimal(), run: { ...(minimal().run as object), type: "ftp" } }, /run\.type は "command"・"files"・"web" のどれか/);
 });
 
 test("fixes and workspace.link are checked", () => {
