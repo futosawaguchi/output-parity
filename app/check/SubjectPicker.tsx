@@ -4,7 +4,6 @@ import styles from "./check.module.css";
 
 const FORMAT_LABEL: Record<string, string> = { pdf: "PDF", text: "テキスト", html: "HTML" };
 const RUN_LABEL: Record<string, string> = { command: "コマンド", files: "ファイルを置く", web: "Web（サーバを立てる）" };
-const GROUP_CLASS: Record<string, string> = { broken: styles.dotBroken, needs_review: styles.dotReview, unjudged: styles.dotUnjudged, harmless: styles.dotHarmless };
 
 /** A subject as the page lists it: with the counts of its latest result (GET /api/runs). */
 export type ListedSubject = SubjectEntry & { latest?: Tally | null };
@@ -16,39 +15,33 @@ function describeOutput({ format, encoding }: { format: string; encoding: string
 }
 
 /**
- * The subjects down the left, each with what it compares and how its latest result came out.
- * Choosing one swaps the results beside it; the list stays. Not while a job runs: it belongs to this subject.
+ * The subjects as the row of names at the top, the one shown underlined, each with how many of its
+ * latest result are broken. Choosing one swaps the page below; the row stays. Not while a job
+ * runs: it belongs to this subject.
  */
 export function SubjectPicker({ subjects, current, disabled, onChoose }: { subjects: ListedSubject[]; current: string; disabled: boolean; onChoose: (id: string) => void }) {
   return (
     <nav aria-label="題材">
-      <p className={styles.subjectsTitle}>題材</p>
       <ul className={styles.subjectList}>
         {subjects.map((s) => {
           const selected = s.id === current;
+          const broken = s.latest?.groups.find((g) => g.group === "broken")?.count ?? 0;
           return (
             <li key={s.id}>
               <button
                 className={`${styles.subjectItem} ${selected ? styles.subjectItemSelected : ""}`}
                 aria-current={selected ? "page" : undefined}
                 disabled={disabled && !selected}
+                title={describe(s)}
                 onClick={() => {
                   if (!selected) onChoose(s.id);
                 }}
               >
-                <span className={styles.subjectName}>{shortName(s)}</span>
-                {s.summary ? (
-                  <>
-                    <span className={styles.subjectEnvs}>
-                      {s.summary.old} → {s.summary.new}
-                    </span>
-                    <span className={styles.subjectKind}>
-                      {[...s.summary.outputs.map(describeOutput), RUN_LABEL[s.summary.runType] ?? s.summary.runType].join("・")}
-                    </span>
-                    <Latest tally={s.latest ?? null} />
-                  </>
-                ) : (
-                  <span className={styles.subjectKind}>設定が読めません</span>
+                {shortName(s)}
+                {broken > 0 && (
+                  <span className={styles.subjectBroken} aria-label={`壊れている ${broken}`}>
+                    {broken}
+                  </span>
                 )}
               </button>
             </li>
@@ -59,18 +52,12 @@ export function SubjectPicker({ subjects, current, disabled, onChoose }: { subje
   );
 }
 
-function Latest({ tally }: { tally: Tally | null }) {
-  if (!tally) return <span className={styles.subjectLatest}>まだ結果がありません</span>;
-  return (
-    <span className={styles.subjectLatest}>
-      {tally.groups.map((g) => (
-        <span key={g.group} className={styles.subjectCount}>
-          <span className={`${styles.dot} ${GROUP_CLASS[g.group]}`} aria-hidden />
-          {GROUP_LABEL[g.group]} {g.count}
-        </span>
-      ))}
-    </span>
-  );
+/** What the subject compares, in one line: the environments, the outputs, how they are made, the latest counts. */
+function describe(s: ListedSubject): string {
+  if (!s.summary) return "設定が読めません";
+  const kinds = [...s.summary.outputs.map(describeOutput), RUN_LABEL[s.summary.runType] ?? s.summary.runType].join("・");
+  const latest = s.latest ? s.latest.groups.map((g) => `${GROUP_LABEL[g.group]} ${g.count}`).join("・") : "まだ結果がありません";
+  return `${s.summary.old} → ${s.summary.new}（${kinds}）／ ${latest}`;
 }
 
 /** The name without the "(old → new)" at its end: the item shows the environments on their own line. */

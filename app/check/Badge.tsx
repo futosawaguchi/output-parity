@@ -7,7 +7,7 @@ const VERDICT_CLASS: Record<Verdict, string> = {
   broken: styles.broken,
 };
 
-/** The verdict as a coloured label. Colour carries meaning only (DESIGN 5). */
+/** The verdict as coloured words after a square of its colour (the squares of the result map). Colour carries meaning only (DESIGN 5). */
 export function Badge({ verdict, small = false }: { verdict: Verdict; small?: boolean }) {
   return <span className={`${styles.badge} ${VERDICT_CLASS[verdict]} ${small ? styles.badgeSmall : ""}`}>{VERDICT_LABEL[verdict]}</span>;
 }

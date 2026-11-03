@@ -1,38 +1,46 @@
-/* The whole window: a dark column for the tool and its subjects, a white one for the work. */
-.shell {
-  display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  min-height: 100vh;
+/* The page: a row of the tool's name and its subjects, then the work under a thin rule. */
+.page {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 48px 96px;
 }
 
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  padding: 28px 18px;
-  background: var(--side-bg);
-  color: var(--side-fg);
+.top {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
 }
 
 .appName {
-  padding: 0 10px;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  font-size: 18px;
+  font-weight: 700;
 }
 
-.appLead {
-  padding: 0 10px;
-  margin: 6px 0 32px;
-  color: var(--side-muted);
-  font-size: 13px;
-  line-height: 1.6;
+/* Three squares: the result map in miniature. */
+.appMark {
+  width: 22px;
+  height: 6px;
+  background:
+    linear-gradient(var(--harmless-bg), var(--harmless-bg)) 0 0 / 6px 6px no-repeat,
+    linear-gradient(var(--broken-fg), var(--broken-fg)) 8px 0 / 6px 6px no-repeat,
+    linear-gradient(var(--harmless-bg), var(--harmless-bg)) 16px 0 / 6px 6px no-repeat;
 }
 
 .main {
   min-width: 0;
-  padding: 36px 48px 96px;
+  padding-top: 40px;
+}
+
+.appLead {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 10px;
 }
 
 .loading {
@@ -52,7 +60,7 @@
 .runButton {
   padding: 12px 22px;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--foreground);
   color: var(--background);
   font-weight: 600;
@@ -68,7 +76,7 @@
 .subButton {
   padding: 11px 20px;
   border: 1px solid var(--foreground);
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--background);
   color: var(--foreground);
   font-weight: 600;
@@ -112,16 +120,18 @@
 
 .problem {
   margin-top: 20px;
-  padding: 14px 18px;
-  border-left: 4px solid var(--broken-fg);
-  background: var(--broken-bg);
+  padding: 12px 0;
+  border-top: 2px solid var(--broken-fg);
+  border-bottom: 1px solid var(--line);
+  color: var(--broken-fg);
 }
 
 /* Not an error: this machine lacks PHP or a key, and the bundled run is shown instead. */
 .notice {
   margin-top: 14px;
-  padding: 10px 16px;
-  border-left: 4px solid var(--line);
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   color: var(--muted);
   font-size: 15px;
 }
@@ -176,33 +186,44 @@
 
 .badge {
   flex: none;
-  display: inline-block;
-  padding: 3px 12px;
-  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-weight: 700;
-  font-size: 16px;
   white-space: nowrap;
 }
 
+.badge::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
 .badgeSmall {
-  padding: 1px 9px;
   font-size: 14px;
   margin-right: 10px;
 }
 
 .harmless {
   color: var(--harmless-fg);
+}
+
+.harmless::before {
   background: var(--harmless-bg);
 }
 
 .review {
   color: var(--review-fg);
-  background: var(--review-bg);
+}
+
+.review::before {
+  background: #e0a800;
 }
 
 .broken {
   color: var(--broken-fg);
-  background: var(--broken-bg);
 }
 
 .findings {
@@ -211,13 +232,8 @@
 }
 
 .finding {
-  padding: 14px 18px;
-  background: var(--surface);
-  border-radius: 8px;
-}
-
-.finding + .finding {
-  margin-top: 10px;
+  padding: 16px 0 4px;
+  border-top: 1px solid var(--line);
 }
 
 .findingWhat {
@@ -227,8 +243,8 @@
 
 .facts {
   display: grid;
-  grid-template-columns: 5.5em 1fr;
-  row-gap: 6px;
+  grid-template-columns: 6.5em 1fr;
+  row-gap: 8px;
 }
 
 .facts dt {
@@ -246,8 +262,8 @@
   margin: 0 8px 4px 0;
   padding: 1px 8px;
   border: 1px solid var(--line);
-  border-radius: 4px;
-  background: var(--background);
+  border-radius: 2px;
+  background: #fff;
 }
 
 /* Side-by-side outputs and the plain diff */
@@ -294,10 +310,10 @@
 }
 
 .naive {
-  margin-bottom: 16px;
-  padding: 12px 16px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  margin-bottom: 20px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .naiveHead {
@@ -356,33 +372,36 @@
 /* What is being checked, shown before running */
 
 .target {
-  margin-bottom: 22px;
+  margin-bottom: 28px;
 }
 
 .targetName {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 32px;
+  font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1.3;
 }
 
-.envChip {
-  padding: 3px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+.targetEnvs {
+  margin-top: 6px;
   font-family: var(--font-mono);
   font-size: 15px;
-  font-weight: 600;
+  color: var(--muted);
 }
 
-.targetDescription {
-  margin-top: 8px;
-  max-width: 62em;
+/* Label on the left, what it says on the right (as on the author's site). */
+.targetFacts {
+  display: grid;
+  grid-template-columns: 10em minmax(0, 62em);
+  gap: 10px 24px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.targetFacts dt {
   color: var(--muted);
+  font-size: 15px;
 }
 
 .targetCases {
@@ -391,12 +410,12 @@
 }
 
 .scope {
-  margin-top: 10px;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .scope ul {
-  margin: 2px 0 2px 1.2em;
+  margin: 6px 0 2px 1.2em;
+  color: var(--muted);
 }
 
 .scopeTitle {
@@ -440,9 +459,14 @@
   background: var(--surface);
 }
 
-.rowOpen {
+.rowOpen,
+.rowOpen:hover {
   background: var(--surface);
-  box-shadow: inset 3px 0 0 var(--foreground);
+}
+
+.rowOpen .caseLabel {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .pickCol {
@@ -574,13 +598,13 @@
 .fixOk,
 .fixNotYet {
   margin-bottom: 20px;
-  padding: 14px 18px;
-  border-left: 4px solid var(--harmless-fg);
-  background: var(--surface);
+  padding: 14px 0;
+  border-top: 2px solid var(--foreground);
+  border-bottom: 1px solid var(--line);
 }
 
 .fixNotYet {
-  border-left-color: var(--broken-fg);
+  border-top-color: var(--broken-fg);
 }
 
 .fixHeadline {
@@ -594,39 +618,29 @@
   margin: 8px 0;
 }
 
-/* The subjects in the dark column; the one shown is a lighter surface. */
-.subjectsTitle {
-  padding: 0 10px;
-  margin-bottom: 8px;
-  color: var(--side-muted);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
+/* The subjects as names in a row; the one shown is underlined (as the author's site marks the page). */
 .subjectList {
   list-style: none;
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 4px 28px;
 }
 
 .subjectItem {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  width: 100%;
-  padding: 12px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
   border: none;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--side-fg);
-  text-align: left;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
   cursor: pointer;
 }
 
 .subjectItem:hover:not(:disabled) {
-  background: var(--side-hover);
+  color: var(--foreground);
 }
 
 .subjectItem:disabled {
@@ -636,61 +650,28 @@
 
 .subjectItemSelected,
 .subjectItemSelected:hover:not(:disabled) {
-  background: var(--side-selected);
+  color: var(--foreground);
+  font-weight: 700;
+  border-bottom-color: var(--foreground);
   cursor: default;
 }
 
-.subjectName {
-  font-weight: 700;
-  line-height: 1.4;
-}
-
-.subjectEnvs {
-  font-size: 14px;
-  color: var(--side-fg);
-}
-
-.subjectKind {
-  color: var(--side-muted);
-  font-size: 13px;
-}
-
-.subjectLatest {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 12px;
-  margin-top: 6px;
-  font-size: 13px;
-  color: var(--side-muted);
-}
-
-.subjectCount {
+/* How many of its latest result are broken: a red square with the number. */
+.subjectBroken {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  white-space: nowrap;
+  gap: 4px;
+  color: var(--broken-fg);
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.dot {
+.subjectBroken::before {
+  content: "";
   width: 8px;
   height: 8px;
-  border-radius: 2px;
-}
-
-.dotBroken {
-  background: var(--side-broken);
-}
-
-.dotReview {
-  background: var(--side-review);
-}
-
-.dotUnjudged {
-  border: 1.5px solid var(--side-muted);
-}
-
-.dotHarmless {
-  background: var(--side-harmless);
+  border-radius: 1px;
+  background: var(--broken-fg);
 }
 
 .notice button {
@@ -699,10 +680,10 @@
 
 /* The answer of a run: how many, and how many in each group, large and in their colours. */
 .countBand {
-  margin: 4px 0 20px;
-  padding: 22px 24px;
-  border-radius: 14px;
-  background: var(--surface);
+  margin: 8px 0 24px;
+  padding: 26px 0 22px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .countLine {
@@ -762,7 +743,7 @@
   display: inline-block;
   padding: 5px 14px;
   border: 1px solid var(--foreground);
-  border-radius: 8px;
+  border-radius: 4px;
   color: var(--foreground);
   font-size: 15px;
   font-weight: 600;
@@ -835,18 +816,21 @@
 }
 
 .viewSwitch button {
-  padding: 3px 12px;
-  border: 1px solid var(--line);
+  padding: 2px 0;
+  margin-right: 18px;
+  border: none;
+  border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
 }
 
 .viewSwitch button[aria-pressed="true"] {
-  border-color: var(--foreground);
+  border-bottom-color: var(--foreground);
   color: var(--foreground);
+  font-weight: 700;
 }
 
 /* The web type: the page that was opened, before how each side answered. */
@@ -866,46 +850,43 @@
 
 /* One case, or two side by side: a framed panel under the list, with its own title bar. */
 .panel {
-  margin-top: 24px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  overflow: hidden;
+  margin-top: 40px;
+  border-top: 2px solid var(--foreground);
 }
 
 .panelBar {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px 20px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  padding: 16px 0 12px;
 }
 
 .panelBody {
-  padding: 18px 20px 22px;
+  padding: 4px 0 8px;
 }
 
 .closeButton {
   flex: none;
-  padding: 5px 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--background);
-  color: var(--foreground);
-  font-size: 14px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
   cursor: pointer;
 }
 
+.closeButton::after {
+  content: " ×";
+}
+
 .closeButton:hover {
-  border-color: var(--foreground);
+  color: var(--foreground);
 }
 
 .scope summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
   cursor: pointer;
 }
 
@@ -927,7 +908,7 @@
   width: 26px;
   height: 26px;
   border: none;
-  border-radius: 5px;
+  border-radius: 2px;
   cursor: pointer;
   transition: transform 0.12s ease, background-color 0.3s ease;
 }
@@ -949,7 +930,7 @@
 }
 
 .sqHarmless {
-  background: #d3d7dc;
+  background: var(--harmless-bg);
 }
 
 .sqUnjudged {
@@ -968,7 +949,7 @@
 }
 
 .sqChecked {
-  background: #9aa1a9;
+  background: #9b9b95;
 }
 
 .sqOpen {

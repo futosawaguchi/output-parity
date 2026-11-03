@@ -200,13 +200,16 @@ export function RunPanel() {
   };
 
   return (
-    <div className={styles.shell}>
-      <aside className={styles.sidebar}>
-        <p className={styles.appName}>output-parity</p>
-        <p className={styles.appLead}>バージョンを上げる前と後の出力を比べ、違いを「読む人の判断が変わるか」で分けます</p>
+    <div className={styles.page}>
+      <header className={styles.top}>
+        <p className={styles.appName}>
+          <span className={styles.appMark} aria-hidden />
+          output-parity
+        </p>
         <SubjectPicker subjects={subjects} current={subjectId ?? ""} disabled={running} onChoose={choose} />
-      </aside>
+      </header>
       <main className={styles.main}>
+        <p className={styles.appLead}>バージョンを上げる前と後の出力を比べ、違いを「読む人の判断が変わるか」で分けるツール</p>
         {loading && <p className={styles.loading} role="status">読み込んでいます…</p>}
         {target && <TargetIntro target={target} showCases={!shown} />}
         {!loading && (
@@ -260,25 +263,25 @@ export function RunPanel() {
 function TargetIntro({ target, showCases }: { target: Target; showCases: boolean }) {
   return (
     <div className={styles.target}>
-      <h1 className={styles.targetName}>
-        {target.name.replace(/（[^（）]*→[^（）]*）\s*$/, "")}
-        <span className={styles.envChip}>
-          {target.environments.old} → {target.environments.new}
-        </span>
-      </h1>
-      <p className={styles.targetDescription}>{target.description}</p>
-      <details className={styles.scope}>
-        <summary>
-          <span className={styles.scopeTitle}>Claude に送るもの</span>
-          <span className={styles.muted}>送る前に鍵などに見える値を *** にし、送った全文は残します</span>
-        </summary>
-        <ul>
-          {target.claudeScope.map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-        </ul>
-        <p className={styles.muted}>パスワード・鍵・トークンに見える値は *** にしてから送ります。送ったものは実行ごとに残り、各入力の詳細で見られます</p>
-      </details>
+      <h1 className={styles.targetName}>{target.name.replace(/（[^（）]*→[^（）]*）\s*$/, "")}</h1>
+      <p className={styles.targetEnvs}>
+        {target.environments.old} → {target.environments.new}
+      </p>
+      <dl className={styles.targetFacts}>
+        <dt>何を比べるか</dt>
+        <dd>{target.description}</dd>
+        <dt>Claude に送るもの</dt>
+        <dd>
+          <details className={styles.scope}>
+            <summary>送る前に鍵などに見える値を *** にし、送った全文は残します</summary>
+            <ul>
+              {target.claudeScope.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </details>
+        </dd>
+      </dl>
       {showCases && (
         <ul className={styles.targetCases}>
           {target.cases.slice(0, MANY_CASES).map((c) => (

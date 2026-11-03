@@ -1,22 +1,14 @@
 /* Light only: the PDFs under comparison are white, so a dark page makes them hard to read. */
 /* Colour carries meaning only (DESIGN 5): grey = harmless, yellow = needs review, red = broken. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --muted: #5f6368;
-  --line: #e3e3e3;
-  --surface: #f7f7f7;
-  --side-bg: #15161a;
-  --side-fg: #ececee;
-  --side-muted: #9a9ea6;
-  --side-hover: #202228;
-  --side-selected: #2c2f36;
-  --side-broken: #f0625a;
-  --side-review: #e8b53a;
-  --side-harmless: #6f747d;
+  --background: #fbfbfa;
+  --foreground: #1a1a18;
+  --muted: #6b6b66;
+  --line: #e2e2de;
+  --surface: #f3f3f0;
 
-  --harmless-fg: #4b5563;
-  --harmless-bg: #eef0f2;
+  --harmless-fg: #6b6b66;
+  --harmless-bg: #d6d6d1;
   --review-fg: #8a5a00;
   --review-bg: #fff4cc;
   --broken-fg: #b42318;
