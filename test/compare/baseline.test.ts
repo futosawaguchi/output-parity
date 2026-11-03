@@ -16,7 +16,7 @@ test("identical runs have no unstable lines", () => {
 test("a replaced unstable line is explained by the baseline", () => {
   const old = ["date: 09:00", "body"];
   const now = ["date: 10:00", "body"];
-  const changes = applyBaseline(diffLines(old, now), new Map([[0, "whole" as const]]));
+  const changes = applyBaseline(diffLines(old, now), unstableLines(now, ["date: 10:01", "body"]));
   assert.equal(changes.length, 1);
   assert.equal(changes[0].explainedByBaseline, true);
 });
@@ -24,14 +24,14 @@ test("a replaced unstable line is explained by the baseline", () => {
 test("a removed line is never explained, even next to unstable lines", () => {
   const old = ["date: 09:00", "row A", "total"];
   const now = ["date: 10:00", "total"];
-  const changes = applyBaseline(diffLines(old, now), new Map([[0, "whole" as const]]));
+  const changes = applyBaseline(diffLines(old, now), unstableLines(now, ["date: 10:01", "total"]));
   assert.ok(changes.some((c) => c.oldLines.includes("row A") && !c.explainedByBaseline));
 });
 
 test("a replaced stable line stays unexplained even when it neighbours an unstable one", () => {
   const old = ["date: 09:00", "producer: v1", "body"];
   const now = ["date: 10:00", "producer: v2", "body"];
-  const changes = applyBaseline(diffLines(old, now), new Map([[0, "whole" as const]]));
+  const changes = applyBaseline(diffLines(old, now), unstableLines(now, ["date: 10:01", "producer: v2", "body"]));
   assert.deepEqual(
     changes.map((c) => [c.newLines, c.explainedByBaseline]),
     [
@@ -72,4 +72,12 @@ test("a random id is one piece, whatever mix of letters and digits it has", () =
 test("Japanese text right next to a number stays a separate piece", () => {
   const unstable = unstableLines(["発行10:00:01合計57,000"], ["発行10:00:05合計57,000"]);
   assert.equal(applyBaseline(diffLines(["発行09:59:58合計72,000"], ["発行10:00:01合計57,000"]), unstable)[0].explainedByBaseline, false);
+});
+
+test("a line the second run could not pair up is never set aside", () => {
+  // The second run printed one line fewer, so which parts change cannot be told: the total is kept.
+  const unstable = unstableLines(["発行 10:00:01", "合計 57,000"], ["合計 57,000"]);
+  assert.equal(unstable.get(0), "whole");
+  const changes = applyBaseline(diffLines(["発行 09:59:58 合計 72,000"], ["発行 10:00:01 合計 57,000"]), new Map([[0, "whole" as const]]));
+  assert.equal(changes[0].explainedByBaseline, false);
 });
