@@ -6,8 +6,14 @@
   --muted: #5f6368;
   --line: #e3e3e3;
   --surface: #f7f7f7;
-  --link: #1a5fd0;
-  --selected: #eef2f8;
+  --side-bg: #15161a;
+  --side-fg: #ececee;
+  --side-muted: #9a9ea6;
+  --side-hover: #202228;
+  --side-selected: #2c2f36;
+  --side-broken: #f0625a;
+  --side-review: #e8b53a;
+  --side-harmless: #6f747d;
 
   --harmless-fg: #4b5563;
   --harmless-bg: #eef0f2;

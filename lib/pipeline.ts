@@ -9,6 +9,7 @@ import { judgeByMachine, judgeCase } from "./judge/judge-case";
 import type { CauseReport } from "./fix/locate-cause";
 import type { FixAttempt } from "./fix/verify";
 import type { CaseVerdict } from "./judge/verdict";
+import { CASE_CHECKED } from "./progress";
 import { preflight } from "./runner/preflight";
 import { collectCase } from "./runner/files";
 import { runCase, type CaseResult, type SlotResult } from "./runner/run-case";
@@ -243,5 +244,6 @@ export async function checkCase(
     });
   }
   const output = about.output ? { output: about.output } : {};
+  report(CASE_CHECKED);
   return { caseId, label: about.label, description: about.description, ...output, runs: result.slots, comparison: compared.comparison, naive, verdict };
 }

@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { JobKind, JobState } from "@/lib/jobs";
 import type { RunReport } from "@/lib/pipeline";
+import { CASE_CHECKED } from "@/lib/progress";
 import { SAME_ORIGIN_HEADER } from "@/lib/same-origin";
 import styles from "./check.module.css";
 import type { CauseActions } from "./CauseView";
+import { CaseMap, type Square } from "./CaseMap";
 import { MANY_CASES } from "./case-order";
 import { ReportView } from "./ReportView";
 import { SubjectPicker, type ListedSubject } from "./SubjectPicker";
@@ -198,8 +200,12 @@ export function RunPanel() {
   };
 
   return (
-    <div className={subjects.length > 1 ? styles.shell : undefined}>
-      {subjects.length > 1 && <SubjectPicker subjects={subjects} current={subjectId ?? ""} disabled={running} onChoose={choose} />}
+    <div className={styles.shell}>
+      <aside className={styles.sidebar}>
+        <p className={styles.appName}>output-parity</p>
+        <p className={styles.appLead}>バージョンを上げる前と後の出力を比べ、違いを「読む人の判断が変わるか」で分けます</p>
+        <SubjectPicker subjects={subjects} current={subjectId ?? ""} disabled={running} onChoose={choose} />
+      </aside>
       <main className={styles.main}>
         {loading && <p className={styles.loading} role="status">読み込んでいます…</p>}
         {target && <TargetIntro target={target} showCases={!shown} />}
@@ -219,6 +225,7 @@ export function RunPanel() {
             {job?.status === "running" && job.kind !== "cause" && <Progress job={job} labelOf={(id) => target?.cases.find((c) => c.id === id)?.label ?? id} />}
           </div>
         )}
+        {job?.status === "running" && job.kind !== "cause" && target && <CaseMap squares={squaresWhileRunning(target.cases, job.progress)} />}
         {cannotRun && !job && (
           <p className={styles.notice}>
             この環境ではまだ実行できません: {cannotRun.message}
@@ -253,8 +260,13 @@ export function RunPanel() {
 function TargetIntro({ target, showCases }: { target: Target; showCases: boolean }) {
   return (
     <div className={styles.target}>
-      <p className={styles.targetName}>{target.name}</p>
-      <p>{target.description}</p>
+      <h1 className={styles.targetName}>
+        {target.name.replace(/（[^（）]*→[^（）]*）\s*$/, "")}
+        <span className={styles.envChip}>
+          {target.environments.old} → {target.environments.new}
+        </span>
+      </h1>
+      <p className={styles.targetDescription}>{target.description}</p>
       <details className={styles.scope}>
         <summary>
           <span className={styles.scopeTitle}>Claude に送るもの</span>
@@ -297,6 +309,16 @@ function Progress({ job, labelOf }: { job: Extract<JobState, { status: "running"
       )}
     </p>
   );
+}
+
+/** Each input's square from the progress so far: none yet, being worked on, or checked. */
+function squaresWhileRunning(cases: Target["cases"], progress: { caseId: string; message: string }[]): Square[] {
+  const last = new Map<string, string>();
+  for (const p of progress) if (p.caseId) last.set(p.caseId, p.message);
+  return cases.map((c) => {
+    const message = last.get(c.id);
+    return { id: c.id, label: c.label, state: message === undefined ? "waiting" : message === CASE_CHECKED ? "checked" : "working" };
+  });
 }
 
 function ProblemBox({ problem }: { problem: Problem }) {

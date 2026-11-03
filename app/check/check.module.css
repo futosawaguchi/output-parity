@@ -1,49 +1,38 @@
-.page {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 28px 32px 80px;
+/* The whole window: a dark column for the tool and its subjects, a white one for the work. */
+.shell {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  min-height: 100vh;
 }
 
-/* The band at the top: where the tool starts. */
-.appBar {
+.sidebar {
   position: sticky;
   top: 0;
-  z-index: 10;
-  background: var(--background);
-  border-bottom: 1px solid var(--line);
-}
-
-.appBarInner {
-  display: flex;
-  align-items: baseline;
-  gap: 18px;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 14px 32px;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 28px 18px;
+  background: var(--side-bg);
+  color: var(--side-fg);
 }
 
 .appName {
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--foreground);
-  text-decoration: none;
+  padding: 0 10px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .appLead {
-  color: var(--muted);
-  font-size: 14px;
-}
-
-/* Subjects on the left, results on the right. */
-.shell {
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  gap: 36px;
-  align-items: start;
+  padding: 0 10px;
+  margin: 6px 0 32px;
+  color: var(--side-muted);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .main {
   min-width: 0;
+  padding: 36px 48px 96px;
 }
 
 .loading {
@@ -367,14 +356,33 @@
 /* What is being checked, shown before running */
 
 .target {
-  margin-bottom: 20px;
-  padding: 16px 20px;
-  background: var(--surface);
-  border-radius: 8px;
+  margin-bottom: 22px;
 }
 
 .targetName {
-  font-weight: 700;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.envChip {
+  padding: 3px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.targetDescription {
+  margin-top: 8px;
+  max-width: 62em;
+  color: var(--muted);
 }
 
 .targetCases {
@@ -586,24 +594,21 @@
   margin: 8px 0;
 }
 
-/* The subjects down the left; the one shown is filled in. */
-.subjects {
-  position: sticky;
-  top: 84px;
-}
-
+/* The subjects in the dark column; the one shown is a lighter surface. */
 .subjectsTitle {
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 600;
+  padding: 0 10px;
   margin-bottom: 8px;
+  color: var(--side-muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .subjectList {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .subjectItem {
@@ -611,28 +616,27 @@
   flex-direction: column;
   gap: 1px;
   width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
+  padding: 12px 12px;
+  border: none;
   border-radius: 10px;
-  background: var(--background);
-  color: var(--foreground);
+  background: transparent;
+  color: var(--side-fg);
   text-align: left;
   cursor: pointer;
 }
 
 .subjectItem:hover:not(:disabled) {
-  border-color: var(--muted);
+  background: var(--side-hover);
 }
 
 .subjectItem:disabled {
-  color: #9a9a9a;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-.subjectItemSelected {
-  border-color: var(--foreground);
-  background: var(--selected);
-  box-shadow: inset 4px 0 0 var(--foreground);
+.subjectItemSelected,
+.subjectItemSelected:hover:not(:disabled) {
+  background: var(--side-selected);
   cursor: default;
 }
 
@@ -643,10 +647,11 @@
 
 .subjectEnvs {
   font-size: 14px;
+  color: var(--side-fg);
 }
 
 .subjectKind {
-  color: var(--muted);
+  color: var(--side-muted);
   font-size: 13px;
 }
 
@@ -656,36 +661,36 @@
   gap: 2px 12px;
   margin-top: 6px;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--side-muted);
 }
 
 .subjectCount {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   white-space: nowrap;
 }
 
 .dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
 }
 
 .dotBroken {
-  background: var(--broken-fg);
+  background: var(--side-broken);
 }
 
 .dotReview {
-  background: #d9a400;
+  background: var(--side-review);
 }
 
 .dotUnjudged {
-  border: 1.5px solid var(--muted);
+  border: 1.5px solid var(--side-muted);
 }
 
 .dotHarmless {
-  background: #b8bec6;
+  background: var(--side-harmless);
 }
 
 .notice button {
@@ -694,15 +699,16 @@
 
 /* The answer of a run: how many, and how many in each group, large and in their colours. */
 .countBand {
-  margin: 4px 0 16px;
-  padding: 16px 20px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  margin: 4px 0 20px;
+  padding: 22px 24px;
+  border-radius: 14px;
+  background: var(--surface);
 }
 
 .countLine {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .countTotal {
@@ -730,13 +736,18 @@
   margin-top: 8px;
 }
 
-/* Opens another page: blue, underlined, with an arrow (the roles of what can be pressed, DESIGN 5). */
+/* Opens another page: underlined, with an arrow (the roles of what can be pressed, DESIGN 5). */
 .pageLink {
-  color: var(--link);
+  color: var(--foreground);
   font-weight: 600;
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-color: var(--muted);
+  text-underline-offset: 4px;
   white-space: nowrap;
+}
+
+.pageLink:hover {
+  text-decoration-color: var(--foreground);
 }
 
 .pageLink::after {
@@ -900,4 +911,76 @@
 
 .scope[open] summary {
   margin-bottom: 6px;
+}
+
+/* Every input as one square (CaseMap). */
+.caseMap {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 6px;
+}
+
+.square {
+  display: block;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.3s ease;
+}
+
+.square:hover:not(:disabled) {
+  transform: scale(1.15);
+}
+
+.square:disabled {
+  cursor: default;
+}
+
+.sqBroken {
+  background: var(--broken-fg);
+}
+
+.sqReview {
+  background: #e0a800;
+}
+
+.sqHarmless {
+  background: #d3d7dc;
+}
+
+.sqUnjudged {
+  background: var(--background);
+  box-shadow: inset 0 0 0 2px #b8bec6;
+}
+
+.sqWaiting {
+  background: var(--background);
+  box-shadow: inset 0 0 0 1.5px var(--line);
+}
+
+.sqWorking {
+  background: var(--foreground);
+  animation: pulse 0.9s ease-in-out infinite alternate;
+}
+
+.sqChecked {
+  background: #9aa1a9;
+}
+
+.sqOpen {
+  outline: 3px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.35;
+  }
 }

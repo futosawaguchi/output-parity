@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
 import { GROUP_LABEL, groupOf, inReadingOrder, MANY_CASES, tally } from "./case-order";
 import { CaseDetail } from "./CaseDetail";
+import { CaseMap } from "./CaseMap";
 import { CaseTable } from "./CaseTable";
 import styles from "./check.module.css";
 import type { CauseActions } from "./CauseView";
@@ -60,6 +61,14 @@ export function ReportView({
       {report.judgeHeld && <HeldNotice held={report.judgeHeld} busy={cause.busy} onJudge={onJudgeHeld} />}
       <div className={styles.countBand}>
         <CountLine cases={report.cases} />
+        <CaseMap
+          squares={report.cases.map((c) => ({ id: c.caseId, label: c.label, state: groupOf(c) }))}
+          openId={openId}
+          onOpen={(id) => {
+            setPicked([]);
+            setOpenId(id);
+          }}
+        />
         {record && (
           <p className={styles.recordLinks}>
             <a className={styles.pageLink} href={record.page} target="_blank" rel="noreferrer">
