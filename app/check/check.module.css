@@ -330,6 +330,10 @@
   word-break: break-all;
 }
 
+.notCompared {
+  padding-left: 1.4em;
+}
+
 /* What is being checked, shown before running */
 
 .target {

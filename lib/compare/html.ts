@@ -29,7 +29,7 @@ export async function extractHtml(path: string, encoding: string): Promise<Extra
   const title = findTitle(doc);
   if (title) lines.push(`title: ${title}`);
   walk(doc, lines);
-  return { lines: lines.done(), pages: [], unreadable: [...unreadable, ...decoded.unreadable] };
+  return { lines: lines.done(), pages: [], unreadable: [...unreadable, ...decoded.unreadable], undecodable: decoded.undecodable };
 }
 
 /** Text collected into lines; a block boundary ends the current line. */

@@ -9,6 +9,12 @@ export type ExtractedDocument = {
   pages: PageLayout[];
   /** Parts that could not be turned into text, e.g. images. Reported, never silently skipped. */
   unreadable: string[];
+  /**
+   * Characters the encoding could not decode (each became U+FFFD). Any difference there is lost:
+   * two different names read as the same row of �, so "no difference" cannot be said. Absent in
+   * reports saved before it was counted, and for formats that are not decoded as text.
+   */
+  undecodable?: number;
 };
 
 export type PageLayout = {

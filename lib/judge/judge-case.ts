@@ -4,7 +4,7 @@ import { sep } from "node:path";
 import type { Change } from "../compare/baseline";
 import type { CaseComparison } from "../compare/compare-case";
 import { redactSecrets } from "../redact";
-import { describeOutcome } from "../runner/outcome";
+import { describeOutcome, differentEndings } from "../runner/outcome";
 import type { Slot, SlotResult } from "../runner/run-case";
 import type { SentRecorder } from "../sent-log";
 import { checkArithmetic } from "./arithmetic";
@@ -25,7 +25,8 @@ export type JudgeContext = {
 type Labels = Pick<JudgeContext, "oldLabel" | "newLabel">;
 
 /**
- * The verdicts the machine reaches on its own: no difference left, no output, unreadable output.
+ * The verdicts the machine reaches on its own: no difference left, no output, unreadable output,
+ * and the same output reached by a different ending or read through a wrong encoding (needs review).
  * null when only judgement can decide. Used without Claude too (the run after an edit).
  */
 export async function judgeByMachine(c: CaseComparison, ctx: Labels): Promise<CaseVerdict | null> {
@@ -42,11 +43,27 @@ export async function judgeByMachine(c: CaseComparison, ctx: Labels): Promise<Ca
 
   const kept = cmp.changes.filter((ch) => !ch.explainedByBaseline);
   const dropped = cmp.changes.filter((ch) => ch.explainedByBaseline);
-  if (kept.length === 0) {
-    const note = dropped.length > 0 ? `（毎回変わる値 ${dropped.length} か所は除外）` : "";
-    return machine(c.caseId, "harmless", `旧と新の出力に違いはありません${note}`, []);
+  if (kept.length > 0) return null;
+  // "No difference" holds only for what the machine compared: how the runs ended, and text it could decode.
+  const ending = differentEndings(c.runs);
+  if (ending) {
+    const what = `出力は同じですが、終わり方が違います（${ctx.oldLabel}: ${ending.old}／${ctx.newLabel}: ${ending.new}）`;
+    return machine(c.caseId, "needs_review", what, [
+      finding("needs_review", what, "出力のあとで失敗した・別のページへ移すようになった、などは出力の比較には出ません", [`${ctx.oldLabel}: ${ending.old}`, `${ctx.newLabel}: ${ending.new}`, ...(await stderrHead(run("new")))], "実行の記録（終了コード・HTTP の状態・stderr）"),
+    ]);
   }
-  return null;
+  const misread = [
+    ...(cmp.old.undecodable ? [`${ctx.oldLabel}: 読めない文字 ${cmp.old.undecodable} か所`] : []),
+    ...(cmp.new.undecodable ? [`${ctx.newLabel}: 読めない文字 ${cmp.new.undecodable} か所`] : []),
+  ];
+  if (misread.length > 0) {
+    const what = "差は見つかりませんでしたが、文字コードとして読めない部分があります";
+    return machine(c.caseId, "needs_review", what, [
+      finding("needs_review", what, "読めない文字はどれも同じ記号（�）になるので、その部分の違いは比べられていません", misread, "設定の output.encoding（出力の文字コード）"),
+    ]);
+  }
+  const note = dropped.length > 0 ? `（毎回変わる値 ${dropped.length} か所は除外）` : "";
+  return machine(c.caseId, "harmless", `旧と新の出力に違いはありません${note}`, []);
 }
 
 /**

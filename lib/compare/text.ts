@@ -22,15 +22,17 @@ export async function readBytes(path: string): Promise<Uint8Array> {
  * Bytes that are not valid in the encoding become U+FFFD and are counted, never dropped: a
  * wrong encoding setting must show up in the report, not quietly garble the comparison.
  */
-export function decode(bytes: Uint8Array, encoding: string): { text: string; unreadable: string[] } {
+export function decode(bytes: Uint8Array, encoding: string): Decoded {
   const text = new TextDecoder(encoding).decode(bytes);
   const bad = text.split("�").length - 1;
-  return { text, unreadable: bad > 0 ? [`文字コード ${encoding} として読めない部分が ${bad} か所あります（� に置き換えました）`] : [] };
+  return { text, unreadable: bad > 0 ? [`文字コード ${encoding} として読めない部分が ${bad} か所あります（� に置き換えました）`] : [], undecodable: bad };
 }
 
+type Decoded = { text: string; unreadable: string[]; undecodable: number };
+
 /** Lines without their line ends (\n or \r\n); a final line end does not make an empty last line. */
-export function splitLines({ text, unreadable }: { text: string; unreadable: string[] }): { lines: string[]; unreadable: string[] } {
+export function splitLines({ text, ...rest }: Decoded): { lines: string[]; unreadable: string[]; undecodable: number } {
   const lines = text.split(/\r?\n/);
   if (lines.at(-1) === "") lines.pop();
-  return { lines, unreadable };
+  return { lines, ...rest };
 }

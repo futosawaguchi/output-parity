@@ -64,6 +64,7 @@ export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseRep
       )}
       <CauseSection c={c} subjectId={report.subjectId} actions={cause} />
       <DroppedLines comparison={c.comparison} />
+      <NotCompared comparison={c.comparison} labels={[report.environments.old.label, report.environments.new.label]} />
     </article>
   );
 }
@@ -176,6 +177,23 @@ function DroppedLines({ comparison }: { comparison: Comparison }) {
         毎回変わる値として除外した {lines.length} 行（同じ環境で2回動かして違った行。判定の対象外）
       </summary>
       <pre className={styles.droppedLines}>{lines.join("\n")}</pre>
+    </details>
+  );
+}
+
+/** What the comparison could not read (images, bytes the encoding could not decode): a "no difference" does not cover it. */
+function NotCompared({ comparison, labels }: { comparison: Comparison; labels: [string, string] }) {
+  if (comparison.kind !== "compared") return null;
+  const parts = [...comparison.old.unreadable.map((u) => `${labels[0]}: ${u}`), ...comparison.new.unreadable.map((u) => `${labels[1]}: ${u}`)];
+  if (parts.length === 0) return null;
+  return (
+    <details className={styles.dropped}>
+      <summary>比べられなかった部分 {parts.length} 件（ここに違いがあっても、差には出ません）</summary>
+      <ul className={`${styles.droppedLines} ${styles.notCompared}`}>
+        {parts.map((p, i) => (
+          <li key={i}>{p}</li>
+        ))}
+      </ul>
     </details>
   );
 }

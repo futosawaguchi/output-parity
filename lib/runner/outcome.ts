@@ -38,3 +38,17 @@ export function describeOutcome(o: ExecOutcome): string {
       return `サーバが応えませんでした（${o.message}）`;
   }
 }
+
+/**
+ * How the old and new runs ended, when the two differ (exit code, HTTP status, where a redirect
+ * goes). The same output with a different ending is not "no difference": a program that now
+ * fails after writing its output, or a page that now sends the reader elsewhere, has changed.
+ * Compared as people read them, so a timeout or a crash counts as a different ending too.
+ */
+export function differentEndings(runs: { slot: string; outcome: ExecOutcome }[]): { old: string; new: string } | null {
+  const of = (slot: string) => runs.find((r) => r.slot === slot);
+  const [oldRun, newRun] = [of("old"), of("new")];
+  if (!oldRun || !newRun) return null;
+  const ending = { old: describeOutcome(oldRun.outcome), new: describeOutcome(newRun.outcome) };
+  return ending.old === ending.new ? null : ending;
+}
