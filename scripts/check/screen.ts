@@ -18,8 +18,10 @@ export async function screenChecks(results: Results, base: string, browser: Brow
     await results.step(`${tag}a`, "見積書の同梱: 題材のカード・件数・PDF 2 枚・原因", async () => {
       await page.goto(`${base}/check`);
       const count = await countLine(page);
-      const cards = await page.locator("nav[aria-label=題材] button").count();
-      expect(cards === 4, `題材のカードが ${cards} 枚（期待 4）`);
+      // The four shipped subjects; a subject of one's own in targets/ may add a card.
+      const cards = await page.locator("nav[aria-label=題材] button").allInnerTexts();
+      const missing = ["見積書", "TCPDF", "作業日報", "架空書店"].filter((name) => !cards.some((t) => t.includes(name)));
+      expect(missing.length === 0, `題材のカードに無いもの: ${missing.join("・")}（${cards.length} 枚）`);
       expect((await page.locator("nav[aria-label=題材] button[aria-current=page]").innerText()).includes("見積書"), "選ばれている題材が見積書ではありません");
       expect(count === "4 件: 壊れている 2・要確認 1・無害 1", `件数「${count}」`);
       await openCase(page, /入力 C/);
