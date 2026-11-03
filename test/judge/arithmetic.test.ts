@@ -94,3 +94,14 @@ test("a number written right after Japanese text is a number; one glued to Latin
   assert.ok(checkArithmetic("13.0 ≠ 7.0（差 6.0 = 重複した2行の4.0 + 2.0）").every((c) => c.ok));
   assert.ok(checkArithmetic("A101 + 5 = 5").every((c) => !c.text.includes("101")));
 });
+
+test("a quoted name is one label, even with a number at its end, and a term may follow its label", () => {
+  // Claude's own wording on 11/3: the 0 inside the quotes is part of the quoted text, not a term.
+  const checks = checkArithmetic("文字数 144 − 116 = 28 = 「A-101出張費0」9 + 「A-102夜間割増0」10 + 「A-104値引き0」9");
+  assert.deepEqual(checks.map((c) => [c.text, c.ok]), [
+    ["144 − 116 = 28", true],
+    ["28 = 9 + 10 + 9", true],
+  ]);
+  assert.ok(checkArithmetic("57,000 − 値引き 5,000 = 52,000").every((c) => c.ok));
+  assert.ok(!checkArithmetic("28 = 『A』9 + 『B』10").every((c) => c.ok), "a wrong sum is still wrong");
+});
