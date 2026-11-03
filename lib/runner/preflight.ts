@@ -43,4 +43,11 @@ export async function preflight(config: ParityConfig, root: string): Promise<voi
       );
     }
   }
+  // The original is what every request starts from (runner/web.ts); it is read from the source, never from work/.
+  if (run.type === "web" && run.database !== null) {
+    const original = join(config.source, run.database);
+    if (!(await stat(original).catch(() => null))?.isFile()) {
+      throw new ConfigError(`DB のファイルがありません: ${original}（設定の run.database）`, "設定の run.database.file を、source からの相対パスで確かめてください");
+    }
+  }
 }

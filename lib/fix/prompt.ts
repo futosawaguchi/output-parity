@@ -39,9 +39,11 @@ export async function buildCauseMessage(c: CaseReport, environments: Environment
         // The output path is the tool's own (runs/…/<slot>/output.*); a placeholder says more.
         const args = r.args.map((a) => (basename(a).startsWith("output.") && basename(dirname(a)) === r.slot ? "<出力ファイル>" : a));
         const stderr = fromRoot((await readFile(r.stderrPath, "utf8").catch(() => "")).trim().split("\n").slice(0, 5).join("\n"));
+        // The web type: the page asked for says more than how the server was started.
+        const how = r.request ? `${r.request}（${basename(r.command)} のサーバに問い合わせ）` : `${basename(r.command)} ${args.join(" ")}`;
         return [
-          `${environments[r.env].label}: ${basename(r.command)} ${args.join(" ")} → ${describeOutcome(r.outcome)}`,
-          stderr ? `標準エラー出力の先頭:\n${stderr}` : "",
+          `${environments[r.env].label}: ${how} → ${describeOutcome(r.outcome)}`,
+          stderr ? `${r.request ? "サーバの記録" : "標準エラー出力"}の先頭:\n${stderr}` : "",
         ]
           .filter(Boolean)
           .join("\n");

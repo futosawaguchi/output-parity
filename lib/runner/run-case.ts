@@ -20,6 +20,8 @@ export type SlotResult = {
   env: EnvironmentName;
   command: string;
   args: string[];
+  /** The page requested, as "GET /order.php?id=1" (run.type "web"; command and args then start the server). */
+  request?: string;
   outcome: ExecOutcome;
   durationMs: number;
   /** Path of the output file, or null when the program did not produce one. */
@@ -31,8 +33,8 @@ export type SlotResult = {
 export type CaseResult = { caseId: string; slots: SlotResult[] };
 
 /** stdout may be the output itself; stderr is evidence only, so far less of it is kept. */
-const MAX_STDOUT_BYTES = 100 * 1024 * 1024;
-const MAX_STDERR_BYTES = 1024 * 1024;
+export const MAX_STDOUT_BYTES = 100 * 1024 * 1024;
+export const MAX_STDERR_BYTES = 1024 * 1024;
 
 /**
  * Runs one case three times, writing everything under `caseDir`. Runs sequentially.
@@ -45,6 +47,19 @@ export async function runCase(
   cwd: string,
   caseDir: string,
   keepOld?: SlotResult,
+): Promise<CaseResult> {
+  return runSlots(testCase.id, caseDir, keepOld, (slot, env, slotDir) => runSlot(config, testCase, cwd, slotDir, slot, env));
+}
+
+/**
+ * The three slots of one case in order, each written under `caseDir`/<slot>, with the old slot
+ * copied from `keepOld` when given. Shared by the command type and the web type (runner/web.ts).
+ */
+export async function runSlots(
+  caseId: string,
+  caseDir: string,
+  keepOld: SlotResult | undefined,
+  runOne: (slot: Slot, env: EnvironmentName, slotDir: string) => Promise<SlotResult>,
 ): Promise<CaseResult> {
   const slots: SlotResult[] = [];
   let newFinishedAt = 0;
@@ -59,10 +74,10 @@ export async function runCase(
     // exits, so starting the baseline more than a second after the new run *finished*
     // guarantees a different second.
     if (slot === "baseline") await sleep(newFinishedAt + MIN_BASELINE_GAP_MS - Date.now());
-    slots.push(await runSlot(config, testCase, cwd, join(caseDir, slot), slot, env));
+    slots.push(await runOne(slot, env, join(caseDir, slot)));
     if (slot === "new") newFinishedAt = Date.now();
   }
-  return { caseId: testCase.id, slots };
+  return { caseId, slots };
 }
 
 const MIN_BASELINE_GAP_MS = 1100;

@@ -11,7 +11,11 @@ export type ExecOutcome =
   | { kind: "outputTooLarge"; maxBufferBytes: number }
   | { kind: "spawnFailed"; code: string; message: string }
   /** Nothing ran: the output was given as a file (run.type "files"), or that file was not there. */
-  | { kind: "given"; found: boolean };
+  | { kind: "given"; found: boolean }
+  /** A page was requested from the tool's own server (run.type "web"). 5xx means no page: the server failed. */
+  | { kind: "http"; status: number; location: string | null }
+  /** The server did not answer (it stopped, or refused the connection). */
+  | { kind: "requestFailed"; message: string };
 
 /** One line describing how a run ended, for people. */
 export function describeOutcome(o: ExecOutcome): string {
@@ -28,5 +32,9 @@ export function describeOutcome(o: ExecOutcome): string {
       return `起動できませんでした（${o.code}）`;
     case "given":
       return o.found ? "渡されたファイル" : "フォルダにファイルがありません";
+    case "http":
+      return `HTTP ${o.status}${o.location ? `（${o.location} へ移動）` : ""}`;
+    case "requestFailed":
+      return `サーバが応えませんでした（${o.message}）`;
   }
 }

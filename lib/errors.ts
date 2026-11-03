@@ -16,3 +16,6 @@ export class SetupError extends Error {
 export class ConfigError extends SetupError {}
 
 export class CommandNotFoundError extends SetupError {}
+
+/** A web server of the web type did not start listening (run.type "web"). */
+export class ServerStartError extends SetupError {}

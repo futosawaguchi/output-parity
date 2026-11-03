@@ -9,6 +9,8 @@ import { parseJsonc } from "./jsonc";
 
 /** Placeholder in case args that the runner replaces with the output file path. */
 export const OUTPUT_PLACEHOLDER = "{output}";
+/** Placeholder in a web server's args that the runner replaces with the port it chose (DESIGN 7-4c). */
+export const PORT_PLACEHOLDER = "{port}";
 
 export type EnvironmentName = "old" | "new";
 
@@ -27,7 +29,7 @@ export type EnvironmentSummary = Pick<Environment, "label" | "command">;
 export type EnvironmentSummaries = Record<EnvironmentName, EnvironmentSummary>;
 
 /** How the outputs are produced (DESIGN 7-4c): by running the programs, or given as files. */
-export type RunSpec = CommandRun | FilesRun;
+export type RunSpec = CommandRun | FilesRun | WebRun;
 
 export type CommandRun = {
   /** The tool runs the old and new programs on every case. */
@@ -42,6 +44,30 @@ export type CommandRun = {
    */
   needs: string[];
 };
+
+/**
+ * The tool starts the old and new web servers itself, on this machine, and requests every case's
+ * page from both (DESIGN 7-4c). Only 127.0.0.1 is ever asked: the settings give paths, never URLs,
+ * so nothing here can point the tool at a server elsewhere (DESIGN 7-3).
+ */
+export type WebRun = {
+  type: "web";
+  /** Where the servers start, relative to the source. */
+  cwd: string;
+  /** For each request. */
+  timeoutMs: number;
+  /** Each side's args hold {port} (e.g. "127.0.0.1:{port}"): the tool chooses a free port. */
+  environments: Record<EnvironmentName, Environment>;
+  needs: string[];
+  /**
+   * A database file (relative to the source) copied back from the original before every request,
+   * so that what one request writes cannot change what the next one shows. null: none.
+   */
+  database: string | null;
+};
+
+/** One page to request. The method and form are sent as written; the path is under the server's root. */
+export type WebRequest = { method: "GET" | "POST"; path: string; form: Record<string, string> };
 
 /**
  * The old and new outputs are already there, one folder each, the same name for the same input
@@ -87,21 +113,25 @@ export type Case = {
   label: string;
   /** One line about the input, shown on screen. */
   description: string;
-  /** Arguments passed as an array (never through a shell). */
+  /** Arguments passed as an array (never through a shell). Empty for the web type. */
   args: string[];
+  /** The page to request: the web type only. */
+  request?: WebRequest;
 };
 
 /**
  * Many cases written once (DESIGN 7-4c): one case per file in run.cwd whose name matches
- * each.file. In id, label, description and args, {file} is the file's name and {name} the same
- * without its extension. Expanded into cases when the subject is loaded (lib/case-groups.ts).
+ * each.file, or one per number in each.range. In id, label, description, args and request,
+ * {file} is the file's name and {name} the same without its extension; {n} is the number.
+ * Expanded into cases when the subject is loaded (lib/case-groups.ts).
  */
 export type CaseGroup = {
-  each: { file: string };
+  each: { file: string } | { range: [number, number] };
   id: string;
   label: string;
   description: string;
   args: string[];
+  request?: WebRequest;
 };
 
 export type ParityConfig = {
@@ -125,6 +155,8 @@ export type ParityConfig = {
 export const CONFIG_VERSION = 1;
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_LINKED = ["vendor", "node_modules"];
+/** each.range is for a few dozen inputs, not a typo that runs a million. */
+const MAX_RANGE = 1000;
 export const CASE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const ENV_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
@@ -188,13 +220,14 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   const runSpec = parseRun(run, dirname(path), fail);
 
   if (!isObject(output) || typeof output.format !== "string") return fail("output.format がありません");
-  if (output.from !== "file" && output.from !== "stdout") fail('output.from は "file" か "stdout" にしてください');
-  const from = output.from as OutputSpec["from"];
+  // A web page is the response body; there is nothing to choose.
+  if (runSpec.type !== "web" && output.from !== "file" && output.from !== "stdout") fail('output.from は "file" か "stdout" にしてください');
+  const from = runSpec.type === "web" ? "stdout" : (output.from as OutputSpec["from"]);
   const encoding = output.encoding ?? "utf-8";
   if (typeof encoding !== "string" || !isEncoding(encoding)) fail(`output.encoding「${String(encoding)}」は読めない文字コードです（utf-8 / shift_jis / euc-jp など）`);
 
   if (runSpec.type === "files" && caseGroups !== undefined) fail("ファイル型（run.type が files）では caseGroups は使えません（cases を書かなければ、フォルダのファイルが全部入力になります）");
-  const parsedGroups = parseCaseGroups(caseGroups, from, fail);
+  const parsedGroups = parseCaseGroups(caseGroups, runSpec.type, from, fail);
   if (cases !== undefined && !Array.isArray(cases)) return fail("cases が配列ではありません");
   const caseList: unknown[] = cases ?? [];
   // The files type finds its inputs in the folders when none are written (lib/runner/files.ts).
@@ -206,16 +239,26 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     }
     if (seen.has(c.id)) fail(`cases の id「${c.id}」が重複しています`);
     seen.add(c.id);
+    if ((c.label !== undefined && typeof c.label !== "string") || (c.description !== undefined && typeof c.description !== "string")) {
+      fail(`cases[${i}] の label と description は文字列にしてください`);
+    }
+    const about = { id: c.id, label: (c.label as string | undefined) ?? c.id, description: (c.description as string | undefined) ?? "" };
+    if (runSpec.type === "web") {
+      if (c.args !== undefined) fail(`cases[${i}].args は Web 型では使えません（開くページは request に書いてください）`);
+      return { ...about, args: [], request: parseRequest(c.request, `cases[${i}].request`, fail) };
+    }
+    if (c.request !== undefined) fail(`cases[${i}].request は Web 型（run.type が web）のときだけ書けます`);
     if (!isStringArray(c.args)) fail(`cases[${i}].args が文字列の配列ではありません`);
     const args = c.args as string[];
     if (runSpec.type === "command" && from === "file" && !args.includes(OUTPUT_PLACEHOLDER)) {
       fail(`cases[${i}].args に ${OUTPUT_PLACEHOLDER} がありません（output.from が "file" のとき必要）`);
     }
-    if ((c.label !== undefined && typeof c.label !== "string") || (c.description !== undefined && typeof c.description !== "string")) {
-      fail(`cases[${i}] の label と description は文字列にしてください`);
-    }
-    return { id: c.id, label: (c.label as string | undefined) ?? c.id, description: (c.description as string | undefined) ?? "", args };
+    return { ...about, args };
   });
+
+  if (runSpec.type === "web" && runSpec.database !== null && fixes === "suggest-only") {
+    fail("run.database と fixes: \"suggest-only\" は一緒に使えません（suggest-only はその場で動かすので、元の DB を毎回書き戻すことになります。fixes を \"apply\" にすると work/ の写しの中で戻します）");
+  }
 
   return {
     version: CONFIG_VERSION,
@@ -232,33 +275,68 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   };
 }
 
-function parseCaseGroups(groups: unknown, from: OutputSpec["from"], fail: (what: string) => never): CaseGroup[] {
+function parseCaseGroups(groups: unknown, runType: RunSpec["type"], from: OutputSpec["from"], fail: (what: string) => never): CaseGroup[] {
   if (groups === undefined) return [];
   if (!Array.isArray(groups)) return fail("caseGroups が配列ではありません");
   return groups.map((g, i): CaseGroup => {
     const at = `caseGroups[${i}]`;
-    if (!isObject(g) || !isObject(g.each) || typeof g.each.file !== "string") return fail(`${at}.each.file（当てはめるファイル名の形。例 "example_*.php"）がありません`);
-    const file = g.each.file;
-    if (file === "" || /[\\/]/.test(file) || !/[*?]/.test(file)) fail(`${at}.each.file は、/ を含まず * か ? を含むファイル名の形にしてください`);
-    if (!isStringArray(g.args)) return fail(`${at}.args が文字列の配列ではありません`);
-    if (from === "file" && !g.args.includes(OUTPUT_PLACEHOLDER)) fail(`${at}.args に ${OUTPUT_PLACEHOLDER} がありません（output.from が "file" のとき必要）`);
+    const each = isObject(g) && isObject(g.each) ? parseEach(g.each, at, fail) : fail(`${at}.each（each.file か each.range）がありません`);
     for (const key of ["id", "label", "description"] as const) {
       if (g[key] !== undefined && typeof g[key] !== "string") fail(`${at}.${key} は文字列にしてください`);
     }
-    return {
-      each: { file },
-      id: (g.id as string | undefined) ?? "{name}",
-      label: (g.label as string | undefined) ?? "{file}",
+    const byFile = "file" in each;
+    const about = {
+      each,
+      id: (g.id as string | undefined) ?? (byFile ? "{name}" : "{n}"),
+      label: (g.label as string | undefined) ?? (byFile ? "{file}" : "{n}"),
       description: (g.description as string | undefined) ?? "",
-      args: g.args,
     };
+    if (runType === "web") {
+      if (g.args !== undefined) fail(`${at}.args は Web 型では使えません（開くページは request に書いてください）`);
+      return { ...about, args: [], request: parseRequest(g.request, `${at}.request`, fail) };
+    }
+    if (g.request !== undefined) fail(`${at}.request は Web 型（run.type が web）のときだけ書けます`);
+    if (!isStringArray(g.args)) return fail(`${at}.args が文字列の配列ではありません`);
+    if (from === "file" && !g.args.includes(OUTPUT_PLACEHOLDER)) fail(`${at}.args に ${OUTPUT_PLACEHOLDER} がありません（output.from が "file" のとき必要）`);
+    return { ...about, args: g.args };
   });
+}
+
+function parseEach(each: Record<string, unknown>, at: string, fail: (what: string) => never): CaseGroup["each"] {
+  if (each.range !== undefined) {
+    const r = each.range;
+    if (!Array.isArray(r) || r.length !== 2 || !r.every((n) => Number.isInteger(n) && n >= 0) || r[0] > r[1] || r[1] - r[0] >= MAX_RANGE) {
+      fail(`${at}.each.range は [最初, 最後] の 0 以上の整数にしてください（例 [1, 30]。${MAX_RANGE} 件まで）`);
+    }
+    return { range: [r[0], r[1]] };
+  }
+  const file = each.file;
+  if (typeof file !== "string") return fail(`${at}.each.file（当てはめるファイル名の形。例 "example_*.php"）か each.range（例 [1, 30]）がありません`);
+  if (file === "" || /[\\/]/.test(file) || !/[*?]/.test(file)) fail(`${at}.each.file は、/ を含まず * か ? を含むファイル名の形にしてください`);
+  return { file };
+}
+
+/** A page under the server's root. Never a URL: the host is always the tool's own server on 127.0.0.1. */
+function parseRequest(r: unknown, at: string, fail: (what: string) => never): WebRequest {
+  if (!isObject(r) || typeof r.path !== "string") return fail(`${at}.path（開くページ。例 "/order.php?id=1"）がありません`);
+  const path = r.path;
+  // "//host" and "\\host" would name another host; whitespace and control characters have no place in a path.
+  if (!path.startsWith("/") || path.startsWith("//") || /[\\\s\u0000-\u001f]/.test(path)) {
+    fail(`${at}.path は / で始まるパスにしてください（URL やホスト名は書けません。問い合わせるのは道具が立てた手元のサーバだけです）`);
+  }
+  const method = r.method ?? "GET";
+  if (method !== "GET" && method !== "POST") fail(`${at}.method は "GET" か "POST" にしてください`);
+  const form = (r.form as unknown) ?? {};
+  if (!isObject(form) || !Object.values(form).every((v) => typeof v === "string")) fail(`${at}.form は、名前と文字列の値の組にしてください`);
+  if (method === "GET" && Object.keys(form as object).length > 0) fail(`${at}.form は method が "POST" のときだけ書けます（GET はパスの ? の後ろに書いてください）`);
+  return { method: method as WebRequest["method"], path, form: form as Record<string, string> };
 }
 
 function parseRun(run: unknown, base: string, fail: (what: string) => never): RunSpec {
   if (!isObject(run)) return fail("run がありません");
   if (run.type === "files") return parseFilesRun(run, base, fail);
-  if (run.type !== "command") return fail(`run.type は "command" か "files" にしてください`);
+  if (run.type !== "command" && run.type !== "web") return fail(`run.type は "command"・"files"・"web" のどれかにしてください`);
+  const web = run.type === "web";
 
   const cwd = run.cwd ?? ".";
   if (typeof cwd !== "string" || isAbsolute(cwd) || normalize(cwd).split(sep)[0] === "..") {
@@ -285,15 +363,27 @@ function parseRun(run: unknown, base: string, fail: (what: string) => never): Ru
         if (!ENV_NAME_PATTERN.test(k) || typeof v !== "string") fail(`${at}.env の「${k}」は、英数字と _ の名前に文字列の値にしてください`);
       }
     }
-    environments[key] = {
-      label: env.label,
-      command: env.command,
-      args: (env.args as string[] | undefined) ?? [],
-      env: (env.env as Record<string, string> | undefined) ?? {},
-    };
+    const args = (env.args as string[] | undefined) ?? [];
+    if (web && !args.some((a) => a.includes(PORT_PLACEHOLDER))) {
+      fail(`${at}.args に ${PORT_PLACEHOLDER} がありません（Web 型では道具が空いているポートを選んで渡します。例 ["-S", "127.0.0.1:${PORT_PLACEHOLDER}"]）`);
+    }
+    environments[key] = { label: env.label, command: env.command, args, env: (env.env as Record<string, string> | undefined) ?? {} };
   }
 
-  return { type: "command", cwd: cwd as string, timeoutMs: (run.timeoutMs as number | undefined) ?? DEFAULT_TIMEOUT_MS, environments, needs: needs as string[] };
+  const timeoutMs = (run.timeoutMs as number | undefined) ?? DEFAULT_TIMEOUT_MS;
+  if (!web) {
+    if (run.database !== undefined) fail("run.database は Web 型（run.type が web）のときだけ書けます");
+    return { type: "command", cwd: cwd as string, timeoutMs, environments, needs: needs as string[] };
+  }
+  let database: string | null = null;
+  if (run.database !== undefined) {
+    const file = isObject(run.database) ? run.database.file : undefined;
+    if (typeof file !== "string" || file === "" || isAbsolute(file) || normalize(file).split(sep)[0] === "..") {
+      fail("run.database は { \"file\": \"source の中の DB ファイルの相対パス\" } にしてください");
+    }
+    database = file as string;
+  }
+  return { type: "web", cwd: cwd as string, timeoutMs, environments, needs: needs as string[], database };
 }
 
 function parseFilesRun(run: Record<string, unknown>, base: string, fail: (what: string) => never): FilesRun {

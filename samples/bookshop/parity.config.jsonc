@@ -1,0 +1,34 @@
+// Web アプリの題材。架空の書店の注文管理（PHP・SQLite）を、道具が PHP 7.4 と 8.5 の内蔵サーバで手元に立て、同じページを開いて比べる。
+// 書き方は README の「設定ファイル」。パスはこのファイルからの相対で書く。
+{
+  "version": 1,
+  "name": "架空書店の注文管理 Web アプリ（PHP 7.4 → 8.5）",
+  "description": "架空の書店の注文管理画面（samples/bookshop/app/。PHP・SQLite）を、道具が PHP 7.4 と PHP 8.5 の内蔵サーバで手元（127.0.0.1）に立て、注文の一覧と注文 30 件の画面を開いて比べます。注文・書名・お客様は今回作った架空のものです。",
+
+  "source": "app",
+  "fixes": "apply",
+  // 架空のサンプルなので、出力もソースも送ってよい
+  "claude": { "send": "output-and-source" },
+
+  "run": {
+    "type": "web",
+    "timeoutMs": 10000,
+    // {port} は道具が空いているポートを選んで入れる。問い合わせるのは 127.0.0.1 だけ（URL は書かない）
+    "environments": {
+      "old": { "label": "PHP 7.4", "command": "/opt/homebrew/opt/php@7.4/bin/php", "args": ["-d", "display_errors=0", "-S", "127.0.0.1:{port}", "-t", "public"] },
+      "new": { "label": "PHP 8.5", "command": "/opt/homebrew/bin/php", "args": ["-d", "display_errors=0", "-S", "127.0.0.1:{port}", "-t", "public"] }
+    },
+    // 画面を開くと DB に書く（開いた回数）。問い合わせのたびに、この原本から work/ の写しへ戻す
+    "database": { "file": "data/shop.sqlite" }
+  },
+
+  "output": { "format": "html", "encoding": "utf-8" },
+
+  // id・label・description は、画面に出たり Claude に渡ったりする。期待する判定が分からない名前にする
+  "cases": [
+    { "id": "list", "label": "注文の一覧", "description": "注文 30 件の一覧（注文日の順）", "request": { "path": "/" } }
+  ],
+  "caseGroups": [
+    { "each": { "range": [1, 30] }, "id": "order-{n}", "label": "注文 {n}", "description": "注文 {n} の詳細", "request": { "path": "/order.php?id={n}" } }
+  ]
+}
