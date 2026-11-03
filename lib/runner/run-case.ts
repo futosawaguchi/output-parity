@@ -1,6 +1,6 @@
 import { copyFile, mkdir, stat, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { OUTPUT_PLACEHOLDER, type Case, type EnvironmentName, type ParityConfig } from "../config";
+import { OUTPUT_PLACEHOLDER, outputOf, type Case, type EnvironmentName, type ParityConfig } from "../config";
 import { execOnce, type ExecOutcome } from "./exec";
 
 /**
@@ -113,7 +113,7 @@ async function runSlot(
   env: EnvironmentName,
 ): Promise<SlotResult> {
   await mkdir(slotDir, { recursive: true });
-  const outputPath = join(slotDir, `output.${config.output.format}`);
+  const outputPath = join(slotDir, `output.${outputOf(config, testCase).format}`);
   // Only the command type runs anything (the files type is collected in runner/files.ts).
   if (config.run.type !== "command") throw new Error("runCase is for the command type");
   const environment = config.run.environments[env];

@@ -1,6 +1,6 @@
 import { copyFile, mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import { extname, join } from "node:path";
-import { CASE_ID_PATTERN, type Case, type FilesRun, type ParityConfig } from "../config";
+import { CASE_ID_PATTERN, outputOf, type Case, type FilesRun, type ParityConfig } from "../config";
 import { ConfigError } from "../errors";
 import type { CaseResult, Slot, SlotResult } from "./run-case";
 
@@ -49,7 +49,7 @@ export async function collectCase(config: ParityConfig, run: FilesRun, testCase:
     await mkdir(slotDir, { recursive: true });
     const from = join(dir, file);
     const found = (await stat(from).catch(() => null))?.isFile() ?? false;
-    const outputPath = join(slotDir, `output.${config.output.format}`);
+    const outputPath = join(slotDir, `output.${outputOf(config, testCase).format}`);
     if (found) await copyFile(from, outputPath);
     const stdoutPath = join(slotDir, "stdout.txt");
     const stderrPath = join(slotDir, "stderr.txt");

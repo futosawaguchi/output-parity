@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { join } from "node:path";
 import { whyNotSending } from "@/lib/claude-scope";
-import { adapterFor } from "@/lib/compare/adapters";
+import { adaptersForReport } from "@/lib/compare/adapters";
 import { SetupError } from "@/lib/errors";
 import { currentJob, runningJob, startJob } from "@/lib/jobs";
 import { judgeHeldCases } from "@/lib/rejudge";
@@ -27,9 +27,9 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ message: "判定を待っている入力がありません", nextStep: "画面を読み込み直してください" }, { status: 400 });
   }
   const held = job.report;
-  let adapter;
+  let adapters;
   try {
-    adapter = adapterFor({ format: held.outputFormat, encoding: held.outputEncoding });
+    adapters = adaptersForReport(held);
     const refused = whyNotSending((await loadSubject(root, subjectId)).config, "judge");
     if (refused) return Response.json(refused, { status: 400 });
   } catch (e) {
@@ -39,7 +39,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!process.env.ANTHROPIC_API_KEY) return Response.json(NO_KEY, { status: 400 });
   const client = new Anthropic();
 
-  const result = startJob("judge", subjectId, (onProgress) => judgeHeldCases(held, { adapter, client, runsRoot: join(root, "runs"), onProgress }));
+  const result = startJob("judge", subjectId, (onProgress) => judgeHeldCases(held, { adapters, client, runsRoot: join(root, "runs"), onProgress }));
   if (!result.started) return alreadyRunning(result.running, subjectId);
   return Response.json({ jobId: result.jobId }, { status: 202 });
 }

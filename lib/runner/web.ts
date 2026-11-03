@@ -3,7 +3,7 @@ import { openSync, closeSync } from "node:fs";
 import { copyFile, mkdir, open, rm, stat, writeFile } from "node:fs/promises";
 import { connect, createServer } from "node:net";
 import { join } from "node:path";
-import { PORT_PLACEHOLDER, type Case, type EnvironmentName, type ParityConfig, type WebRun } from "../config";
+import { outputOf, PORT_PLACEHOLDER, type Case, type EnvironmentName, type ParityConfig, type WebRun } from "../config";
 import { ConfigError, ServerStartError } from "../errors";
 import { childEnv } from "./child-env";
 import { STDERR_CUT_MARK } from "./exec";
@@ -106,7 +106,7 @@ async function requestPage(
 ): Promise<SlotResult> {
   await mkdir(slotDir, { recursive: true });
   const request = testCase.request!;
-  const outputPath = join(slotDir, `output.${config.output.format}`);
+  const outputPath = join(slotDir, `output.${outputOf(config, testCase).format}`);
   const stdoutPath = join(slotDir, "stdout.txt");
   const stderrPath = join(slotDir, "stderr.txt");
 

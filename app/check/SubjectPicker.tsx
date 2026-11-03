@@ -4,6 +4,12 @@ import styles from "./check.module.css";
 const FORMAT_LABEL: Record<string, string> = { pdf: "PDF", text: "テキスト", html: "HTML" };
 const RUN_LABEL: Record<string, string> = { command: "コマンド", files: "ファイルを置く", web: "Web（サーバを立てる）" };
 
+/** "PDF" / "テキスト（Shift_JIS）": a format, with the encoding when it is not UTF-8. */
+function describeOutput({ format, encoding }: { format: string; encoding: string }): string {
+  const name = FORMAT_LABEL[format] ?? format;
+  return encoding.toLowerCase() === "utf-8" ? name : `${name}（${encoding.toUpperCase().replace("SHIFT_JIS", "Shift_JIS")}）`;
+}
+
 /**
  * The subjects side by side, each with what it compares: the environments, the output and how the
  * outputs are made. Choosing one loads the page for it. Not while a job runs: it belongs to this subject.
@@ -33,11 +39,7 @@ export function SubjectPicker({ subjects, current, disabled }: { subjects: Subje
                     {s.summary.old} → {s.summary.new}
                   </span>
                   <span className={styles.subjectKind}>
-                    {[
-                      FORMAT_LABEL[s.summary.format] ?? s.summary.format,
-                      ...(s.summary.encoding.toLowerCase() === "utf-8" ? [] : [s.summary.encoding.toUpperCase().replace("SHIFT_JIS", "Shift_JIS")]),
-                      RUN_LABEL[s.summary.runType] ?? s.summary.runType,
-                    ].join("・")}
+                    {[...s.summary.outputs.map(describeOutput), RUN_LABEL[s.summary.runType] ?? s.summary.runType].join("・")}
                   </span>
                 </>
               ) : (

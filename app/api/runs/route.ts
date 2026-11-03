@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { connection } from "next/server";
 import { loadBundledFix, loadBundledReport } from "@/lib/bundled";
 import { describeScope, whyNotSending } from "@/lib/claude-scope";
-import { adapterFor } from "@/lib/compare/adapters";
+import { adaptersForConfig } from "@/lib/compare/adapters";
 import { summarizeEnvironments, type ParityConfig } from "@/lib/config";
 import { SetupError } from "@/lib/errors";
 import { currentJob, runningJob, startJob } from "@/lib/jobs";
@@ -25,10 +25,10 @@ export async function POST(request: Request): Promise<Response> {
     return notFromOurPage();
   }
   const subjectId = subjectIdOf(((await request.json().catch(() => ({}))) as { subject?: unknown }).subject);
-  let subject, adapter;
+  let subject, adapters;
   try {
     subject = await loadSubject(root, subjectId);
-    adapter = adapterFor(subject.config.output);
+    adapters = adaptersForConfig(subject.config);
   } catch (e) {
     if (e instanceof SetupError) return Response.json({ message: e.message, nextStep: e.nextStep }, { status: 400 });
     throw e;
@@ -42,7 +42,7 @@ export async function POST(request: Request): Promise<Response> {
   const client = judging ? new Anthropic() : null;
 
   const result = startJob("run", subjectId, (onProgress) =>
-    runPipeline({ subjectId, config, adapter, root: runRoot, prepare: subject.workDir !== null, runsRoot: join(root, "runs"), client, onProgress }),
+    runPipeline({ subjectId, config, adapters, root: runRoot, prepare: subject.workDir !== null, runsRoot: join(root, "runs"), client, onProgress }),
   );
   if (!result.started) return alreadyRunning(result.running, subjectId);
   return Response.json({ jobId: result.jobId }, { status: 202 });

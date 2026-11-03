@@ -2,7 +2,7 @@ import { readdir, realpath, stat } from "node:fs/promises";
 import { isAbsolute, join, relative, sep } from "node:path";
 import { expandCaseGroups } from "./case-groups";
 import { withFileCases } from "./runner/files";
-import { loadConfig, summarizeEnvironments, type ParityConfig, type RunSpec } from "./config";
+import { loadConfig, outputOf, summarizeEnvironments, type ParityConfig, type RunSpec } from "./config";
 import { ConfigError } from "./errors";
 
 // A subject is one system connected to the tool by one settings file (DESIGN 7-4c):
@@ -34,8 +34,15 @@ export type Subject = {
 export type SubjectEntry = {
   id: string;
   name: string | null;
-  summary?: { old: string; new: string; format: string; encoding: string; runType: RunSpec["type"] };
+  /** outputs: the settings' output first, then any other a case is read in (a CSV among the pages). */
+  summary?: { old: string; new: string; outputs: { format: string; encoding: string }[]; runType: RunSpec["type"] };
 };
+
+/** Every way the subject's outputs are read, without repeats: the settings' output, then the cases' own. */
+function outputsOf(config: ParityConfig): { format: string; encoding: string }[] {
+  const all = [outputOf(config, {}), ...[...config.cases, ...config.caseGroups].flatMap((c) => (c.output ? [c.output] : []))];
+  return all.filter((o, i) => all.findIndex((p) => p.format === o.format && p.encoding === o.encoding) === i);
+}
 
 /** The subject a request names, or the default one when it names none. Checked by loadSubject. */
 export function subjectIdOf(value: unknown): string {
@@ -67,7 +74,7 @@ export async function listSubjects(root: string): Promise<SubjectEntry[]> {
       entries.push({
         id,
         name: config.name,
-        summary: { old: envs.old.label, new: envs.new.label, format: config.output.format, encoding: config.output.encoding, runType: config.run.type },
+        summary: { old: envs.old.label, new: envs.new.label, outputs: outputsOf(config), runType: config.run.type },
       });
     }
   }

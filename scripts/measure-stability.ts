@@ -10,7 +10,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { loadBundledReport } from "../lib/bundled";
 import { whyNotSending } from "../lib/claude-scope";
-import { adapterFor } from "../lib/compare/adapters";
+import { adaptersForReport } from "../lib/compare/adapters";
 import { SetupError } from "../lib/errors";
 import { VERDICT_LABEL } from "../lib/judge/verdict";
 import { rejudgeBundled } from "../lib/rejudge";
@@ -38,10 +38,10 @@ async function main(): Promise<void> {
   console.log(`題材 ${id}: Claude が判定する ${byClaude.length} 件 × ${times} 回 = ${byClaude.length * times} 回 Claude を呼びます`);
 
   const client = createClient();
-  const adapter = adapterFor({ format: bundled.outputFormat, encoding: bundled.outputEncoding });
+  const adapters = adaptersForReport(bundled);
   const rounds: { runId: string; verdicts: Record<string, string> }[] = [];
   for (let round = 1; round <= times; round++) {
-    const report = await rejudgeBundled(bundled, { adapter, client, runsRoot });
+    const report = await rejudgeBundled(bundled, { adapters, client, runsRoot });
     if (report.judgeHeld) throw new SetupError(`判定が ${report.judgeHeld.count} 件あり、止まりました`, "測るのは Claude に判定させる入力が 10 件以下の題材だけです");
     const verdicts = Object.fromEntries(report.cases.map((c) => [c.caseId, c.verdict ? `${c.verdict.verdict}（${c.verdict.judgedBy.kind}）` : "未判定"]));
     rounds.push({ runId: report.runId, verdicts });

@@ -1,13 +1,13 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Adapter } from "./compare/adapters";
+import type { AdapterOf } from "./compare/adapters";
 import { checkCase, JUDGE_WITHOUT_ASKING, judgeWaiting, type CheckOptions, type Checked, type ProgressEvent, type RunReport } from "./pipeline";
 import { createRunDir } from "./runner/run-dir";
 import { sentRecorder } from "./sent-log";
 
 export type RejudgeOptions = {
-  adapter: Adapter;
+  adapters: AdapterOf;
   client: Anthropic;
   runsRoot: string;
   onProgress?: (event: ProgressEvent) => void;
@@ -55,7 +55,7 @@ export async function judgeHeldCases(held: RunReport, opts: RejudgeOptions): Pro
 
 function optionsFor(report: RunReport, opts: RejudgeOptions): CheckOptions {
   return {
-    adapter: opts.adapter,
+    adapters: opts.adapters,
     client: opts.client,
     environments: report.environments,
     record: sentRecorder(join(opts.runsRoot, "sent")),

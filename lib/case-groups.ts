@@ -56,7 +56,7 @@ function caseOf(group: CaseGroup, values: Record<string, string>, from: string, 
   if (!CASE_ID_PATTERN.test(id)) {
     throw new ConfigError(`caseGroups[${index}] で ${from} から作った id「${id}」が使えません`, "id は英数字・-・_ だけになるようにしてください（{name} の代わりに別の形を書く）");
   }
-  const made: Case = { id, label: fill(group.label), description: fill(group.description), args: group.args.map(fill) };
+  const made: Case = { id, label: fill(group.label), description: fill(group.description), args: group.args.map(fill), ...(group.output ? { output: group.output } : {}) };
   if (group.request) {
     const form = Object.fromEntries(Object.entries(group.request.form).map(([k, v]) => [k, fill(v)]));
     made.request = { method: group.request.method, path: fill(group.request.path), form };

@@ -1,3 +1,4 @@
+import { formatsOf } from "../case-output";
 import { VERDICT_LABEL, type CaseVerdict } from "../judge/verdict";
 import type { CaseReport, RunReport } from "../pipeline";
 import { describeOutcome } from "../runner/outcome";
@@ -89,7 +90,7 @@ function where(report: RunReport, createdAt: Date): Block[] {
         `説明: ${oneLine(report.configDescription)}`,
         `旧: ${env.old.label}（\`${env.old.command}\`）`,
         `新: ${env.new.label}（\`${env.new.command}\`）`,
-        `出力の形式: ${report.outputFormat}${report.outputEncoding ? `（${report.outputEncoding}）` : ""}`,
+        `出力の形式: ${describeFormats(report)}`,
       ].map((text) => ({ text })),
     },
   ];
@@ -263,6 +264,13 @@ function cannotSay(): Block[] {
       ].map((text) => ({ text })),
     },
   ];
+}
+
+/** "html（utf-8）" or, when cases are read differently, "html（utf-8）31 件・text（shift_jis）1 件". */
+function describeFormats(report: RunReport): string {
+  const formats = formatsOf(report);
+  if (formats.length === 1 && !report.cases.some((c) => c.output)) return `${report.outputFormat}${report.outputEncoding ? `（${report.outputEncoding}）` : ""}`;
+  return formats.map((f) => `${f.format}（${f.encoding}）${f.count} 件`).join("・");
 }
 
 function time(iso: string): string {

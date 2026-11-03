@@ -1,3 +1,4 @@
+import { outputKindOf } from "@/lib/case-output";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
 import styles from "./check.module.css";
 import { PageFrame } from "./PageFrame";
@@ -15,12 +16,13 @@ export type HtmlView = "page" | "lines";
  */
 export function OutputView({ report, c, slot, view = "lines" }: { report: RunReport; c: CaseReport; slot: "old" | "new"; view?: HtmlView }) {
   const label = report.environments[slot].label;
-  if (report.outputFormat === "pdf") return <PdfView src={outputUrl(report, c.caseId, slot)} label={label} />;
-  if (report.outputFormat === "html" && view === "page") {
+  const format = outputKindOf(report, c).format;
+  if (format === "pdf") return <PdfView src={outputUrl(report, c.caseId, slot)} label={label} />;
+  if (format === "html" && view === "page") {
     return (
       <figure className={styles.pdf}>
         <figcaption className={styles.pdfLabel}>{label}（画面。スクリプトと外のファイルは読み込みません）</figcaption>
-        <PageFrame src={pageUrl(report, c.caseId, slot)} title={`${label} の画面`} />
+        <PageFrame src={pageUrl(report, c, slot)} title={`${label} の画面`} />
       </figure>
     );
   }
@@ -45,7 +47,7 @@ export function OutputView({ report, c, slot, view = "lines" }: { report: RunRep
   return (
     <figure className={styles.pdf}>
       <figcaption className={styles.pdfLabel}>
-        {label}（{report.outputFormat === "html" ? "画面に見える文字とフォームの値" : "テキスト"}・{comparison[slot].lines.length} 行）
+        {label}（{format === "html" ? "画面の文字とフォームの値" : "テキスト"}・{comparison[slot].lines.length} 行）
       </figcaption>
       <ol className={styles.textLines}>
         {comparison[slot].lines.map((line, i) => (

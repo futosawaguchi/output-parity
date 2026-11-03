@@ -1,6 +1,6 @@
 import { join } from "node:path";
 import { loadBundledReport } from "@/lib/bundled";
-import { adapterFor } from "@/lib/compare/adapters";
+import { adaptersForConfig } from "@/lib/compare/adapters";
 import { CASE_ID_PATTERN } from "@/lib/config";
 import { SetupError } from "@/lib/errors";
 import { applyAndVerify } from "@/lib/fix/apply-and-verify";
@@ -33,10 +33,10 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ message: "当てる直し方が見つかりません", nextStep: "画面を読み込み直し、原因をもう一度探してください" }, { status: 400 });
   }
 
-  let subject, adapter;
+  let subject, adapters;
   try {
     subject = await loadSubject(root, subjectId);
-    adapter = adapterFor(subject.config.output);
+    adapters = adaptersForConfig(subject.config);
     // Running again needs the interpreters; say so now rather than after writing to work/.
     await preflight(subject.config, subject.config.source);
   } catch (e) {
@@ -49,7 +49,7 @@ export async function POST(request: Request): Promise<Response> {
   const result = startJob("verify", subjectId, (onProgress) =>
     applyAndVerify(base, caseId as string, candidate, {
       config,
-      adapter,
+      adapters,
       workDir,
       runsRoot: join(root, "runs"),
       onProgress,

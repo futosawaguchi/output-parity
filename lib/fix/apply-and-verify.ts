@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Adapter } from "../compare/adapters";
+import type { AdapterOf } from "../compare/adapters";
 import type { ParityConfig } from "../config";
 import { runPipeline, type ProgressEvent, type RunReport } from "../pipeline";
 import { prepareWorkspace } from "../workspace";
@@ -10,7 +10,7 @@ import { assessFix, type FixAttempt } from "./verify";
 
 export type ApplyOptions = {
   config: ParityConfig;
-  adapter: Adapter;
+  adapters: AdapterOf;
   workDir: string;
   runsRoot: string;
   onProgress?: (event: ProgressEvent) => void;
@@ -44,7 +44,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
   const rerun = await runPipeline({
     subjectId: base.subjectId,
     config: opts.config,
-    adapter: opts.adapter,
+    adapters: opts.adapters,
     root: opts.workDir,
     runsRoot: opts.runsRoot,
     keepOld: new Map(original.cases.flatMap((c) => c.runs.filter((r) => r.slot === "old").map((r) => [c.caseId, r] as const))),

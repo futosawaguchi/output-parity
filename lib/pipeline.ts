@@ -1,10 +1,10 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Adapter } from "./compare/adapters";
+import type { AdapterOf } from "./compare/adapters";
 import { compareCase, type Comparison } from "./compare/compare-case";
 import { naiveDiff, type NaiveDiff } from "./compare/naive";
-import { summarizeEnvironments, type EnvironmentSummaries, type ParityConfig } from "./config";
+import { summarizeEnvironments, type CaseOutput, type EnvironmentSummaries, type ParityConfig } from "./config";
 import { judgeByMachine, judgeCase } from "./judge/judge-case";
 import type { CauseReport } from "./fix/locate-cause";
 import type { FixAttempt } from "./fix/verify";
@@ -23,6 +23,8 @@ export type CaseReport = {
   caseId: string;
   label: string;
   description: string;
+  /** How this case's output was read, when not as the report's outputFormat says (a CSV among pages). */
+  output?: CaseOutput;
   runs: SlotResult[];
   comparison: Comparison;
   /** What a plain diff of the raw files says. null when the old or new run produced no output. */
@@ -74,7 +76,8 @@ export type PipelineOptions = {
   /** Recorded in the report (lib/subject.ts). */
   subjectId: string;
   config: ParityConfig;
-  adapter: Adapter;
+  /** The adapter for each case (adaptersFor): a case may be read in its own format. */
+  adapters: AdapterOf;
   /** The program's root for this run: work/ (DESIGN 7-4), or the source itself when fixes is suggest-only. run.cwd is inside it. */
   root: string;
   /** Copy the source into `root` first, for a fresh start. Left out when re-running after an edit. */
@@ -94,7 +97,7 @@ export type PipelineOptions = {
  * SetupError (the user's setup is broken).
  */
 export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
-  const { config, adapter, client } = opts;
+  const { config, adapters, client } = opts;
   const report = (message: string, caseId = "") => opts.onProgress?.({ caseId, message });
 
   if (opts.prepare) {
@@ -107,7 +110,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
   const run = await createRunDir(opts.runsRoot, startedAt);
 
   const environments = summarizeEnvironments(config.run);
-  const checkOpts: CheckOptions = { adapter, client, environments, record: sentRecorder(join(opts.runsRoot, "sent")), onProgress: opts.onProgress };
+  const checkOpts: CheckOptions = { adapters, client, environments, record: sentRecorder(join(opts.runsRoot, "sent")), onProgress: opts.onProgress };
   const web = runSpec.type === "web" ? webRunner(config, runSpec, opts.root, run.path) : null;
   const verb = web ? "開いています" : "実行しています";
   // Cases may run side by side (run.parallel); the report keeps the order of the settings.
@@ -199,7 +202,7 @@ export async function judgeWaiting(
 }
 
 export type CheckOptions = {
-  adapter: Adapter;
+  adapters: AdapterOf;
   client: Anthropic | null;
   environments: EnvironmentSummaries;
   /** Keeps what is sent to Claude (runs/sent/). */
@@ -213,11 +216,12 @@ export type CheckOptions = {
  */
 export async function checkCase(
   result: CaseResult,
-  about: { label: string; description: string },
+  about: { label: string; description: string; output?: CaseOutput },
   opts: CheckOptions,
 ): Promise<CaseReport> {
-  const { adapter, client, environments, record } = opts;
+  const { client, environments, record } = opts;
   const caseId = result.caseId;
+  const adapter = opts.adapters(caseId);
   const report = (message: string) => opts.onProgress?.({ caseId, message });
 
   report("出力をテキストにして比べています");
@@ -238,5 +242,6 @@ export async function checkCase(
       record,
     });
   }
-  return { caseId, label: about.label, description: about.description, runs: result.slots, comparison: compared.comparison, naive, verdict };
+  const output = about.output ? { output: about.output } : {};
+  return { caseId, label: about.label, description: about.description, ...output, runs: result.slots, comparison: compared.comparison, naive, verdict };
 }

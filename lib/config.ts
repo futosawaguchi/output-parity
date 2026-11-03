@@ -122,7 +122,16 @@ export type Case = {
   args: string[];
   /** The page to request: the web type only. */
   request?: WebRequest;
+  /** How this case's output is read, when not as `output` says. */
+  output?: CaseOutput;
 };
+
+/**
+ * How one case's output is read when it differs from the rest: a web app shows pages (html) and
+ * also exports a CSV (text, often Shift_JIS), and both are what the old system did. Only the
+ * format and the encoding can differ; where the output comes from is the same for every case.
+ */
+export type CaseOutput = { format: string; encoding: string };
 
 /**
  * Many cases written once (DESIGN 7-4c): one case per file in run.cwd whose name matches
@@ -137,6 +146,7 @@ export type CaseGroup = {
   description: string;
   args: string[];
   request?: WebRequest;
+  output?: CaseOutput;
 };
 
 export type ParityConfig = {
@@ -233,7 +243,8 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   if (typeof encoding !== "string" || !isEncoding(encoding)) fail(`output.encoding「${String(encoding)}」は読めない文字コードです（utf-8 / shift_jis / euc-jp など）`);
 
   if (runSpec.type === "files" && caseGroups !== undefined) fail("ファイル型（run.type が files）では caseGroups は使えません（cases を書かなければ、フォルダのファイルが全部入力になります）");
-  const parsedGroups = parseCaseGroups(caseGroups, runSpec.type, from, fail);
+  const base: CaseOutput = { format: output.format, encoding: encoding as string };
+  const parsedGroups = parseCaseGroups(caseGroups, runSpec.type, from, base, fail);
   if (cases !== undefined && !Array.isArray(cases)) return fail("cases が配列ではありません");
   const caseList: unknown[] = cases ?? [];
   // The files type finds its inputs in the folders when none are written (lib/runner/files.ts).
@@ -248,7 +259,12 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
     if ((c.label !== undefined && typeof c.label !== "string") || (c.description !== undefined && typeof c.description !== "string")) {
       fail(`cases[${i}] の label と description は文字列にしてください`);
     }
-    const about = { id: c.id, label: (c.label as string | undefined) ?? c.id, description: (c.description as string | undefined) ?? "" };
+    const about = {
+      id: c.id,
+      label: (c.label as string | undefined) ?? c.id,
+      description: (c.description as string | undefined) ?? "",
+      ...parseCaseOutput(c.output, `cases[${i}].output`, base, fail),
+    };
     if (runSpec.type === "web") {
       if (c.args !== undefined) fail(`cases[${i}].args は Web 型では使えません（開くページは request に書いてください）`);
       return { ...about, args: [], request: parseRequest(c.request, `cases[${i}].request`, fail) };
@@ -281,7 +297,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   };
 }
 
-function parseCaseGroups(groups: unknown, runType: RunSpec["type"], from: OutputSpec["from"], fail: (what: string) => never): CaseGroup[] {
+function parseCaseGroups(groups: unknown, runType: RunSpec["type"], from: OutputSpec["from"], base: CaseOutput, fail: (what: string) => never): CaseGroup[] {
   if (groups === undefined) return [];
   if (!Array.isArray(groups)) return fail("caseGroups が配列ではありません");
   return groups.map((g, i): CaseGroup => {
@@ -296,6 +312,7 @@ function parseCaseGroups(groups: unknown, runType: RunSpec["type"], from: Output
       id: (g.id as string | undefined) ?? (byFile ? "{name}" : "{n}"),
       label: (g.label as string | undefined) ?? (byFile ? "{file}" : "{n}"),
       description: (g.description as string | undefined) ?? "",
+      ...parseCaseOutput(g.output, `${at}.output`, base, fail),
     };
     if (runType === "web") {
       if (g.args !== undefined) fail(`${at}.args は Web 型では使えません（開くページは request に書いてください）`);
@@ -306,6 +323,24 @@ function parseCaseGroups(groups: unknown, runType: RunSpec["type"], from: Output
     if (from === "file" && !g.args.includes(OUTPUT_PLACEHOLDER)) fail(`${at}.args に ${OUTPUT_PLACEHOLDER} がありません（output.from が "file" のとき必要）`);
     return { ...about, args: g.args };
   });
+}
+
+/** A case's own output, filled in from `base` where it says nothing; nothing when the case has none. */
+function parseCaseOutput(value: unknown, at: string, base: CaseOutput, fail: (what: string) => never): { output?: CaseOutput } {
+  if (value === undefined) return {};
+  if (!isObject(value)) return fail(`${at} がオブジェクトではありません`);
+  const unknownKey = Object.keys(value).find((k) => k !== "format" && k !== "encoding");
+  if (unknownKey) fail(`${at}.${unknownKey} は入力ごとには書けません（書けるのは format と encoding）`);
+  if (value.format !== undefined && typeof value.format !== "string") fail(`${at}.format は文字列にしてください`);
+  if (value.encoding !== undefined && (typeof value.encoding !== "string" || !isEncoding(value.encoding))) {
+    fail(`${at}.encoding「${String(value.encoding)}」は読めない文字コードです（utf-8 / shift_jis / euc-jp など）`);
+  }
+  return { output: { format: (value.format as string | undefined) ?? base.format, encoding: (value.encoding as string | undefined) ?? base.encoding } };
+}
+
+/** How a case's output is read: its own output, or the settings' output. */
+export function outputOf(config: Pick<ParityConfig, "output">, c: { output?: CaseOutput }): CaseOutput {
+  return c.output ?? { format: config.output.format, encoding: config.output.encoding };
 }
 
 function parseEach(each: Record<string, unknown>, at: string, fail: (what: string) => never): CaseGroup["each"] {

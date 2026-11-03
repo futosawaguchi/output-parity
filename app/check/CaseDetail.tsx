@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Comparison } from "@/lib/compare/compare-case";
+import { outputKindOf } from "@/lib/case-output";
 import { readCalculation } from "@/lib/judge/arithmetic";
 import type { CaseVerdict, Finding } from "@/lib/judge/verdict";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
@@ -30,7 +31,7 @@ export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseRep
           {describeOutcome(run("new").outcome)}
         </span>
       </header>
-      {report.outputFormat === "html" && (
+      {outputKindOf(report, c).format === "html" && (
         <div className={styles.viewSwitch} role="group" aria-label="出力の見せ方">
           {(["page", "lines"] as const).map((v) => (
             <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>

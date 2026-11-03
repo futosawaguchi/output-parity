@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { join } from "node:path";
 import { loadBundledReport } from "@/lib/bundled";
 import { whyNotSending } from "@/lib/claude-scope";
-import { adapterFor } from "@/lib/compare/adapters";
+import { adaptersForReport } from "@/lib/compare/adapters";
 import { SetupError } from "@/lib/errors";
 import { startJob } from "@/lib/jobs";
 import { rejudgeBundled } from "@/lib/rejudge";
@@ -22,9 +22,9 @@ export async function POST(request: Request): Promise<Response> {
   if (!bundled) {
     return Response.json(NO_BUNDLE, { status: 400 });
   }
-  let adapter;
+  let adapters;
   try {
-    adapter = adapterFor({ format: bundled.outputFormat, encoding: bundled.outputEncoding });
+    adapters = adaptersForReport(bundled);
     // The bundle belongs to a subject; its settings decide what may be sent.
     const refused = whyNotSending((await loadSubject(root, subjectId)).config, "judge");
     if (refused) return Response.json(refused, { status: 400 });
@@ -36,7 +36,7 @@ export async function POST(request: Request): Promise<Response> {
   const client = new Anthropic();
 
   const result = startJob("rejudge", subjectId, (onProgress) =>
-    rejudgeBundled(bundled, { adapter, client, runsRoot: join(root, "runs"), onProgress }),
+    rejudgeBundled(bundled, { adapters, client, runsRoot: join(root, "runs"), onProgress }),
   );
   if (!result.started) return alreadyRunning(result.running, subjectId);
   return Response.json({ jobId: result.jobId }, { status: 202 });

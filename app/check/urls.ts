@@ -1,4 +1,5 @@
-import type { RunReport } from "@/lib/pipeline";
+import { outputKindOf } from "@/lib/case-output";
+import type { CaseReport, RunReport } from "@/lib/pipeline";
 
 // Where the page fetches files from. The bundled runs are found by subject (they share the run
 // ids "bundled" and "bundled-fix"), so every link names the subject of the report it belongs to.
@@ -8,8 +9,8 @@ export function outputUrl(report: RunReport, caseId: string, slot: string): stri
 }
 
 /** An HTML output as a page to draw, in the encoding it was read in (the route locks it down). */
-export function pageUrl(report: RunReport, caseId: string, slot: string): string {
-  return `${outputUrl(report, caseId, slot)}&view=page&charset=${encodeURIComponent(report.outputEncoding ?? "utf-8")}`;
+export function pageUrl(report: RunReport, c: CaseReport, slot: string): string {
+  return `${outputUrl(report, c.caseId, slot)}&view=page&charset=${encodeURIComponent(outputKindOf(report, c).encoding)}`;
 }
 
 /**

@@ -53,3 +53,27 @@ export function adapterFor(output: OutputKind): Adapter {
   }
   return make(output.encoding ?? DEFAULT_ENCODING);
 }
+
+/** The adapter for each case, by its id. */
+export type AdapterOf = (caseId: string) => Adapter;
+
+/**
+ * One adapter per case: the case's own output kind when it has one (a CSV export among the pages
+ * of a web app), the default otherwise. Every kind is checked here, so a format no adapter reads
+ * stops the run before anything runs, not halfway through.
+ */
+export function adaptersFor(fallback: OutputKind, cases: { id: string; output?: OutputKind }[]): AdapterOf {
+  const base = adapterFor(fallback);
+  const own = new Map(cases.flatMap((c) => (c.output ? [[c.id, adapterFor(c.output)] as const] : [])));
+  return (caseId) => own.get(caseId) ?? base;
+}
+
+/** The adapters for a subject's settings (cases already expanded from caseGroups). */
+export function adaptersForConfig(config: { output: OutputKind; cases: { id: string; output?: OutputKind }[] }): AdapterOf {
+  return adaptersFor(config.output, config.cases);
+}
+
+/** The adapters a saved report was read with, to compare and judge its outputs again. */
+export function adaptersForReport(report: { outputFormat: string; outputEncoding?: string; cases: { caseId: string; output?: OutputKind }[] }): AdapterOf {
+  return adaptersFor({ format: report.outputFormat, encoding: report.outputEncoding }, report.cases.map((c) => ({ id: c.caseId, output: c.output })));
+}
