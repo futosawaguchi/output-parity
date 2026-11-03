@@ -646,3 +646,11 @@
   font-family: var(--font-mono);
   font-size: 13px;
 }
+
+/* After an edit: a verdict carried over from before it (the difference is the same). */
+.carriedNote {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}

@@ -52,7 +52,16 @@ export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseRep
         )}
       </div>
       <NaiveDiffView naive={c.naive} />
-      {c.verdict ? <VerdictBlock verdict={c.verdict} subjectId={report.subjectId} /> : <p className={styles.muted}>判定していません</p>}
+      {c.verdict ? (
+        <VerdictBlock verdict={c.verdict} subjectId={report.subjectId} />
+      ) : c.carried ? (
+        <>
+          <p className={styles.muted}>当てたあとは判定していません。差が当てる前とまったく同じなので、当てる前の判定を出しています</p>
+          <VerdictBlock verdict={c.carried} subjectId={report.subjectId} />
+        </>
+      ) : (
+        <p className={styles.muted}>判定していません</p>
+      )}
       <CauseSection c={c} subjectId={report.subjectId} actions={cause} />
       <DroppedLines comparison={c.comparison} />
     </article>

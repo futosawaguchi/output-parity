@@ -5,6 +5,7 @@ import type { ParityConfig } from "../config";
 import { runPipeline, type ProgressEvent, type RunReport } from "../pipeline";
 import { prepareWorkspace } from "../workspace";
 import { applyEdit } from "./apply-edit";
+import { carryVerdicts } from "./carry";
 import { assessFix, type FixAttempt } from "./verify";
 
 export type ApplyOptions = {
@@ -40,7 +41,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
   const attempt: FixAttempt = { caseId, edit, applied, original };
   if (applied.kind === "refused") return { ...base, fixAttempt: attempt };
 
-  const after = await runPipeline({
+  const rerun = await runPipeline({
     subjectId: base.subjectId,
     config: opts.config,
     adapter: opts.adapter,
@@ -50,6 +51,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
     client: null,
     onProgress: opts.onProgress,
   });
+  const after = carryVerdicts(original, rerun);
   attempt.verification = assessFix(caseId, base, after);
   // Saved with the edit and the verdict on it: the record of what was applied (DESIGN 4-5), and
   // what npm run bundle ships so the round trip can be seen without PHP.

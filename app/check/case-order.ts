@@ -13,7 +13,7 @@ const ORDER: Group[] = ["broken", "needs_review", "unjudged", "harmless"];
 const GROUP_LABEL: Record<Group, string> = { ...VERDICT_LABEL, unjudged: "未判定" };
 
 export function groupOf(c: CaseReport): Group {
-  return c.verdict?.verdict ?? "unjudged";
+  return (c.verdict ?? c.carried)?.verdict ?? "unjudged";
 }
 
 /** "65 件: 壊れている 1・無害 64", groups with none left out. */

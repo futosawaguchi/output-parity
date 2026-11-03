@@ -29,6 +29,11 @@ export type CaseReport = {
   naive: NaiveDiff | null;
   /** null when the run was made without judging. */
   verdict: CaseVerdict | null;
+  /**
+   * After an edit (not judged again), the verdict from before the edit when the difference is
+   * exactly the same (lib/fix/carry.ts). Shown as that, never as a new verdict.
+   */
+  carried?: CaseVerdict;
   /** Where in the source the difference comes from; present once someone asked (DESIGN 7-4). */
   cause?: CauseReport;
 };

@@ -40,8 +40,19 @@ export function CaseTable({ cases, openId, onOpen, picked, onPick }: Props) {
               <span className={styles.caseLabel}>{c.label}</span>
               <span className={styles.caseDescription}>{c.description}</span>
             </td>
-            <td>{c.verdict ? <Badge verdict={c.verdict.verdict} /> : <span className={styles.muted}>未判定</span>}</td>
-            <td className={styles.rowSummary}>{c.verdict ? c.verdict.summary : describeRemaining(remainingOf(c.comparison))}</td>
+            <td>
+              {c.verdict ? (
+                <Badge verdict={c.verdict.verdict} />
+              ) : c.carried ? (
+                <>
+                  <Badge verdict={c.carried.verdict} />
+                  <span className={styles.carriedNote}>当てる前の判定（差は同じ）</span>
+                </>
+              ) : (
+                <span className={styles.muted}>未判定</span>
+              )}
+            </td>
+            <td className={styles.rowSummary}>{(c.verdict ?? c.carried)?.summary ?? describeRemaining(remainingOf(c.comparison))}</td>
           </tr>
         ))}
       </tbody>
