@@ -39,6 +39,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 - 入力 C の原因（`estimate.php` の行）と直し方。「同梱の『当てて確かめた結果』を見る」で、直し方を当てて流し直した結果が見られます
 - 判定と原因探しで Claude に送った全文（伏せ字のあと）
 - API キーがあれば、同梱の PDF を Claude に判定し直させられます（php は要りません）
+- 題材「架空書店の注文管理」（Web 型）も同梱しています。注文 31 画面の判定、旧と新の画面を左右に描いたもの、注文 21 の原因と直したあとの結果が見られます
 
 ## 全部動かす
 
@@ -56,6 +57,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
    npm run samples -- --judge   # 判定まで（Claude を呼ぶ）
    npm run samples -- --subject tcpdf-examples   # TCPDF の公式の例 65 本
    npm run samples -- --subject worklog          # Python 3.10 → 3.12 の作業日報（CSV・Shift_JIS）
+   npm run samples -- --subject bookshop         # Web 型。架空書店の注文管理（PHP の内蔵サーバ・SQLite）
    ```
 
 ## 自分のシステムで試す
@@ -79,14 +81,14 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 | `workspace.link` | | work/ に写さずリンクするフォルダ名（既定 `vendor`・`node_modules`） |
 | `claude.send` | ⭕ | Claude に送る範囲。既定はありません → [Claude に送るもの](#claude-に送るもの) |
 | `claude.neverRead` | | 原因探しで読ませないパス（`.gitignore` と同じ書き方） |
-| `run.type` | ⭕ | `command`（道具が旧と新のプログラムを動かす）か `files`（出力がもう手元にある。下の「ファイル型」） |
-| `run.cwd` / `run.timeoutMs` | | command のとき。動かす場所（source の中。既定 `.`）／打ち切るまでの時間（既定 30000） |
-| `run.needs` | | command のとき。動かす前にあるはずのもの（source からの相対。例 `["lib-old/vendor"]`）。無ければ実行せず、依存の取り方を出します |
-| `run.environments.old` / `.new` | ⭕ | command のとき。`label`・`command`（フルパス）・`args`（全入力の前に付ける引数）・`env`（その側だけの環境変数） |
-| `output.format` / `output.from` | ⭕ | `pdf`・`text`（ログ・CSV・標準出力など）・`html`（画面に見える文字とフォームの値）／`file`（プログラムが `{output}` に書く）か `stdout` |
+| `run.type` | ⭕ | `command`（道具が旧と新のプログラムを動かす）・`files`（出力がもう手元にある。下の「ファイル型」）・`web`（道具が旧と新のサーバを立てて画面を開く。下の「Web 型」） |
+| `run.cwd` / `run.timeoutMs` | | command と web のとき。動かす場所（source の中。既定 `.`）／打ち切るまでの時間（既定 30000。web では1回の問い合わせ） |
+| `run.needs` | | command と web のとき。動かす前にあるはずのもの（source からの相対。例 `["lib-old/vendor"]`）。無ければ実行せず、依存の取り方を出します |
+| `run.environments.old` / `.new` | ⭕ | command と web のとき。`label`・`command`（フルパス）・`args`（全入力の前に付ける引数。web ではサーバの起動の引数で `{port}` を含める）・`env`（その側だけの環境変数） |
+| `output.format` / `output.from` | ⭕ | `pdf`・`text`（ログ・CSV・標準出力など）・`html`（画面に見える文字とフォームの値）／`file`（プログラムが `{output}` に書く）か `stdout`（web では書きません） |
 | `output.encoding` | | テキストと HTML の文字コード（既定 `utf-8`。`shift_jis`・`euc-jp` など）。HTML が `<meta charset>` で宣言していれば、そちらを使います |
-| `cases[]` | ※ | `id`・`label`・`description`・`args`。`args` の `{output}` は出力ファイルのパスに置き換わります |
-| `caseGroups[]` | ※ | まとめ書き。`each.file`（例 `"example_*.php"`）に当てはまる `run.cwd` のファイルごとに入力を1つ作ります。`id`・`label`・`description`・`args` の `{file}` はファイル名、`{name}` は拡張子を除いた名前に置き換わります（既定は id `{name}`・label `{file}`） |
+| `cases[]` | ※ | `id`・`label`・`description`・`args`。`args` の `{output}` は出力ファイルのパスに置き換わります。web では `args` の代わりに `request`（開くページ） |
+| `caseGroups[]` | ※ | まとめ書き。`each.file`（例 `"example_*.php"`）に当てはまる `run.cwd` のファイルごとに入力を1つ作ります。`id`・`label`・`description`・`args` の `{file}` はファイル名、`{name}` は拡張子を除いた名前に置き換わります（既定は id `{name}`・label `{file}`）。`each.range`（例 `[1, 30]`）なら番号ごとに作り、`{n}` が番号になります |
 
 ※ `cases` と `caseGroups` のどちらかに、入力が1つ以上要ります（ファイル型では、書かなければフォルダのファイルが全部入力になります）。
 
@@ -106,6 +108,31 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 - 同じ入力の出力は、それぞれのフォルダに同じ名前で置きます。片方にしか無いファイルは「出力なし」として結果に出ます
 - 比べたファイルは実行の記録（`runs/`）に写して残します
 - プログラムを動かさないので、「当てて確かめる」は使えません（理由つきで止まります）。`source` にソースを指せば、原因探しは使えます
+
+### Web 型（道具がサーバを立てて画面を開く）
+
+ブラウザで開く業務アプリは、道具が旧と新のサーバを手元に立て、同じページを開いて比べます。例は `samples/bookshop/parity.config.jsonc` です。
+
+```jsonc
+"run": {
+  "type": "web",
+  "environments": {
+    "old": { "label": "PHP 7.4", "command": "/path/to/php7.4", "args": ["-S", "127.0.0.1:{port}", "-t", "public"] },
+    "new": { "label": "PHP 8.5", "command": "/path/to/php8.5", "args": ["-S", "127.0.0.1:{port}", "-t", "public"] }
+  },
+  "database": { "file": "data/shop.sqlite" }  // 任意。問い合わせのたびに、この原本から写しへ戻す
+},
+"output": { "format": "html" },
+"cases": [{ "id": "list", "label": "注文の一覧", "request": { "path": "/" } }],
+"caseGroups": [{ "each": { "range": [1, 30] }, "id": "order-{n}", "label": "注文 {n}", "request": { "path": "/order.php?id={n}" } }]
+```
+
+- 問い合わせるのは、道具が立てたサーバ（`127.0.0.1`）だけです。設定に書けるのはパスだけで、URL やホスト名は書けません。ポートは道具が空いているものを選び、`{port}` に入れます
+- リダイレクトは追いません（状態と行き先を結果として残します）。500 番台は「出力なし」として扱い、サーバの記録（エラーの行）を根拠に出します
+- `request` は `method`（`GET` か `POST`）・`path`・`form`（POST のときの値）です
+- `database` を書くと、問い合わせのたびに原本の DB を work/ の写しへ戻します（画面を開くと DB に書くアプリでも、前の問い合わせの影響が残りません）。原本は書き換えないので、`fixes: "suggest-only"` とは一緒に使えません。SQLite のようなファイルの DB だけです。MySQL などは、試す用のものを自分で用意してください
+- ⚠️ ログインはしません。ログインが要る画面は、試す環境だけでログインを外してください（環境変数で切り替えるなど。`env` で渡せます）
+- 画面は「画面で見る」で左右に描きます。描くときは、スクリプト・外への読み込み（画像・CSS・通信）・フォームの送信をすべて止めます。外の CSS で見た目を作っているアプリは、飾りのない画面になります
 
 - ⚠️ `id`・`label`・`description` は画面に出て、Claude にも渡ります。期待する判定が分かる名前にしないでください
 - ⚠️ 設定ファイルと同梱の結果は `source` の外に置きます（原因探しで Claude に答えを読ませないため）
@@ -181,6 +208,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 
 - 形式に依存するのは「変換」の1か所だけです。比較・揺れ・判定・原因は、テキストの行しか見ません。形式を足すのは `lib/compare/` にファイルを1つ足すことです（PDF・テキスト・HTML）
 - 言語にも依存しません。設定ファイルの `command` を変えるだけで、PHP の題材と Python の題材が同じ道具で動きます（`samples/worklog/`）
+- システムへのつなぎ方も3つの型（コマンド・ファイル・Web）と設定ファイル1枚で、道具のコードは書き換えません
 - 判定と原因探しのプロンプトに、見積書や PHP に固有の語は書いていません
 
 ## サンプルについて
@@ -188,6 +216,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 - 同梱の見積書と入力データは、**この作品のために作った架空のもの**です。実在の取引先・案件・金額は含みません
 - PDF ライブラリは本物の公開 OSS です（TCPDF 6.2.26 / 6.3.0、FPDI 1.6.2）。アプリ（`samples/estimate/app/estimate.php`）は自分で書きました
 - 作業日報の題材（`samples/worklog/`）も架空です。Python 3.11 で `datetime.fromisoformat` が受け付ける日付の形が広がったため、3.10 では読めずに飛ばされていた行が、3.12 では集計に入ります。落ちず、警告も出ず、合計だけが変わります
+- 架空書店の注文管理（`samples/bookshop/`。Web 型）も架空です。書名・お客様・注文は作ったものです。PHP 8.1 から SQLite の数が文字列ではなく数として返るため、ギフト包装の行が消えたり、在庫切れの本が「残りわずか」になったりします。画面は普通に出て、HTTP も 200 のままです。明細の無い注文は 0 で割り、PHP 8 では 500 になります
 - もう1つの題材は、TCPDF 6.3.0 に付属する公式の例 65 本そのものです（書き換えずに動かします）。手元の測定では 64 本が差なし、`example_050`（2次元バーコード PDF417）だけが PHP 8.5 で構文エラーになり、PDF が出ません。この題材は同梱していません（composer で取得します）
 - TCPDF は LGPL-3.0 です。MIT のこのリポジトリに実体を入れないよう、`vendor/` は同梱せず composer で取得します。古い版を使うので、composer の脆弱性の勧告はパッケージ名で無視しています
 
