@@ -2,6 +2,7 @@ import { VERDICT_LABEL, type CaseVerdict } from "../judge/verdict";
 import type { CaseReport, RunReport } from "../pipeline";
 import { describeOutcome } from "../runner/outcome";
 import { describeRemaining, remainingOf } from "../fix/verify";
+import type { SentRecord } from "../sent-log";
 import type { Deprecation } from "./deprecations";
 
 // The record of what was checked (DESIGN 4-5 "1 への答え"): the document the previous person never
@@ -174,13 +175,21 @@ function fix(report: RunReport): string[] {
 }
 
 function sent(report: RunReport): string[] {
-  const items = report.cases.flatMap((c) =>
-    [
-      { what: "判定", rec: c.verdict?.sent },
-      { what: "判定（当てる前）", rec: c.carried?.sent },
-      { what: "原因探し", rec: c.cause?.sent },
-    ].flatMap(({ what, rec }) => (rec ? [{ label: c.label, what, rec }] : [])),
-  );
+  // After an edit, what was sent before it (the verdicts, the cause that led to the edit) is part
+  // of the same round trip; the same sending may be reached twice (a carried verdict), so by file.
+  const sources = [
+    ...report.cases.map((c) => ({ c, before: false })),
+    ...(report.fixAttempt?.original.cases ?? []).map((c) => ({ c, before: true })),
+  ];
+  const byFile = new Map<string, { label: string; what: string; rec: SentRecord }>();
+  for (const { c, before } of sources) {
+    for (const [rec, carried] of [[c.verdict?.sent, before], [c.carried?.sent, true], [c.cause?.sent, before]] as const) {
+      if (rec && !byFile.has(rec.file)) {
+        byFile.set(rec.file, { label: c.label, what: `${rec.purpose === "cause" ? "原因探し" : "判定"}${carried ? "（当てる前）" : ""}`, rec });
+      }
+    }
+  }
+  const items = [...byFile.values()];
   const folder = report.origin === "bundled" ? "同梱の sent/" : "runs/sent/";
   if (items.length === 0) return ["## Claude に送ったもの", "何も送っていません（機械で決まったか、判定していません）。"];
   const chars = items.reduce((n, i) => n + i.rec.chars, 0);
