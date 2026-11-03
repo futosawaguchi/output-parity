@@ -17,6 +17,7 @@ export const WITHOUT_CLAUDE: Record<string, CaseExpectation> = {
     default: SAME,
     cases: {
       list: "残った差 2 行 / 判定なし",
+      export: "残った差 4 行 / 判定なし",
       "order-8": "残った差 2 行 / 判定なし",
       ...Object.fromEntries([4, 12, 19, 21, 25].map((n) => [`order-${n}`, "残った差 1 行 / 判定なし"])),
       "order-27": "出力なし / 壊れている（機械）",

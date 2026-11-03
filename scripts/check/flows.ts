@@ -88,7 +88,7 @@ export async function withoutPhpFlows(results: Results, base: string, browser: B
     await results.step("4j", "php が無いとき（架空書店）: 注文 21 が直り、注文 8 は当てる前の判定のまま", async () => {
       await page.goto(`${base}/check?subject=bookshop`);
       await countLine(page);
-      await replay(page, /注文 21/, "直りました: 注文 21", "31 件: 壊れている 2・無害 29", "31 件: 壊れている 3・無害 28");
+      await replay(page, /注文 21/, "直りました: 注文 21", "32 件: 壊れている 2・無害 30", "32 件: 壊れている 3・無害 29");
       await page.getByRole("button", { name: /当てて確かめた結果」を見る/ }).click();
       await waitForText(page, "直りました: 注文 21", 10_000);
       const row8 = await page.locator("tbody tr").filter({ hasText: /注文 8/ }).first().innerText();

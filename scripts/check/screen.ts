@@ -58,7 +58,7 @@ export async function screenChecks(results: Results, base: string, browser: Brow
     await results.step(`${tag}i`, "架空書店の同梱: 件数・並び・開いたページ・画面で見る・HTTP 500", async () => {
       await page.goto(`${base}/check?subject=bookshop`);
       const count = await countLine(page);
-      expect(count === "31 件: 壊れている 3・無害 28", `件数「${count}」`);
+      expect(count === "32 件: 壊れている 3・無害 29", `件数「${count}」`);
       const firstThree = await page.locator("tbody tr td:nth-child(2) > span:first-child").evaluateAll((spans) => spans.slice(0, 3).map((s) => (s as HTMLElement).innerText.trim()));
       expect(firstThree.join("・") === "注文 8・注文 21・注文 27", `一覧の上の 3 件が「${firstThree.join("・")}」`);
       await openCase(page, /注文 8/);
@@ -86,7 +86,7 @@ export async function screenChecks(results: Results, base: string, browser: Brow
       expect(csp.startsWith("default-src 'none'") && csp.includes("sandbox") && page8.headers.get("x-content-type-options") === "nosniff", `CSP「${csp}」`);
       const pdf = await fetch(`${base}/api/outputs/bundled/case-c/new?subject=estimate&view=page&charset=utf-8`);
       expect(pdf.status === 404, `PDF に view=page で ${pdf.status}（期待 404）`);
-      for (const path of ["/check/record?subject=estimate&from=bundled", "/api/runs", "/check/sent/20261103-103652-order-8-judge-872a.txt?subject=bookshop"]) {
+      for (const path of ["/check/record?subject=estimate&from=bundled", "/api/runs", "/check/sent/20261103-152925-order-8-judge-e51f.txt?subject=bookshop"]) {
         const status = await statusWithHost(base, path, "evil.example");
         expect(status === 403, `${path} がほかの Host で ${status}（期待 403）`);
       }

@@ -3,7 +3,7 @@
   "origin": "run",
   "subjectId": "bookshop",
   "configName": "架空書店の注文管理 Web アプリ（PHP 7.4 → 8.5）",
-  "configDescription": "架空の書店の注文管理画面（samples/bookshop/app/。PHP・SQLite）を、道具が PHP 7.4 と PHP 8.5 の内蔵サーバで手元（127.0.0.1）に立て、注文の一覧と注文 30 件の画面を開いて比べます。注文・書名・お客様は今回作った架空のものです。",
+  "configDescription": "架空の書店の注文管理画面（samples/bookshop/app/。PHP・SQLite）を、道具が PHP 7.4 と PHP 8.5 の内蔵サーバで手元（127.0.0.1）に立て、注文の一覧と注文 30 件の画面、注文の書き出し（CSV）を開いて比べます。注文・書名・お客様は今回作った架空のものです。",
   "environments": {
     "old": {
       "label": "PHP 7.4",
@@ -16,8 +16,8 @@
   },
   "outputFormat": "html",
   "outputEncoding": "utf-8",
-  "startedAt": "2026-11-03T01:38:58.590Z",
-  "finishedAt": "2026-11-03T01:39:40.338Z",
+  "startedAt": "2026-11-03T06:30:43.454Z",
+  "finishedAt": "2026-11-03T06:31:23.283Z",
   "cases": [
     {
       "caseId": "list",
@@ -32,7 +32,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -42,7 +42,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 57,
+          "durationMs": 17,
           "outputPath": "list/old/output.html",
           "stdoutPath": "list/old/stdout.txt",
           "stderrPath": "list/old/stderr.txt"
@@ -55,7 +55,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -65,7 +65,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 6,
+          "durationMs": 11,
           "outputPath": "list/new/output.html",
           "stdoutPath": "list/new/stdout.txt",
           "stderrPath": "list/new/stderr.txt"
@@ -78,7 +78,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -88,7 +88,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 6,
+          "durationMs": 4,
           "outputPath": "list/baseline/output.html",
           "stdoutPath": "list/baseline/stdout.txt",
           "stderrPath": "list/baseline/stderr.txt"
@@ -133,10 +133,11 @@
             "28 | 2026-10-19 | 近藤 様 | 1 | 2,500 円",
             "29 | 2026-10-20 | 坂本 様 | 2 | 3,000 円",
             "30 | 2026-10-20 | 遠藤 様 | 1 | 2,300 円",
-            "表示 2026-11-03 10:35:53"
+            "表示 2026-11-03 15:28:12"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -175,10 +176,11 @@
             "28 | 2026-10-19 | 近藤 様 | 1 | 2,500 円",
             "29 | 2026-10-20 | 坂本 様 | 2 | 3,000 円",
             "30 | 2026-10-20 | 遠藤 様 | 1 | 2,300 円",
-            "表示 2026-11-03 10:38:58"
+            "表示 2026-11-03 15:30:43"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -205,11 +207,11 @@
           {
             "oldStart": 35,
             "oldLines": [
-              "表示 2026-11-03 10:35:53"
+              "表示 2026-11-03 15:28:12"
             ],
             "newStart": 35,
             "newLines": [
-              "表示 2026-11-03 10:38:58"
+              "表示 2026-11-03 15:30:43"
             ],
             "explainedByBaseline": true
           }
@@ -229,7 +231,7 @@
       "carried": {
         "caseId": "list",
         "verdict": "harmless",
-        "summary": "注文15と16（同じ注文日 2026-10-10）の並び順だけが入れ替わり、内容に変化はない。",
+        "summary": "注文15番と16番（同じ注文日 2026-10-10）の並び順が入れ替わっただけで、行の中身は同じです。新しい並びは注文番号順・日付順のどちらにも沿っています。",
         "findings": [
           {
             "verdict": "harmless",
@@ -237,17 +239,16 @@
               "C1",
               "C2"
             ],
-            "what": "注文15の行が注文16の後ろから前へ移り、注文番号の昇順になった。",
-            "why": "行の内容は一字も変わっておらず、2行は注文日が同じ 2026-10-10 なので日付順は保たれている。他の同日の組（1・2、4〜6 など）も番号の昇順なので、新の並びのほうが一覧全体と揃っている。",
+            "what": "注文日が同じ 2026-10-10 の注文15番と16番の順序が入れ替わり、新では15番が16番の前に来ています。",
+            "why": "行の中身（日付・お客様・冊数・合計）は旧と新で一字も変わらず、件数も30件のままです。新の並びは注文番号順・注文日順の両方と矛盾せず、旧で15番が16番の後ろにあった並びのほうが不自然でした。",
             "evidence": [
+              "14 | 2026-10-09 | 木村 様 | 2 | 4,000 円",
               "15 | 2026-10-10 | 林 様 | 2 | 3,300 円",
               "16 | 2026-10-10 | 清水 様 | 1 | 2,100 円",
-              "4 | 2026-10-03 | 高橋 様 | 2 | 3,960 円",
-              "5 | 2026-10-03 | 伊藤 様 | 1 | 2,300 円",
-              "6 | 2026-10-03 | 渡辺 様 | 3 | 4,200 円"
+              "17 | 2026-10-11 | 山崎 様 | 1 | 1,700 円"
             ],
             "calculation": null,
-            "checkHere": "表の注文番号14〜17の行（2026-10-10 の2件の並び）"
+            "checkHere": "表の注文番号14〜17の行。新では番号が 14→15→16→17 と連続していること。"
           }
         ],
         "judgedBy": {
@@ -256,9 +257,272 @@
         },
         "sent": {
           "purpose": "judge",
-          "at": "2026-11-03T01:36:35.605Z",
-          "file": "20261103-103635-list-judge-df7e.txt",
-          "chars": 2909,
+          "at": "2026-11-03T06:28:59.910Z",
+          "file": "20261103-152859-list-judge-53d6.txt",
+          "chars": 2979,
+          "masked": 0,
+          "maskedKinds": []
+        }
+      }
+    },
+    {
+      "caseId": "export",
+      "label": "注文の書き出し",
+      "description": "注文 30 件を会計ソフトに取り込む CSV（Shift_JIS）",
+      "output": {
+        "format": "text",
+        "encoding": "shift_jis"
+      },
+      "runs": [
+        {
+          "slot": "old",
+          "env": "old",
+          "command": "/opt/homebrew/opt/php@7.4/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:61527",
+            "-t",
+            "public"
+          ],
+          "request": "GET /export.php",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 7,
+          "outputPath": "export/old/output.text",
+          "stdoutPath": "export/old/stdout.txt",
+          "stderrPath": "export/old/stderr.txt"
+        },
+        {
+          "slot": "new",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:61754",
+            "-t",
+            "public"
+          ],
+          "request": "GET /export.php",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 6,
+          "outputPath": "export/new/output.text",
+          "stdoutPath": "export/new/stdout.txt",
+          "stderrPath": "export/new/stderr.txt"
+        },
+        {
+          "slot": "baseline",
+          "env": "new",
+          "command": "/opt/homebrew/bin/php",
+          "args": [
+            "-d",
+            "display_errors=0",
+            "-S",
+            "127.0.0.1:61754",
+            "-t",
+            "public"
+          ],
+          "request": "GET /export.php",
+          "outcome": {
+            "kind": "http",
+            "status": 200,
+            "location": null
+          },
+          "durationMs": 4,
+          "outputPath": "export/baseline/output.text",
+          "stdoutPath": "export/baseline/stdout.txt",
+          "stderrPath": "export/baseline/stderr.txt"
+        }
+      ],
+      "comparison": {
+        "kind": "compared",
+        "old": {
+          "lines": [
+            "注文番号,注文日,お客様,入金日,クーポン割引率,小計,割引,送料,合計",
+            "1,2026-10-01,山田,2026-10-03,,2600,0,500,3100",
+            "2,2026-10-01,佐藤,2026-10-02,,1500,0,500,2000",
+            "3,2026-10-02,鈴木,,,3200,0,0,3200",
+            "4,2026-10-03,高橋,2026-10-04,10.0,4400,440,0,3960",
+            "5,2026-10-03,伊藤,2026-10-05,,1800,0,500,2300",
+            "6,2026-10-03,渡辺,,,4200,0,0,4200",
+            "7,2026-10-04,中村,2026-10-06,,2400,0,500,2900",
+            "8,2026-10-05,小林,2026-10-06,,3600,0,0,3600",
+            "9,2026-10-05,加藤,2026-10-07,,3000,0,0,3000",
+            "10,2026-10-06,吉田,,,2400,0,500,2900",
+            "11,2026-10-07,山本,2026-10-08,,3200,0,0,3200",
+            "12,2026-10-07,松本,2026-10-09,5.0,4800,240,0,4560",
+            "13,2026-10-08,井上,2026-10-10,,1400,0,500,1900",
+            "14,2026-10-09,木村,,,4000,0,0,4000",
+            "15,2026-10-10,林,2026-10-11,,3300,0,0,3300",
+            "16,2026-10-10,清水,2026-10-12,,1600,0,500,2100",
+            "17,2026-10-11,山崎,2026-10-12,,1200,0,500,1700",
+            "18,2026-10-12,森,,,4800,0,0,4800",
+            "19,2026-10-13,池田,2026-10-14,15.0,3800,570,0,3230",
+            "20,2026-10-13,橋本,2026-10-15,,2800,0,500,3300",
+            "21,2026-10-14,石川,,,3400,0,0,3400",
+            "22,2026-10-15,前田,2026-10-16,,1600,0,500,2100",
+            "23,2026-10-15,藤田,2026-10-17,,1500,0,500,2000",
+            "24,2026-10-16,岡田,,,3600,0,0,3600",
+            "25,2026-10-17,後藤,2026-10-18,10.0,3800,380,0,3420",
+            "26,2026-10-18,長谷川,2026-10-19,,2700,0,500,3200",
+            "27,2026-10-18,村上,,,0,0,500,500",
+            "28,2026-10-19,近藤,2026-10-20,,2000,0,500,2500",
+            "29,2026-10-20,坂本,,,3000,0,0,3000",
+            "30,2026-10-20,遠藤,2026-10-21,,1800,0,500,2300"
+          ],
+          "unreadable": [],
+          "undecodable": 0,
+          "pages": []
+        },
+        "new": {
+          "lines": [
+            "注文番号,注文日,お客様,入金日,クーポン割引率,小計,割引,送料,合計",
+            "1,2026-10-01,山田,2026-10-03,,2600,0,500,3100",
+            "2,2026-10-01,佐藤,2026-10-02,,1500,0,500,2000",
+            "3,2026-10-02,鈴木,,,3200,0,0,3200",
+            "4,2026-10-03,高橋,2026-10-04,10,4400,440,0,3960",
+            "5,2026-10-03,伊藤,2026-10-05,,1800,0,500,2300",
+            "6,2026-10-03,渡辺,,,4200,0,0,4200",
+            "7,2026-10-04,中村,2026-10-06,,2400,0,500,2900",
+            "8,2026-10-05,小林,2026-10-06,,3600,0,0,3600",
+            "9,2026-10-05,加藤,2026-10-07,,3000,0,0,3000",
+            "10,2026-10-06,吉田,,,2400,0,500,2900",
+            "11,2026-10-07,山本,2026-10-08,,3200,0,0,3200",
+            "12,2026-10-07,松本,2026-10-09,5,4800,240,0,4560",
+            "13,2026-10-08,井上,2026-10-10,,1400,0,500,1900",
+            "14,2026-10-09,木村,,,4000,0,0,4000",
+            "15,2026-10-10,林,2026-10-11,,3300,0,0,3300",
+            "16,2026-10-10,清水,2026-10-12,,1600,0,500,2100",
+            "17,2026-10-11,山崎,2026-10-12,,1200,0,500,1700",
+            "18,2026-10-12,森,,,4800,0,0,4800",
+            "19,2026-10-13,池田,2026-10-14,15,3800,570,0,3230",
+            "20,2026-10-13,橋本,2026-10-15,,2800,0,500,3300",
+            "21,2026-10-14,石川,,,3400,0,0,3400",
+            "22,2026-10-15,前田,2026-10-16,,1600,0,500,2100",
+            "23,2026-10-15,藤田,2026-10-17,,1500,0,500,2000",
+            "24,2026-10-16,岡田,,,3600,0,0,3600",
+            "25,2026-10-17,後藤,2026-10-18,10,3800,380,0,3420",
+            "26,2026-10-18,長谷川,2026-10-19,,2700,0,500,3200",
+            "27,2026-10-18,村上,,,0,0,500,500",
+            "28,2026-10-19,近藤,2026-10-20,,2000,0,500,2500",
+            "29,2026-10-20,坂本,,,3000,0,0,3000",
+            "30,2026-10-20,遠藤,2026-10-21,,1800,0,500,2300"
+          ],
+          "unreadable": [],
+          "undecodable": 0,
+          "pages": []
+        },
+        "baseline": {
+          "kind": "used"
+        },
+        "changes": [
+          {
+            "oldStart": 4,
+            "oldLines": [
+              "4,2026-10-03,高橋,2026-10-04,10.0,4400,440,0,3960"
+            ],
+            "newStart": 4,
+            "newLines": [
+              "4,2026-10-03,高橋,2026-10-04,10,4400,440,0,3960"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 12,
+            "oldLines": [
+              "12,2026-10-07,松本,2026-10-09,5.0,4800,240,0,4560"
+            ],
+            "newStart": 12,
+            "newLines": [
+              "12,2026-10-07,松本,2026-10-09,5,4800,240,0,4560"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 19,
+            "oldLines": [
+              "19,2026-10-13,池田,2026-10-14,15.0,3800,570,0,3230"
+            ],
+            "newStart": 19,
+            "newLines": [
+              "19,2026-10-13,池田,2026-10-14,15,3800,570,0,3230"
+            ],
+            "explainedByBaseline": false
+          },
+          {
+            "oldStart": 25,
+            "oldLines": [
+              "25,2026-10-17,後藤,2026-10-18,10.0,3800,380,0,3420"
+            ],
+            "newStart": 25,
+            "newLines": [
+              "25,2026-10-17,後藤,2026-10-18,10,3800,380,0,3420"
+            ],
+            "explainedByBaseline": false
+          }
+        ]
+      },
+      "naive": {
+        "oldBytes": 1363,
+        "newBytes": 1355,
+        "differingLines": 8,
+        "totalLines": 32,
+        "excerpt": [
+          "< 4,2026-10-03,····,2026-10-04,10.0,4400,440,0,3960",
+          "> 4,2026-10-03,····,2026-10-04,10,4400,440,0,3960",
+          "< 12,2026-10-07,···{,2026-10-09,5.0,4800,240,0,4560",
+          "> 12,2026-10-07,···{,2026-10-09,5,4800,240,0,4560",
+          "< 19,2026-10-13,·r·c,2026-10-14,15.0,3800,570,0,3230",
+          "> 19,2026-10-13,·r·c,2026-10-14,15,3800,570,0,3230",
+          "< 25,2026-10-17,····,2026-10-18,10.0,3800,380,0,3420",
+          "> 25,2026-10-17,····,2026-10-18,10,3800,380,0,3420"
+        ]
+      },
+      "verdict": null,
+      "carried": {
+        "caseId": "export",
+        "verdict": "harmless",
+        "summary": "クーポン割引率の表記が「10.0」から「10」のように小数点以下を省いた形に変わりましたが、値は同じで、割引額と合計の計算にも矛盾はありません。",
+        "findings": [
+          {
+            "verdict": "harmless",
+            "changeIds": [
+              "C1",
+              "C2",
+              "C3",
+              "C4"
+            ],
+            "what": "クーポン割引率の列で「.0」が省かれた（10.0→10、5.0→5、15.0→15、10.0→10）。",
+            "why": "数値としては同じ値です。同じ行の割引額と合計は旧と変わらず、新しい率で計算しても一致します。",
+            "evidence": [
+              "4,2026-10-03,高橋,2026-10-04,10,4400,440,0,3960",
+              "12,2026-10-07,松本,2026-10-09,5,4800,240,0,4560",
+              "19,2026-10-13,池田,2026-10-14,15,3800,570,0,3230",
+              "25,2026-10-17,後藤,2026-10-18,10,3800,380,0,3420"
+            ],
+            "calculation": "4400×10% = 440、4400−440+0 = 3960／4800×5% = 240、4800−240 = 4560／3800×15% = 570、3800−570 = 3230／3800×10% = 380、3800−380 = 3420（すべて出力と一致）",
+            "checkHere": "注文番号 4・12・19・25 の行の「クーポン割引率」列"
+          }
+        ],
+        "judgedBy": {
+          "kind": "claude",
+          "model": "claude-opus-5-5"
+        },
+        "sent": {
+          "purpose": "judge",
+          "at": "2026-11-03T06:29:10.364Z",
+          "file": "20261103-152910-export-judge-3804.txt",
+          "chars": 3086,
           "masked": 0,
           "maskedKinds": []
         }
@@ -277,7 +541,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -287,7 +551,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 7,
+          "durationMs": 5,
           "outputPath": "order-1/old/output.html",
           "stdoutPath": "order-1/old/stdout.txt",
           "stderrPath": "order-1/old/stderr.txt"
@@ -300,7 +564,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -310,7 +574,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 26,
+          "durationMs": 3,
           "outputPath": "order-1/new/output.html",
           "stdoutPath": "order-1/new/stdout.txt",
           "stderrPath": "order-1/new/stderr.txt"
@@ -323,7 +587,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -333,7 +597,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 4,
+          "durationMs": 3,
           "outputPath": "order-1/baseline/output.html",
           "stdoutPath": "order-1/baseline/stdout.txt",
           "stderrPath": "order-1/baseline/stderr.txt"
@@ -361,10 +625,11 @@
             "合計 | 3,100 円",
             "1冊あたり | 1,550 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:35:54"
+            "表示 2026-11-03 15:28:15"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -386,10 +651,11 @@
             "合計 | 3,100 円",
             "1冊あたり | 1,550 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:00"
+            "表示 2026-11-03 15:30:46"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -398,11 +664,11 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "表示 2026-11-03 10:35:54"
+              "表示 2026-11-03 15:28:15"
             ],
             "newStart": 18,
             "newLines": [
-              "表示 2026-11-03 10:39:00"
+              "表示 2026-11-03 15:30:46"
             ],
             "explainedByBaseline": true
           }
@@ -441,7 +707,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -451,7 +717,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 16,
+          "durationMs": 3,
           "outputPath": "order-2/old/output.html",
           "stdoutPath": "order-2/old/stdout.txt",
           "stderrPath": "order-2/old/stderr.txt"
@@ -464,7 +730,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -487,7 +753,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -497,7 +763,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 15,
+          "durationMs": 5,
           "outputPath": "order-2/baseline/output.html",
           "stdoutPath": "order-2/baseline/stdout.txt",
           "stderrPath": "order-2/baseline/stderr.txt"
@@ -524,10 +790,11 @@
             "合計 | 2,000 円",
             "1冊あたり | 2,000 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:35:56"
+            "表示 2026-11-03 15:28:16"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -548,10 +815,11 @@
             "合計 | 2,000 円",
             "1冊あたり | 2,000 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:01"
+            "表示 2026-11-03 15:30:47"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -560,11 +828,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:35:56"
+              "表示 2026-11-03 15:28:16"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:01"
+              "表示 2026-11-03 15:30:47"
             ],
             "explainedByBaseline": true
           }
@@ -603,7 +871,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -613,7 +881,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 12,
+          "durationMs": 6,
           "outputPath": "order-3/old/output.html",
           "stdoutPath": "order-3/old/stdout.txt",
           "stderrPath": "order-3/old/stderr.txt"
@@ -626,7 +894,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -636,7 +904,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 9,
+          "durationMs": 4,
           "outputPath": "order-3/new/output.html",
           "stdoutPath": "order-3/new/stdout.txt",
           "stderrPath": "order-3/new/stderr.txt"
@@ -649,7 +917,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -659,7 +927,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 13,
+          "durationMs": 5,
           "outputPath": "order-3/baseline/output.html",
           "stdoutPath": "order-3/baseline/stdout.txt",
           "stderrPath": "order-3/baseline/stderr.txt"
@@ -687,12 +955,13 @@
             "1冊あたり | 1,600 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 3]",
-            "[input hidden token: 6bf391d6a9b916be9979a8190243dc40]",
+            "[input hidden token: 7f76b44897bb451e87a3108a62222d7e]",
             "入金を記録する",
-            "表示 2026-11-03 10:35:57"
+            "表示 2026-11-03 15:28:17"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -714,12 +983,13 @@
             "1冊あたり | 1,600 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 3]",
-            "[input hidden token: 9f3bba2a6462ee83fb5b9d82311f56a4]",
+            "[input hidden token: abb357966e6e0137de449025433167ea]",
             "入金を記録する",
-            "表示 2026-11-03 10:39:02"
+            "表示 2026-11-03 15:30:48"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -728,22 +998,22 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "[input hidden token: 6bf391d6a9b916be9979a8190243dc40]"
+              "[input hidden token: 7f76b44897bb451e87a3108a62222d7e]"
             ],
             "newStart": 18,
             "newLines": [
-              "[input hidden token: 9f3bba2a6462ee83fb5b9d82311f56a4]"
+              "[input hidden token: abb357966e6e0137de449025433167ea]"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 20,
             "oldLines": [
-              "表示 2026-11-03 10:35:57"
+              "表示 2026-11-03 15:28:17"
             ],
             "newStart": 20,
             "newLines": [
-              "表示 2026-11-03 10:39:02"
+              "表示 2026-11-03 15:30:48"
             ],
             "explainedByBaseline": true
           }
@@ -782,7 +1052,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -792,7 +1062,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 9,
+          "durationMs": 4,
           "outputPath": "order-4/old/output.html",
           "stdoutPath": "order-4/old/stdout.txt",
           "stderrPath": "order-4/old/stderr.txt"
@@ -805,7 +1075,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -815,7 +1085,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 17,
+          "durationMs": 5,
           "outputPath": "order-4/new/output.html",
           "stdoutPath": "order-4/new/stdout.txt",
           "stderrPath": "order-4/new/stderr.txt"
@@ -828,7 +1098,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -838,7 +1108,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 13,
+          "durationMs": 3,
           "outputPath": "order-4/baseline/output.html",
           "stdoutPath": "order-4/baseline/stdout.txt",
           "stderrPath": "order-4/baseline/stderr.txt"
@@ -867,10 +1137,11 @@
             "合計 | 3,960 円",
             "1冊あたり | 1,980 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:35:58"
+            "表示 2026-11-03 15:28:19"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -893,10 +1164,11 @@
             "合計 | 3,960 円",
             "1冊あたり | 1,980 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:04"
+            "表示 2026-11-03 15:30:49"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -916,11 +1188,11 @@
           {
             "oldStart": 19,
             "oldLines": [
-              "表示 2026-11-03 10:35:58"
+              "表示 2026-11-03 15:28:19"
             ],
             "newStart": 19,
             "newLines": [
-              "表示 2026-11-03 10:39:04"
+              "表示 2026-11-03 15:30:49"
             ],
             "explainedByBaseline": true
           }
@@ -940,22 +1212,23 @@
       "carried": {
         "caseId": "order-4",
         "verdict": "harmless",
-        "summary": "差はクーポン割引率の表記（10.0%→10%）だけで、値は同じで金額とも合っており無害。",
+        "summary": "変更はクーポン割引率の表記が「10.0%」から「10%」になった1か所だけで、値も金額計算も変わらず無害です。",
         "findings": [
           {
             "verdict": "harmless",
             "changeIds": [
               "C1"
             ],
-            "what": "クーポン割引率の表示が「10.0%」から「10%」に変わった。",
-            "why": "どちらも同じ10%を表しています。割引額-440円、合計3,960円とも矛盾せず、読む人の判断は変わりません。",
+            "what": "クーポン割引の率の表記が「10.0%」から「10%」に変わった。",
+            "why": "率の値は同じで、割引額・合計・1冊あたりの金額とも矛盾しません。ほかに率を表示している箇所がなく、表記の揺れも生じていません。",
             "evidence": [
               "クーポン割引 10% | -440 円",
               "小計 | 4,400 円",
-              "合計 | 3,960 円"
+              "合計 | 3,960 円",
+              "1冊あたり | 1,980 円"
             ],
-            "calculation": "4,400 × 10% = 440、4,400 − 440 = 3,960（合計と一致）",
-            "checkHere": "金額表のクーポン割引の行"
+            "calculation": "4,400 × 10% = 440（割引 -440 円と一致）; 4,400 − 440 + 0 = 3,960（合計と一致）; 3,960 ÷ 2冊 = 1,980（1冊あたりと一致）",
+            "checkHere": "金額表の「クーポン割引」の行"
           }
         ],
         "judgedBy": {
@@ -964,9 +1237,9 @@
         },
         "sent": {
           "purpose": "judge",
-          "at": "2026-11-03T01:36:45.640Z",
-          "file": "20261103-103645-order-4-judge-d95c.txt",
-          "chars": 2015,
+          "at": "2026-11-03T06:29:19.535Z",
+          "file": "20261103-152919-order-4-judge-ba3b.txt",
+          "chars": 2028,
           "masked": 0,
           "maskedKinds": []
         }
@@ -985,7 +1258,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -995,7 +1268,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 21,
+          "durationMs": 7,
           "outputPath": "order-5/old/output.html",
           "stdoutPath": "order-5/old/stdout.txt",
           "stderrPath": "order-5/old/stderr.txt"
@@ -1008,7 +1281,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1018,7 +1291,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 8,
+          "durationMs": 3,
           "outputPath": "order-5/new/output.html",
           "stdoutPath": "order-5/new/stdout.txt",
           "stderrPath": "order-5/new/stderr.txt"
@@ -1031,7 +1304,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1041,7 +1314,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 4,
           "outputPath": "order-5/baseline/output.html",
           "stdoutPath": "order-5/baseline/stdout.txt",
           "stderrPath": "order-5/baseline/stderr.txt"
@@ -1068,10 +1341,11 @@
             "合計 | 2,300 円",
             "1冊あたり | 2,300 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:00"
+            "表示 2026-11-03 15:28:20"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -1092,10 +1366,11 @@
             "合計 | 2,300 円",
             "1冊あたり | 2,300 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:05"
+            "表示 2026-11-03 15:30:51"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -1104,11 +1379,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:00"
+              "表示 2026-11-03 15:28:20"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:05"
+              "表示 2026-11-03 15:30:51"
             ],
             "explainedByBaseline": true
           }
@@ -1147,7 +1422,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -1157,7 +1432,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 17,
+          "durationMs": 7,
           "outputPath": "order-6/old/output.html",
           "stdoutPath": "order-6/old/stdout.txt",
           "stderrPath": "order-6/old/stderr.txt"
@@ -1170,7 +1445,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1180,7 +1455,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 68,
+          "durationMs": 3,
           "outputPath": "order-6/new/output.html",
           "stdoutPath": "order-6/new/stdout.txt",
           "stderrPath": "order-6/new/stderr.txt"
@@ -1193,7 +1468,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1203,7 +1478,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 15,
+          "durationMs": 4,
           "outputPath": "order-6/baseline/output.html",
           "stdoutPath": "order-6/baseline/stdout.txt",
           "stderrPath": "order-6/baseline/stderr.txt"
@@ -1231,12 +1506,13 @@
             "1冊あたり | 1,400 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 6]",
-            "[input hidden token: e355ce1a69e05ddeb9ac1f2e2a2fe560]",
+            "[input hidden token: 98f82bda670ff2901253333e762874cf]",
             "入金を記録する",
-            "表示 2026-11-03 10:36:01"
+            "表示 2026-11-03 15:28:22"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -1258,12 +1534,13 @@
             "1冊あたり | 1,400 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 6]",
-            "[input hidden token: 930f6111ad1d5935321a46d9846c1a46]",
+            "[input hidden token: 9a2319e870c1719931e4490efbee9f1c]",
             "入金を記録する",
-            "表示 2026-11-03 10:39:06"
+            "表示 2026-11-03 15:30:52"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -1272,22 +1549,22 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "[input hidden token: e355ce1a69e05ddeb9ac1f2e2a2fe560]"
+              "[input hidden token: 98f82bda670ff2901253333e762874cf]"
             ],
             "newStart": 18,
             "newLines": [
-              "[input hidden token: 930f6111ad1d5935321a46d9846c1a46]"
+              "[input hidden token: 9a2319e870c1719931e4490efbee9f1c]"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 20,
             "oldLines": [
-              "表示 2026-11-03 10:36:01"
+              "表示 2026-11-03 15:28:22"
             ],
             "newStart": 20,
             "newLines": [
-              "表示 2026-11-03 10:39:06"
+              "表示 2026-11-03 15:30:52"
             ],
             "explainedByBaseline": true
           }
@@ -1326,7 +1603,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -1336,7 +1613,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 17,
+          "durationMs": 5,
           "outputPath": "order-7/old/output.html",
           "stdoutPath": "order-7/old/stdout.txt",
           "stderrPath": "order-7/old/stderr.txt"
@@ -1349,7 +1626,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1359,7 +1636,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 11,
+          "durationMs": 3,
           "outputPath": "order-7/new/output.html",
           "stdoutPath": "order-7/new/stdout.txt",
           "stderrPath": "order-7/new/stderr.txt"
@@ -1372,7 +1649,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1382,7 +1659,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 15,
+          "durationMs": 4,
           "outputPath": "order-7/baseline/output.html",
           "stdoutPath": "order-7/baseline/stdout.txt",
           "stderrPath": "order-7/baseline/stderr.txt"
@@ -1409,10 +1686,11 @@
             "合計 | 2,900 円",
             "1冊あたり | 1,450 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:03"
+            "表示 2026-11-03 15:28:24"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -1433,10 +1711,11 @@
             "合計 | 2,900 円",
             "1冊あたり | 1,450 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:08"
+            "表示 2026-11-03 15:30:53"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -1445,11 +1724,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:03"
+              "表示 2026-11-03 15:28:24"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:08"
+              "表示 2026-11-03 15:30:53"
             ],
             "explainedByBaseline": true
           }
@@ -1488,7 +1767,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -1498,7 +1777,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 8,
+          "durationMs": 6,
           "outputPath": "order-8/old/output.html",
           "stdoutPath": "order-8/old/stdout.txt",
           "stderrPath": "order-8/old/stderr.txt"
@@ -1511,7 +1790,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1521,7 +1800,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 28,
+          "durationMs": 4,
           "outputPath": "order-8/new/output.html",
           "stdoutPath": "order-8/new/stdout.txt",
           "stderrPath": "order-8/new/stderr.txt"
@@ -1534,7 +1813,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1544,7 +1823,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 22,
+          "durationMs": 3,
           "outputPath": "order-8/baseline/output.html",
           "stdoutPath": "order-8/baseline/stdout.txt",
           "stderrPath": "order-8/baseline/stderr.txt"
@@ -1574,10 +1853,11 @@
             "合計 | 3,600 円",
             "1冊あたり | 1,800 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:04"
+            "表示 2026-11-03 15:28:25"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -1599,10 +1879,11 @@
             "合計 | 3,600 円",
             "1冊あたり | 1,800 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:09"
+            "表示 2026-11-03 15:30:54"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -1621,11 +1902,11 @@
           {
             "oldStart": 20,
             "oldLines": [
-              "表示 2026-11-03 10:36:04"
+              "表示 2026-11-03 15:28:25"
             ],
             "newStart": 18,
             "newLines": [
-              "表示 2026-11-03 10:39:09"
+              "表示 2026-11-03 15:30:54"
             ],
             "explainedByBaseline": true
           }
@@ -1645,15 +1926,15 @@
       "carried": {
         "caseId": "order-8",
         "verdict": "broken",
-        "summary": "注文8の詳細画面から「ギフト包装 する（のし付き）」の表示が新で消えており、包装の指示が読めなくなっています。",
+        "summary": "新では注文 8 の「ギフト包装　する（のし付き）」の表示が消えており、包装の指示が読めなくなっています。",
         "findings": [
           {
             "verdict": "broken",
             "changeIds": [
               "C1"
             ],
-            "what": "「ギフト包装」の見出しと値「する（のし付き）」の2行が、新では表示されていません。",
-            "why": "同じ入力で旧は包装ありと表示していたので、この注文は包装の指定があります。新の画面にはその指示がどこにもなく、読む人は包装なしで発送すると判断します。",
+            "what": "旧にあった「ギフト包装」の見出しと値「する（のし付き）」の 2 行が、新ではなくなっています。",
+            "why": "同じ注文なのに、新では包装の有無が「しない」とも書かれず、項目ごと消えています。読む人はのし付き包装の指示に気づけず、発送時の判断が確実に変わります。",
             "evidence": [
               "ギフト包装",
               "する（のし付き）",
@@ -1661,7 +1942,7 @@
               "書名 | 単価 | 冊数 | 小計 | 在庫"
             ],
             "calculation": null,
-            "checkHere": "新の画面で「入金」欄と書名の表の間に、ギフト包装の欄があるか"
+            "checkHere": "新の出力で「2026-10-06 に入金済み」と明細表の見出し行「書名 | 単価 | …」の間"
           }
         ],
         "judgedBy": {
@@ -1670,9 +1951,9 @@
         },
         "sent": {
           "purpose": "judge",
-          "at": "2026-11-03T01:36:52.159Z",
-          "file": "20261103-103652-order-8-judge-872a.txt",
-          "chars": 1924,
+          "at": "2026-11-03T06:29:25.328Z",
+          "file": "20261103-152925-order-8-judge-e51f.txt",
+          "chars": 1994,
           "masked": 0,
           "maskedKinds": []
         }
@@ -1691,7 +1972,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -1701,7 +1982,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 13,
+          "durationMs": 14,
           "outputPath": "order-9/old/output.html",
           "stdoutPath": "order-9/old/stdout.txt",
           "stderrPath": "order-9/old/stderr.txt"
@@ -1714,7 +1995,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1724,7 +2005,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 8,
+          "durationMs": 3,
           "outputPath": "order-9/new/output.html",
           "stdoutPath": "order-9/new/stdout.txt",
           "stderrPath": "order-9/new/stderr.txt"
@@ -1737,7 +2018,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1747,7 +2028,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 9,
+          "durationMs": 3,
           "outputPath": "order-9/baseline/output.html",
           "stdoutPath": "order-9/baseline/stdout.txt",
           "stderrPath": "order-9/baseline/stderr.txt"
@@ -1774,10 +2055,11 @@
             "合計 | 3,000 円",
             "1冊あたり | 1,500 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:06"
+            "表示 2026-11-03 15:28:27"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -1798,10 +2080,11 @@
             "合計 | 3,000 円",
             "1冊あたり | 1,500 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:11"
+            "表示 2026-11-03 15:30:55"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -1810,11 +2093,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:06"
+              "表示 2026-11-03 15:28:27"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:11"
+              "表示 2026-11-03 15:30:55"
             ],
             "explainedByBaseline": true
           }
@@ -1853,7 +2136,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -1863,7 +2146,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 12,
+          "durationMs": 8,
           "outputPath": "order-10/old/output.html",
           "stdoutPath": "order-10/old/stdout.txt",
           "stderrPath": "order-10/old/stderr.txt"
@@ -1876,7 +2159,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1886,7 +2169,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 15,
+          "durationMs": 4,
           "outputPath": "order-10/new/output.html",
           "stdoutPath": "order-10/new/stdout.txt",
           "stderrPath": "order-10/new/stderr.txt"
@@ -1899,7 +2182,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -1909,7 +2192,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 28,
+          "durationMs": 3,
           "outputPath": "order-10/baseline/output.html",
           "stdoutPath": "order-10/baseline/stdout.txt",
           "stderrPath": "order-10/baseline/stderr.txt"
@@ -1937,12 +2220,13 @@
             "1冊あたり | 2,900 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 10]",
-            "[input hidden token: 4229708a6a152ea25278b9b6a45fb6ac]",
+            "[input hidden token: dd8448142a71692610a2c753a6aad113]",
             "入金を記録する",
-            "表示 2026-11-03 10:36:07"
+            "表示 2026-11-03 15:28:28"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -1964,12 +2248,13 @@
             "1冊あたり | 2,900 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 10]",
-            "[input hidden token: d6addb36801a48d8e25f605ee6e673bc]",
+            "[input hidden token: 78e6ae7280775d02a083e66bb941de4c]",
             "入金を記録する",
-            "表示 2026-11-03 10:39:12"
+            "表示 2026-11-03 15:30:57"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -1978,22 +2263,22 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "[input hidden token: 4229708a6a152ea25278b9b6a45fb6ac]"
+              "[input hidden token: dd8448142a71692610a2c753a6aad113]"
             ],
             "newStart": 18,
             "newLines": [
-              "[input hidden token: d6addb36801a48d8e25f605ee6e673bc]"
+              "[input hidden token: 78e6ae7280775d02a083e66bb941de4c]"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 20,
             "oldLines": [
-              "表示 2026-11-03 10:36:07"
+              "表示 2026-11-03 15:28:28"
             ],
             "newStart": 20,
             "newLines": [
-              "表示 2026-11-03 10:39:12"
+              "表示 2026-11-03 15:30:57"
             ],
             "explainedByBaseline": true
           }
@@ -2032,7 +2317,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -2042,7 +2327,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 14,
+          "durationMs": 6,
           "outputPath": "order-11/old/output.html",
           "stdoutPath": "order-11/old/stdout.txt",
           "stderrPath": "order-11/old/stderr.txt"
@@ -2055,7 +2340,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2065,7 +2350,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 18,
+          "durationMs": 3,
           "outputPath": "order-11/new/output.html",
           "stdoutPath": "order-11/new/stdout.txt",
           "stderrPath": "order-11/new/stderr.txt"
@@ -2078,7 +2363,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2088,7 +2373,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 34,
+          "durationMs": 3,
           "outputPath": "order-11/baseline/output.html",
           "stdoutPath": "order-11/baseline/stdout.txt",
           "stderrPath": "order-11/baseline/stderr.txt"
@@ -2116,10 +2401,11 @@
             "合計 | 3,200 円",
             "1冊あたり | 1,600 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:08"
+            "表示 2026-11-03 15:28:29"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -2141,10 +2427,11 @@
             "合計 | 3,200 円",
             "1冊あたり | 1,600 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:13"
+            "表示 2026-11-03 15:30:58"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -2153,11 +2440,11 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "表示 2026-11-03 10:36:08"
+              "表示 2026-11-03 15:28:29"
             ],
             "newStart": 18,
             "newLines": [
-              "表示 2026-11-03 10:39:13"
+              "表示 2026-11-03 15:30:58"
             ],
             "explainedByBaseline": true
           }
@@ -2196,7 +2483,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -2206,7 +2493,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 16,
+          "durationMs": 3,
           "outputPath": "order-12/old/output.html",
           "stdoutPath": "order-12/old/stdout.txt",
           "stderrPath": "order-12/old/stderr.txt"
@@ -2219,7 +2506,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2229,7 +2516,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 3,
           "outputPath": "order-12/new/output.html",
           "stdoutPath": "order-12/new/stdout.txt",
           "stderrPath": "order-12/new/stderr.txt"
@@ -2242,7 +2529,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2252,7 +2539,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 9,
+          "durationMs": 4,
           "outputPath": "order-12/baseline/output.html",
           "stdoutPath": "order-12/baseline/stdout.txt",
           "stderrPath": "order-12/baseline/stderr.txt"
@@ -2282,10 +2569,11 @@
             "合計 | 4,560 円",
             "1冊あたり | 1,520 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:10"
+            "表示 2026-11-03 15:28:31"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -2309,10 +2597,11 @@
             "合計 | 4,560 円",
             "1冊あたり | 1,520 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:15"
+            "表示 2026-11-03 15:30:59"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -2332,11 +2621,11 @@
           {
             "oldStart": 20,
             "oldLines": [
-              "表示 2026-11-03 10:36:10"
+              "表示 2026-11-03 15:28:31"
             ],
             "newStart": 20,
             "newLines": [
-              "表示 2026-11-03 10:39:15"
+              "表示 2026-11-03 15:30:59"
             ],
             "explainedByBaseline": true
           }
@@ -2356,23 +2645,23 @@
       "carried": {
         "caseId": "order-12",
         "verdict": "harmless",
-        "summary": "クーポン割引率の表示が「5.0%」から「5%」に変わっただけで、値と金額の計算は変わっておらず無害です。",
+        "summary": "変更はクーポン割引率の表記が「5.0%」から「5%」になった1点のみで、値は同じであり金額とも矛盾しません。",
         "findings": [
           {
             "verdict": "harmless",
             "changeIds": [
               "C1"
             ],
-            "what": "クーポン割引率の表示が「5.0%」から「5%」に変わった。",
-            "why": "5.0% と 5% は同じ値で、割引額・合計・1冊あたりの金額とも矛盾しません。読む人の判断には影響しません。",
+            "what": "クーポン割引率の表記が「5.0%」から「5%」に変わった。",
+            "why": "5.0% と 5% は同じ値で、割引額 -240 円・合計 4,560 円・1冊あたり 1,520 円はいずれも変わらず、計算とも合っています。",
             "evidence": [
               "クーポン割引 5% | -240 円",
               "小計 | 4,800 円",
               "合計 | 4,560 円",
               "1冊あたり | 1,520 円"
             ],
-            "calculation": "4,800 × 5% = 240、4,800 − 240 = 4,560、4,560 ÷ 3 = 1,520",
-            "checkHere": "表の「クーポン割引」行"
+            "calculation": "4,800 × 0.05 = 240、4,800 − 240 = 4,560、4,560 ÷ 3 = 1,520",
+            "checkHere": "金額表の「クーポン割引」の行"
           }
         ],
         "judgedBy": {
@@ -2381,9 +2670,9 @@
         },
         "sent": {
           "purpose": "judge",
-          "at": "2026-11-03T01:37:00.096Z",
-          "file": "20261103-103700-order-12-judge-f4a4.txt",
-          "chars": 1997,
+          "at": "2026-11-03T06:29:34.664Z",
+          "file": "20261103-152934-order-12-judge-92e7.txt",
+          "chars": 2067,
           "masked": 0,
           "maskedKinds": []
         }
@@ -2402,7 +2691,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -2412,7 +2701,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 4,
           "outputPath": "order-13/old/output.html",
           "stdoutPath": "order-13/old/stdout.txt",
           "stderrPath": "order-13/old/stderr.txt"
@@ -2425,7 +2714,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2435,7 +2724,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 4,
           "outputPath": "order-13/new/output.html",
           "stdoutPath": "order-13/new/stdout.txt",
           "stderrPath": "order-13/new/stderr.txt"
@@ -2448,7 +2737,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2458,7 +2747,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 16,
+          "durationMs": 4,
           "outputPath": "order-13/baseline/output.html",
           "stdoutPath": "order-13/baseline/stdout.txt",
           "stderrPath": "order-13/baseline/stderr.txt"
@@ -2485,10 +2774,11 @@
             "合計 | 1,900 円",
             "1冊あたり | 1,900 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:11"
+            "表示 2026-11-03 15:28:32"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -2509,10 +2799,11 @@
             "合計 | 1,900 円",
             "1冊あたり | 1,900 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:16"
+            "表示 2026-11-03 15:31:00"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -2521,11 +2812,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:11"
+              "表示 2026-11-03 15:28:32"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:16"
+              "表示 2026-11-03 15:31:00"
             ],
             "explainedByBaseline": true
           }
@@ -2564,7 +2855,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -2574,7 +2865,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 8,
           "outputPath": "order-14/old/output.html",
           "stdoutPath": "order-14/old/stdout.txt",
           "stderrPath": "order-14/old/stderr.txt"
@@ -2587,7 +2878,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2597,7 +2888,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 36,
+          "durationMs": 4,
           "outputPath": "order-14/new/output.html",
           "stdoutPath": "order-14/new/stdout.txt",
           "stderrPath": "order-14/new/stderr.txt"
@@ -2610,7 +2901,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2620,7 +2911,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 20,
+          "durationMs": 4,
           "outputPath": "order-14/baseline/output.html",
           "stdoutPath": "order-14/baseline/stdout.txt",
           "stderrPath": "order-14/baseline/stderr.txt"
@@ -2648,12 +2939,13 @@
             "1冊あたり | 2,000 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 14]",
-            "[input hidden token: d16bc66de528af855df94fd30ec2e56b]",
+            "[input hidden token: 31edbdb3f708fcae575cf448a583640b]",
             "入金を記録する",
-            "表示 2026-11-03 10:36:13"
+            "表示 2026-11-03 15:28:33"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -2675,12 +2967,13 @@
             "1冊あたり | 2,000 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 14]",
-            "[input hidden token: 628e8590809a21c494b60e71ad65762f]",
+            "[input hidden token: 2418728b1cc507c34e3ade065074f9af]",
             "入金を記録する",
-            "表示 2026-11-03 10:39:17"
+            "表示 2026-11-03 15:31:02"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -2689,22 +2982,22 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "[input hidden token: d16bc66de528af855df94fd30ec2e56b]"
+              "[input hidden token: 31edbdb3f708fcae575cf448a583640b]"
             ],
             "newStart": 18,
             "newLines": [
-              "[input hidden token: 628e8590809a21c494b60e71ad65762f]"
+              "[input hidden token: 2418728b1cc507c34e3ade065074f9af]"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 20,
             "oldLines": [
-              "表示 2026-11-03 10:36:13"
+              "表示 2026-11-03 15:28:33"
             ],
             "newStart": 20,
             "newLines": [
-              "表示 2026-11-03 10:39:17"
+              "表示 2026-11-03 15:31:02"
             ],
             "explainedByBaseline": true
           }
@@ -2743,7 +3036,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -2753,7 +3046,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 7,
+          "durationMs": 3,
           "outputPath": "order-15/old/output.html",
           "stdoutPath": "order-15/old/stdout.txt",
           "stderrPath": "order-15/old/stderr.txt"
@@ -2766,7 +3059,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2776,7 +3069,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 14,
+          "durationMs": 3,
           "outputPath": "order-15/new/output.html",
           "stdoutPath": "order-15/new/stdout.txt",
           "stderrPath": "order-15/new/stderr.txt"
@@ -2789,7 +3082,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2799,7 +3092,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 13,
+          "durationMs": 3,
           "outputPath": "order-15/baseline/output.html",
           "stdoutPath": "order-15/baseline/stdout.txt",
           "stderrPath": "order-15/baseline/stderr.txt"
@@ -2827,10 +3120,11 @@
             "合計 | 3,300 円",
             "1冊あたり | 1,650 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:14"
+            "表示 2026-11-03 15:28:35"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -2852,10 +3146,11 @@
             "合計 | 3,300 円",
             "1冊あたり | 1,650 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:19"
+            "表示 2026-11-03 15:31:03"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -2864,11 +3159,11 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "表示 2026-11-03 10:36:14"
+              "表示 2026-11-03 15:28:35"
             ],
             "newStart": 18,
             "newLines": [
-              "表示 2026-11-03 10:39:19"
+              "表示 2026-11-03 15:31:03"
             ],
             "explainedByBaseline": true
           }
@@ -2907,7 +3202,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -2917,7 +3212,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 5,
           "outputPath": "order-16/old/output.html",
           "stdoutPath": "order-16/old/stdout.txt",
           "stderrPath": "order-16/old/stderr.txt"
@@ -2930,7 +3225,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2940,7 +3235,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 6,
+          "durationMs": 3,
           "outputPath": "order-16/new/output.html",
           "stdoutPath": "order-16/new/stdout.txt",
           "stderrPath": "order-16/new/stderr.txt"
@@ -2953,7 +3248,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -2963,7 +3258,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 12,
+          "durationMs": 6,
           "outputPath": "order-16/baseline/output.html",
           "stdoutPath": "order-16/baseline/stdout.txt",
           "stderrPath": "order-16/baseline/stderr.txt"
@@ -2990,10 +3285,11 @@
             "合計 | 2,100 円",
             "1冊あたり | 2,100 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:16"
+            "表示 2026-11-03 15:28:36"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -3014,10 +3310,11 @@
             "合計 | 2,100 円",
             "1冊あたり | 2,100 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:20"
+            "表示 2026-11-03 15:31:04"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -3026,11 +3323,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:16"
+              "表示 2026-11-03 15:28:36"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:20"
+              "表示 2026-11-03 15:31:04"
             ],
             "explainedByBaseline": true
           }
@@ -3069,7 +3366,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -3079,7 +3376,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 7,
+          "durationMs": 19,
           "outputPath": "order-17/old/output.html",
           "stdoutPath": "order-17/old/stdout.txt",
           "stderrPath": "order-17/old/stderr.txt"
@@ -3092,7 +3389,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3102,7 +3399,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 3,
           "outputPath": "order-17/new/output.html",
           "stdoutPath": "order-17/new/stdout.txt",
           "stderrPath": "order-17/new/stderr.txt"
@@ -3115,7 +3412,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3125,7 +3422,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 34,
+          "durationMs": 3,
           "outputPath": "order-17/baseline/output.html",
           "stdoutPath": "order-17/baseline/stdout.txt",
           "stderrPath": "order-17/baseline/stderr.txt"
@@ -3152,10 +3449,11 @@
             "合計 | 1,700 円",
             "1冊あたり | 1,700 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:17"
+            "表示 2026-11-03 15:28:38"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -3176,10 +3474,11 @@
             "合計 | 1,700 円",
             "1冊あたり | 1,700 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:21"
+            "表示 2026-11-03 15:31:05"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -3188,11 +3487,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:17"
+              "表示 2026-11-03 15:28:38"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:21"
+              "表示 2026-11-03 15:31:05"
             ],
             "explainedByBaseline": true
           }
@@ -3231,7 +3530,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -3241,7 +3540,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 6,
+          "durationMs": 4,
           "outputPath": "order-18/old/output.html",
           "stdoutPath": "order-18/old/stdout.txt",
           "stderrPath": "order-18/old/stderr.txt"
@@ -3254,7 +3553,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3264,7 +3563,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 63,
+          "durationMs": 3,
           "outputPath": "order-18/new/output.html",
           "stdoutPath": "order-18/new/stdout.txt",
           "stderrPath": "order-18/new/stderr.txt"
@@ -3277,7 +3576,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3287,7 +3586,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 17,
+          "durationMs": 3,
           "outputPath": "order-18/baseline/output.html",
           "stdoutPath": "order-18/baseline/stdout.txt",
           "stderrPath": "order-18/baseline/stderr.txt"
@@ -3315,12 +3614,13 @@
             "1冊あたり | 2,400 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 18]",
-            "[input hidden token: df7a9f1c70b8160e3763a07c3085c5e7]",
+            "[input hidden token: 3653c987af0ee3f33b07361d8a98edc2]",
             "入金を記録する",
-            "表示 2026-11-03 10:36:18"
+            "表示 2026-11-03 15:28:39"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -3342,12 +3642,13 @@
             "1冊あたり | 2,400 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 18]",
-            "[input hidden token: 76143543321bce98632bc5d9ec8329b1]",
+            "[input hidden token: 5e221fc6cbd349d13e3125867f952274]",
             "入金を記録する",
-            "表示 2026-11-03 10:39:23"
+            "表示 2026-11-03 15:31:07"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -3356,22 +3657,22 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "[input hidden token: df7a9f1c70b8160e3763a07c3085c5e7]"
+              "[input hidden token: 3653c987af0ee3f33b07361d8a98edc2]"
             ],
             "newStart": 18,
             "newLines": [
-              "[input hidden token: 76143543321bce98632bc5d9ec8329b1]"
+              "[input hidden token: 5e221fc6cbd349d13e3125867f952274]"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 20,
             "oldLines": [
-              "表示 2026-11-03 10:36:18"
+              "表示 2026-11-03 15:28:39"
             ],
             "newStart": 20,
             "newLines": [
-              "表示 2026-11-03 10:39:23"
+              "表示 2026-11-03 15:31:07"
             ],
             "explainedByBaseline": true
           }
@@ -3410,7 +3711,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -3420,7 +3721,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 4,
+          "durationMs": 7,
           "outputPath": "order-19/old/output.html",
           "stdoutPath": "order-19/old/stdout.txt",
           "stderrPath": "order-19/old/stderr.txt"
@@ -3433,7 +3734,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3443,7 +3744,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 3,
           "outputPath": "order-19/new/output.html",
           "stdoutPath": "order-19/new/stdout.txt",
           "stderrPath": "order-19/new/stderr.txt"
@@ -3456,7 +3757,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3466,7 +3767,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 59,
+          "durationMs": 53,
           "outputPath": "order-19/baseline/output.html",
           "stdoutPath": "order-19/baseline/stdout.txt",
           "stderrPath": "order-19/baseline/stderr.txt"
@@ -3495,10 +3796,11 @@
             "合計 | 3,230 円",
             "1冊あたり | 1,615 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:20"
+            "表示 2026-11-03 15:28:41"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -3521,10 +3823,11 @@
             "合計 | 3,230 円",
             "1冊あたり | 1,615 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:24"
+            "表示 2026-11-03 15:31:08"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -3544,11 +3847,11 @@
           {
             "oldStart": 19,
             "oldLines": [
-              "表示 2026-11-03 10:36:20"
+              "表示 2026-11-03 15:28:41"
             ],
             "newStart": 19,
             "newLines": [
-              "表示 2026-11-03 10:39:24"
+              "表示 2026-11-03 15:31:08"
             ],
             "explainedByBaseline": true
           }
@@ -3568,7 +3871,7 @@
       "carried": {
         "caseId": "order-19",
         "verdict": "harmless",
-        "summary": "差は割引率の表記「15.0%」→「15%」の1か所だけで、値は同じで金額計算も整合しており無害です。",
+        "summary": "クーポン割引率の表記が「15.0%」から「15%」に変わっただけで、金額と合計は旧と同じで整合しています。",
         "findings": [
           {
             "verdict": "harmless",
@@ -3576,15 +3879,15 @@
               "C1"
             ],
             "what": "クーポン割引率の表記が「15.0%」から「15%」に変わった。",
-            "why": "率の値は同じ15%で、表記の桁が変わっただけです。割引額・合計・1冊あたりの金額は新しい出力の中で矛盾がありません。",
+            "why": "率の値は同じで、割引額・合計・1冊あたりの金額は変わらず、計算も合っています。小数の「.0」が消えただけなので、読む人の判断には関係しません。",
             "evidence": [
               "クーポン割引 15% | -570 円",
               "小計 | 3,800 円",
               "合計 | 3,230 円",
               "1冊あたり | 1,615 円"
             ],
-            "calculation": "3,800 × 0.15 = 570; 3,800 − 570 + 0（送料無料） = 3,230; 3,230 ÷ 2冊 = 1,615",
-            "checkHere": "「クーポン割引 15% | -570 円」の行"
+            "calculation": "3,800 × 0.15 = 570、3,800 − 570 + 0（送料無料）= 3,230、3,230 ÷ 2冊 = 1,615",
+            "checkHere": "「クーポン割引」の行の率の表記"
           }
         ],
         "judgedBy": {
@@ -3593,9 +3896,9 @@
         },
         "sent": {
           "purpose": "judge",
-          "at": "2026-11-03T01:37:06.118Z",
-          "file": "20261103-103706-order-19-judge-e6f2.txt",
-          "chars": 1957,
+          "at": "2026-11-03T06:29:39.756Z",
+          "file": "20261103-152939-order-19-judge-1d07.txt",
+          "chars": 2027,
           "masked": 0,
           "maskedKinds": []
         }
@@ -3614,7 +3917,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -3624,7 +3927,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 6,
+          "durationMs": 10,
           "outputPath": "order-20/old/output.html",
           "stdoutPath": "order-20/old/stdout.txt",
           "stderrPath": "order-20/old/stderr.txt"
@@ -3637,7 +3940,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3647,7 +3950,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 16,
+          "durationMs": 3,
           "outputPath": "order-20/new/output.html",
           "stdoutPath": "order-20/new/stdout.txt",
           "stderrPath": "order-20/new/stderr.txt"
@@ -3660,7 +3963,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3670,7 +3973,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 8,
+          "durationMs": 3,
           "outputPath": "order-20/baseline/output.html",
           "stdoutPath": "order-20/baseline/stdout.txt",
           "stderrPath": "order-20/baseline/stderr.txt"
@@ -3697,10 +4000,11 @@
             "合計 | 3,300 円",
             "1冊あたり | 1,650 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:21"
+            "表示 2026-11-03 15:28:42"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -3721,10 +4025,11 @@
             "合計 | 3,300 円",
             "1冊あたり | 1,650 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:25"
+            "表示 2026-11-03 15:31:09"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -3733,11 +4038,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:21"
+              "表示 2026-11-03 15:28:42"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:25"
+              "表示 2026-11-03 15:31:09"
             ],
             "explainedByBaseline": true
           }
@@ -3776,7 +4081,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -3786,7 +4091,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 8,
+          "durationMs": 7,
           "outputPath": "order-21/old/output.html",
           "stdoutPath": "order-21/old/stdout.txt",
           "stderrPath": "order-21/old/stderr.txt"
@@ -3799,7 +4104,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3809,7 +4114,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 20,
+          "durationMs": 3,
           "outputPath": "order-21/new/output.html",
           "stdoutPath": "order-21/new/stdout.txt",
           "stderrPath": "order-21/new/stderr.txt"
@@ -3822,7 +4127,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3832,7 +4137,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 17,
+          "durationMs": 3,
           "outputPath": "order-21/baseline/output.html",
           "stdoutPath": "order-21/baseline/stdout.txt",
           "stderrPath": "order-21/baseline/stderr.txt"
@@ -3861,12 +4166,13 @@
             "1冊あたり | 1,700 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 21]",
-            "[input hidden token: 508c2e19733e041152f4468063a376ea]",
+            "[input hidden token: 027827643c46cf5cea17508e99985bd6]",
             "入金を記録する",
-            "表示 2026-11-03 10:36:22"
+            "表示 2026-11-03 15:28:44"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -3889,12 +4195,13 @@
             "1冊あたり | 1,700 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 21]",
-            "[input hidden token: b23a0a76ed8c3dee211a25ce62013553]",
+            "[input hidden token: 7b01ac10665e3dcbefe3e7f8887c59fa]",
             "入金を記録する",
-            "表示 2026-11-03 10:39:27"
+            "表示 2026-11-03 15:31:10"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -3903,22 +4210,22 @@
           {
             "oldStart": 19,
             "oldLines": [
-              "[input hidden token: 508c2e19733e041152f4468063a376ea]"
+              "[input hidden token: 027827643c46cf5cea17508e99985bd6]"
             ],
             "newStart": 19,
             "newLines": [
-              "[input hidden token: b23a0a76ed8c3dee211a25ce62013553]"
+              "[input hidden token: 7b01ac10665e3dcbefe3e7f8887c59fa]"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 21,
             "oldLines": [
-              "表示 2026-11-03 10:36:22"
+              "表示 2026-11-03 15:28:44"
             ],
             "newStart": 21,
             "newLines": [
-              "表示 2026-11-03 10:39:27"
+              "表示 2026-11-03 15:31:10"
             ],
             "explainedByBaseline": true
           }
@@ -3957,7 +4264,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -3967,7 +4274,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 3,
+          "durationMs": 6,
           "outputPath": "order-22/old/output.html",
           "stdoutPath": "order-22/old/stdout.txt",
           "stderrPath": "order-22/old/stderr.txt"
@@ -3980,7 +4287,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -3990,7 +4297,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 7,
+          "durationMs": 3,
           "outputPath": "order-22/new/output.html",
           "stdoutPath": "order-22/new/stdout.txt",
           "stderrPath": "order-22/new/stderr.txt"
@@ -4003,7 +4310,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4013,7 +4320,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 16,
+          "durationMs": 4,
           "outputPath": "order-22/baseline/output.html",
           "stdoutPath": "order-22/baseline/stdout.txt",
           "stderrPath": "order-22/baseline/stderr.txt"
@@ -4040,10 +4347,11 @@
             "合計 | 2,100 円",
             "1冊あたり | 2,100 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:24"
+            "表示 2026-11-03 15:28:45"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -4064,10 +4372,11 @@
             "合計 | 2,100 円",
             "1冊あたり | 2,100 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:28"
+            "表示 2026-11-03 15:31:11"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -4076,11 +4385,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:24"
+              "表示 2026-11-03 15:28:45"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:28"
+              "表示 2026-11-03 15:31:11"
             ],
             "explainedByBaseline": true
           }
@@ -4119,7 +4428,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -4129,7 +4438,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 4,
+          "durationMs": 9,
           "outputPath": "order-23/old/output.html",
           "stdoutPath": "order-23/old/stdout.txt",
           "stderrPath": "order-23/old/stderr.txt"
@@ -4142,7 +4451,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4152,7 +4461,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 9,
+          "durationMs": 3,
           "outputPath": "order-23/new/output.html",
           "stdoutPath": "order-23/new/stdout.txt",
           "stderrPath": "order-23/new/stderr.txt"
@@ -4165,7 +4474,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4175,7 +4484,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 45,
+          "durationMs": 3,
           "outputPath": "order-23/baseline/output.html",
           "stdoutPath": "order-23/baseline/stdout.txt",
           "stderrPath": "order-23/baseline/stderr.txt"
@@ -4202,10 +4511,11 @@
             "合計 | 2,000 円",
             "1冊あたり | 2,000 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:25"
+            "表示 2026-11-03 15:28:47"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -4226,10 +4536,11 @@
             "合計 | 2,000 円",
             "1冊あたり | 2,000 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:29"
+            "表示 2026-11-03 15:31:13"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -4238,11 +4549,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:25"
+              "表示 2026-11-03 15:28:47"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:29"
+              "表示 2026-11-03 15:31:13"
             ],
             "explainedByBaseline": true
           }
@@ -4281,7 +4592,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -4291,7 +4602,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 4,
+          "durationMs": 5,
           "outputPath": "order-24/old/output.html",
           "stdoutPath": "order-24/old/stdout.txt",
           "stderrPath": "order-24/old/stderr.txt"
@@ -4304,7 +4615,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4314,7 +4625,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 13,
+          "durationMs": 3,
           "outputPath": "order-24/new/output.html",
           "stdoutPath": "order-24/new/stdout.txt",
           "stderrPath": "order-24/new/stderr.txt"
@@ -4327,7 +4638,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4337,7 +4648,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 11,
+          "durationMs": 3,
           "outputPath": "order-24/baseline/output.html",
           "stdoutPath": "order-24/baseline/stdout.txt",
           "stderrPath": "order-24/baseline/stderr.txt"
@@ -4365,12 +4676,13 @@
             "1冊あたり | 1,800 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 24]",
-            "[input hidden token: 239de67ff96f9be970a4bb46aa3042b2]",
+            "[input hidden token: fd4126b36b473e1d4c239f4e664c2104]",
             "入金を記録する",
-            "表示 2026-11-03 10:36:26"
+            "表示 2026-11-03 15:28:48"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -4392,12 +4704,13 @@
             "1冊あたり | 1,800 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 24]",
-            "[input hidden token: 6324a27f5beb8f515ef09ec2bf16eb49]",
+            "[input hidden token: 7f8aac634818062f87f07f622a9b8a98]",
             "入金を記録する",
-            "表示 2026-11-03 10:39:31"
+            "表示 2026-11-03 15:31:14"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -4406,22 +4719,22 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "[input hidden token: 239de67ff96f9be970a4bb46aa3042b2]"
+              "[input hidden token: fd4126b36b473e1d4c239f4e664c2104]"
             ],
             "newStart": 18,
             "newLines": [
-              "[input hidden token: 6324a27f5beb8f515ef09ec2bf16eb49]"
+              "[input hidden token: 7f8aac634818062f87f07f622a9b8a98]"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 20,
             "oldLines": [
-              "表示 2026-11-03 10:36:26"
+              "表示 2026-11-03 15:28:48"
             ],
             "newStart": 20,
             "newLines": [
-              "表示 2026-11-03 10:39:31"
+              "表示 2026-11-03 15:31:14"
             ],
             "explainedByBaseline": true
           }
@@ -4460,7 +4773,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -4470,7 +4783,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 8,
+          "durationMs": 7,
           "outputPath": "order-25/old/output.html",
           "stdoutPath": "order-25/old/stdout.txt",
           "stderrPath": "order-25/old/stderr.txt"
@@ -4483,7 +4796,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4493,7 +4806,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 13,
+          "durationMs": 3,
           "outputPath": "order-25/new/output.html",
           "stdoutPath": "order-25/new/stdout.txt",
           "stderrPath": "order-25/new/stderr.txt"
@@ -4506,7 +4819,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4516,7 +4829,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 8,
+          "durationMs": 3,
           "outputPath": "order-25/baseline/output.html",
           "stdoutPath": "order-25/baseline/stdout.txt",
           "stderrPath": "order-25/baseline/stderr.txt"
@@ -4545,10 +4858,11 @@
             "合計 | 3,420 円",
             "1冊あたり | 1,710 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:27"
+            "表示 2026-11-03 15:28:50"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -4571,10 +4885,11 @@
             "合計 | 3,420 円",
             "1冊あたり | 1,710 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:32"
+            "表示 2026-11-03 15:31:15"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -4594,11 +4909,11 @@
           {
             "oldStart": 19,
             "oldLines": [
-              "表示 2026-11-03 10:36:27"
+              "表示 2026-11-03 15:28:50"
             ],
             "newStart": 19,
             "newLines": [
-              "表示 2026-11-03 10:39:32"
+              "表示 2026-11-03 15:31:15"
             ],
             "explainedByBaseline": true
           }
@@ -4618,23 +4933,23 @@
       "carried": {
         "caseId": "order-25",
         "verdict": "harmless",
-        "summary": "変更はクーポン割引率の表記「10.0%」が「10%」になった1件だけで、値は同じで金額計算とも合うため無害です。",
+        "summary": "クーポン割引率の表記が「10.0%」から「10%」に変わっただけで、金額と計算は新旧とも一致しています。",
         "findings": [
           {
             "verdict": "harmless",
             "changeIds": [
               "C1"
             ],
-            "what": "クーポン割引率の表記が「10.0%」から「10%」に変わった。",
-            "why": "率の値は同じで、割引額・合計・1冊あたりの金額は旧と同じまま、計算とも合っています。",
+            "what": "クーポン割引率の表示が「10.0%」から「10%」に変わった。",
+            "why": "同じ割引率の書き方の違いで、割引額・合計は変わらず計算も合っています。読む人の判断には影響しません。",
             "evidence": [
               "クーポン割引 10% | -380 円",
               "小計 | 3,800 円",
               "合計 | 3,420 円",
               "1冊あたり | 1,710 円"
             ],
-            "calculation": "3,800 × 10% = 380、3,800 − 380 = 3,420、3,420 ÷ 2冊 = 1,710",
-            "checkHere": "表の「クーポン割引」行"
+            "calculation": "3,800 × 10% = 380、3,800 − 380 = 3,420、3,420 ÷ 2冊 = 1,710（すべて表示と一致）",
+            "checkHere": "金額表の「クーポン割引」行"
           }
         ],
         "judgedBy": {
@@ -4643,9 +4958,9 @@
         },
         "sent": {
           "purpose": "judge",
-          "at": "2026-11-03T01:37:19.257Z",
-          "file": "20261103-103719-order-25-judge-e1d2.txt",
-          "chars": 1960,
+          "at": "2026-11-03T06:29:54.893Z",
+          "file": "20261103-152954-order-25-judge-7738.txt",
+          "chars": 2030,
           "masked": 0,
           "maskedKinds": []
         }
@@ -4664,7 +4979,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -4674,7 +4989,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 3,
+          "durationMs": 114,
           "outputPath": "order-26/old/output.html",
           "stdoutPath": "order-26/old/stdout.txt",
           "stderrPath": "order-26/old/stderr.txt"
@@ -4687,7 +5002,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4697,7 +5012,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 18,
+          "durationMs": 3,
           "outputPath": "order-26/new/output.html",
           "stdoutPath": "order-26/new/stdout.txt",
           "stderrPath": "order-26/new/stderr.txt"
@@ -4710,7 +5025,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4720,7 +5035,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 11,
+          "durationMs": 4,
           "outputPath": "order-26/baseline/output.html",
           "stdoutPath": "order-26/baseline/stdout.txt",
           "stderrPath": "order-26/baseline/stderr.txt"
@@ -4748,10 +5063,11 @@
             "合計 | 3,200 円",
             "1冊あたり | 1,600 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:29"
+            "表示 2026-11-03 15:28:52"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -4773,10 +5089,11 @@
             "合計 | 3,200 円",
             "1冊あたり | 1,600 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:33"
+            "表示 2026-11-03 15:31:16"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -4785,11 +5102,11 @@
           {
             "oldStart": 18,
             "oldLines": [
-              "表示 2026-11-03 10:36:29"
+              "表示 2026-11-03 15:28:52"
             ],
             "newStart": 18,
             "newLines": [
-              "表示 2026-11-03 10:39:33"
+              "表示 2026-11-03 15:31:16"
             ],
             "explainedByBaseline": true
           }
@@ -4828,7 +5145,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -4838,7 +5155,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 5,
+          "durationMs": 9,
           "outputPath": "order-27/old/output.html",
           "stdoutPath": "order-27/old/stdout.txt",
           "stderrPath": "order-27/old/stderr.txt"
@@ -4851,7 +5168,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4861,7 +5178,7 @@
             "status": 500,
             "location": null
           },
-          "durationMs": 8,
+          "durationMs": 4,
           "outputPath": null,
           "stdoutPath": "order-27/new/stdout.txt",
           "stderrPath": "order-27/new/stderr.txt"
@@ -4874,7 +5191,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4884,7 +5201,7 @@
             "status": 500,
             "location": null
           },
-          "durationMs": 18,
+          "durationMs": 8,
           "outputPath": null,
           "stdoutPath": "order-27/baseline/stdout.txt",
           "stderrPath": "order-27/baseline/stderr.txt"
@@ -4908,8 +5225,8 @@
             "what": "PHP 8.5 では出力が出ませんでした（HTTP 500）",
             "why": "PHP 7.4 では出力が出ていたので、移行で動かなくなっています",
             "evidence": [
-              "[Tue Nov  3 10:39:35 2026] 127.0.0.1:51621 Accepted",
-              "[Tue Nov  3 10:39:35 2026] PHP Fatal error:  Uncaught DivisionByZeroError: Division by zero in work/bookshop/public/order.php:61",
+              "[Tue Nov  3 15:31:18 2026] 127.0.0.1:61828 Accepted",
+              "[Tue Nov  3 15:31:18 2026] PHP Fatal error:  Uncaught DivisionByZeroError: Division by zero in work/bookshop/public/order.php:61",
               "Stack trace:"
             ],
             "calculation": null,
@@ -4934,7 +5251,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -4944,7 +5261,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 4,
+          "durationMs": 8,
           "outputPath": "order-28/old/output.html",
           "stdoutPath": "order-28/old/stdout.txt",
           "stderrPath": "order-28/old/stderr.txt"
@@ -4957,7 +5274,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4967,7 +5284,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 5,
           "outputPath": "order-28/new/output.html",
           "stdoutPath": "order-28/new/stdout.txt",
           "stderrPath": "order-28/new/stderr.txt"
@@ -4980,7 +5297,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -4990,7 +5307,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 36,
+          "durationMs": 7,
           "outputPath": "order-28/baseline/output.html",
           "stdoutPath": "order-28/baseline/stdout.txt",
           "stderrPath": "order-28/baseline/stderr.txt"
@@ -5017,10 +5334,11 @@
             "合計 | 2,500 円",
             "1冊あたり | 2,500 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:31"
+            "表示 2026-11-03 15:28:55"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -5041,10 +5359,11 @@
             "合計 | 2,500 円",
             "1冊あたり | 2,500 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:36"
+            "表示 2026-11-03 15:31:19"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -5053,11 +5372,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:31"
+              "表示 2026-11-03 15:28:55"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:36"
+              "表示 2026-11-03 15:31:19"
             ],
             "explainedByBaseline": true
           }
@@ -5096,7 +5415,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -5106,7 +5425,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 3,
+          "durationMs": 11,
           "outputPath": "order-29/old/output.html",
           "stdoutPath": "order-29/old/stdout.txt",
           "stderrPath": "order-29/old/stderr.txt"
@@ -5119,7 +5438,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -5129,7 +5448,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 9,
+          "durationMs": 4,
           "outputPath": "order-29/new/output.html",
           "stdoutPath": "order-29/new/stdout.txt",
           "stderrPath": "order-29/new/stderr.txt"
@@ -5142,7 +5461,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -5152,7 +5471,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 10,
+          "durationMs": 4,
           "outputPath": "order-29/baseline/output.html",
           "stdoutPath": "order-29/baseline/stdout.txt",
           "stderrPath": "order-29/baseline/stderr.txt"
@@ -5181,12 +5500,13 @@
             "1冊あたり | 1,500 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 29]",
-            "[input hidden token: 95cf454c8d8498b1e5c2ace1429f18c6]",
+            "[input hidden token: e86ac3f98c9c840ef8c8a2c997c9c85a]",
             "入金を記録する",
-            "表示 2026-11-03 10:36:33"
+            "表示 2026-11-03 15:28:57"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -5209,12 +5529,13 @@
             "1冊あたり | 1,500 円",
             "この注文を開いた回数: 1",
             "[input hidden id: 29]",
-            "[input hidden token: d8db271ab0b5b4a115c1a91d134c10e8]",
+            "[input hidden token: be1f2d3e1a9c763f1ae2fee899b4ff56]",
             "入金を記録する",
-            "表示 2026-11-03 10:39:37"
+            "表示 2026-11-03 15:31:20"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -5223,22 +5544,22 @@
           {
             "oldStart": 19,
             "oldLines": [
-              "[input hidden token: 95cf454c8d8498b1e5c2ace1429f18c6]"
+              "[input hidden token: e86ac3f98c9c840ef8c8a2c997c9c85a]"
             ],
             "newStart": 19,
             "newLines": [
-              "[input hidden token: d8db271ab0b5b4a115c1a91d134c10e8]"
+              "[input hidden token: be1f2d3e1a9c763f1ae2fee899b4ff56]"
             ],
             "explainedByBaseline": true
           },
           {
             "oldStart": 21,
             "oldLines": [
-              "表示 2026-11-03 10:36:33"
+              "表示 2026-11-03 15:28:57"
             ],
             "newStart": 21,
             "newLines": [
-              "表示 2026-11-03 10:39:37"
+              "表示 2026-11-03 15:31:20"
             ],
             "explainedByBaseline": true
           }
@@ -5277,7 +5598,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51369",
+            "127.0.0.1:61527",
             "-t",
             "public"
           ],
@@ -5287,7 +5608,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 6,
+          "durationMs": 3,
           "outputPath": "order-30/old/output.html",
           "stdoutPath": "order-30/old/stdout.txt",
           "stderrPath": "order-30/old/stderr.txt"
@@ -5300,7 +5621,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -5310,7 +5631,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 7,
+          "durationMs": 3,
           "outputPath": "order-30/new/output.html",
           "stdoutPath": "order-30/new/stdout.txt",
           "stderrPath": "order-30/new/stderr.txt"
@@ -5323,7 +5644,7 @@
             "-d",
             "display_errors=0",
             "-S",
-            "127.0.0.1:51561",
+            "127.0.0.1:61754",
             "-t",
             "public"
           ],
@@ -5333,7 +5654,7 @@
             "status": 200,
             "location": null
           },
-          "durationMs": 16,
+          "durationMs": 3,
           "outputPath": "order-30/baseline/output.html",
           "stdoutPath": "order-30/baseline/stdout.txt",
           "stderrPath": "order-30/baseline/stderr.txt"
@@ -5360,10 +5681,11 @@
             "合計 | 2,300 円",
             "1冊あたり | 2,300 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:36:34"
+            "表示 2026-11-03 15:28:58"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "new": {
           "lines": [
@@ -5384,10 +5706,11 @@
             "合計 | 2,300 円",
             "1冊あたり | 2,300 円",
             "この注文を開いた回数: 1",
-            "表示 2026-11-03 10:39:39"
+            "表示 2026-11-03 15:31:22"
           ],
           "pages": [],
-          "unreadable": []
+          "unreadable": [],
+          "undecodable": 0
         },
         "baseline": {
           "kind": "used"
@@ -5396,11 +5719,11 @@
           {
             "oldStart": 17,
             "oldLines": [
-              "表示 2026-11-03 10:36:34"
+              "表示 2026-11-03 15:28:58"
             ],
             "newStart": 17,
             "newLines": [
-              "表示 2026-11-03 10:39:39"
+              "表示 2026-11-03 15:31:22"
             ],
             "explainedByBaseline": true
           }
@@ -5432,7 +5755,7 @@
     "edit": {
       "file": "lib/orders.php",
       "oldText": "    if ($stock === '0') {",
-      "newText": "    if ((int) $stock === 0) {"
+      "newText": "    if ((string) $stock === '0') {"
     },
     "applied": {
       "kind": "applied",
@@ -5452,6 +5775,18 @@
           "after": {
             "kind": "lines",
             "count": 2
+          }
+        },
+        {
+          "caseId": "export",
+          "label": "注文の書き出し",
+          "before": {
+            "kind": "lines",
+            "count": 4
+          },
+          "after": {
+            "kind": "lines",
+            "count": 4
           }
         },
         {

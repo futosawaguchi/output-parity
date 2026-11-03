@@ -1,10 +1,10 @@
-[Tue Nov  3 10:36:30 2026] 127.0.0.1:51470 Accepted
-[Tue Nov  3 10:36:30 2026] PHP Fatal error:  Uncaught DivisionByZeroError: Division by zero in work/bookshop/public/order.php:61
+[Tue Nov  3 15:28:54 2026] 127.0.0.1:61653 Accepted
+[Tue Nov  3 15:28:54 2026] PHP Fatal error:  Uncaught DivisionByZeroError: Division by zero in work/bookshop/public/order.php:61
 Stack trace:
 #0 {main}
   thrown in work/bookshop/public/order.php on line 61
-[Tue Nov  3 10:36:30 2026] 127.0.0.1:51470 [500]: GET /order.php?id=27 - Uncaught DivisionByZeroError: Division by zero in work/bookshop/public/order.php:61
+[Tue Nov  3 15:28:54 2026] 127.0.0.1:61653 [500]: GET /order.php?id=27 - Uncaught DivisionByZeroError: Division by zero in work/bookshop/public/order.php:61
 Stack trace:
 #0 {main}
   thrown in work/bookshop/public/order.php on line 61
-[Tue Nov  3 10:36:30 2026] 127.0.0.1:51470 Closing
+[Tue Nov  3 15:28:54 2026] 127.0.0.1:61653 Closing
