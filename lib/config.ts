@@ -152,6 +152,8 @@ export type CaseGroup = {
 export type ParityConfig = {
   version: 1;
   name: string;
+  /** A short name for the row of subjects at the top of the page; the name when not given. */
+  shortName: string;
   /** What is being checked, in a sentence or two. Shown above the results. */
   description: string;
   /** Absolute path of the program's source (written relative to the settings file). */
@@ -203,11 +205,12 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   }
 
   if (!isObject(json)) return fail("中身がオブジェクトではありません");
-  const { version, name, description, source, workspace, fixes, claude, run, output, cases, caseGroups } = json;
+  const { version, name, shortName, description, source, workspace, fixes, claude, run, output, cases, caseGroups } = json;
 
   if (version === undefined) fail(`version がありません（"version": ${CONFIG_VERSION} を書いてください）`);
   if (version !== CONFIG_VERSION) fail(`version ${JSON.stringify(version)} には対応していません（対応しているのは ${CONFIG_VERSION}）`);
   if (typeof name !== "string") fail("name が文字列ではありません");
+  if (shortName !== undefined && typeof shortName !== "string") fail("shortName が文字列ではありません");
   if (description !== undefined && typeof description !== "string") fail("description が文字列ではありません");
   if (typeof source !== "string" || source === "") return fail("source（プログラムのソースの場所）がありません");
 
@@ -285,6 +288,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   return {
     version: CONFIG_VERSION,
     name: name as string,
+    shortName: (shortName as string | undefined) ?? (name as string),
     description: (description as string | undefined) ?? "",
     source: resolve(dirname(path), source),
     workspace: { link },

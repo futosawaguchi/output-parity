@@ -86,6 +86,7 @@ npm run check:all      # 上の全部 ＋ Claude を呼ぶ往復・php が無い
 |---|---|---|
 | `version` | ⭕ | `1` |
 | `name` / `description` | name ⭕ | 画面に出す題材の名前と説明 |
+| `shortName` | | 画面の一番上の題材の並びに出す短い名前（無ければ `name`） |
 | `source` | ⭕ | プログラムのソース。実行のたびに `work/<名前>/` に写し、そこで動かします（原本は書き換えません） |
 | `fixes` | | `apply`（既定。直し方を work/ に当てて確かめる）か `suggest-only`（写さずにその場で動かし、何も書かない。直し方は提案だけ） |
 | `workspace.link` | | work/ に写さずリンクするフォルダ名（既定 `vendor`・`node_modules`） |

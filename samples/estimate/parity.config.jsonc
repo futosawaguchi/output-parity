@@ -3,6 +3,7 @@
 {
   "version": 1,
   "name": "見積書 estimate.php（PHP 7.4 → 8.5）",
+  "shortName": "見積書",
   "description": "架空の見積書を PDF で出す小さな PHP アプリ（samples/estimate/app/estimate.php）を、PHP 7.4 と PHP 8.5 で同じ入力から動かして比べます。見積書は今回作った架空のもので、PDF ライブラリ（TCPDF・FPDI）は本物の公開 OSS です。",
 
   // プログラムのソース。実行のたびに work/estimate/ に写して、そこで動かす（原本は書き換えない）

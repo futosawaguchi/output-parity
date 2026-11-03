@@ -3,6 +3,7 @@
 {
   "version": 1,
   "name": "作業日報の集計 worklog.py（Python 3.10 → 3.12）",
+  "shortName": "作業日報",
   "description": "架空の作業日報を集計して CSV（Shift_JIS）で出す小さな Python のスクリプト（samples/worklog/app/worklog.py）を、Python 3.10 と Python 3.12 で同じ入力から動かして比べます。日報は今回作った架空のものです。",
 
   "source": "app",

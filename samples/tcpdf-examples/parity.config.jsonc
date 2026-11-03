@@ -4,6 +4,7 @@
 {
   "version": 1,
   "name": "TCPDF の公式の例 65 本（PHP 7.4 → 8.5）",
+  "shortName": "TCPDF 65本",
   "description": "PDF ライブラリ TCPDF 6.3.0 に付属する公式の例（example_001〜065.php）を、PHP 7.4 と PHP 8.5 で動かして比べます。TCPDF は公開 OSS の本物で、書き換えません（原因と直し方の提案まで）。",
 
   // composer のプロジェクト。例は vendor/ の中にあり、その場で動かす（TCPDF を写さない・書き換えない）

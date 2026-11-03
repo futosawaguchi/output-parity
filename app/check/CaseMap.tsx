@@ -17,6 +17,9 @@ const STATE_CLASS: Record<SquareState, string> = {
   checked: styles.sqChecked,
 };
 
+/** At most this many inputs, the squares are drawn twice as large. */
+const FEW = 10;
+
 const STATE_LABEL: Record<SquareState, string> = { ...GROUP_LABEL, waiting: "まだ", working: "いま確かめています", checked: "確かめ終わり" };
 
 /**
@@ -25,7 +28,7 @@ const STATE_LABEL: Record<SquareState, string> = { ...GROUP_LABEL, waiting: "ま
  */
 export function CaseMap({ squares, openId, onOpen }: { squares: Square[]; openId?: string | null; onOpen?: (id: string) => void }) {
   return (
-    <ol className={styles.caseMap} aria-label="入力ごとの結果">
+    <ol className={`${styles.caseMap} ${squares.length <= FEW ? styles.caseMapFew : ""}`} aria-label="入力ごとの結果">
       {squares.map((s) => (
         <li key={s.id}>
           <button

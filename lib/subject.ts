@@ -34,6 +34,8 @@ export type Subject = {
 export type SubjectEntry = {
   id: string;
   name: string | null;
+  /** The short name for the row of subjects (the settings' shortName, or the name). */
+  shortName?: string;
   /** outputs: the settings' output first, then any other a case is read in (a CSV among the pages). */
   summary?: { old: string; new: string; outputs: { format: string; encoding: string }[]; runType: RunSpec["type"] };
 };
@@ -74,6 +76,7 @@ export async function listSubjects(root: string): Promise<SubjectEntry[]> {
       entries.push({
         id,
         name: config.name,
+        shortName: config.shortName,
         summary: { old: envs.old.label, new: envs.new.label, outputs: outputsOf(config), runType: config.run.type },
       });
     }

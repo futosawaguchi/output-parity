@@ -60,8 +60,6 @@ function describe(s: ListedSubject): string {
   return `${s.summary.old} → ${s.summary.new}（${kinds}）／ ${latest}`;
 }
 
-/** The name without the "(old → new)" at its end: the item shows the environments on their own line. */
 function shortName(s: SubjectEntry): string {
-  if (!s.name) return s.id;
-  return s.summary ? s.name.replace(/（[^（）]*→[^（）]*）\s*$/, "") : s.name;
+  return s.shortName ?? s.name ?? s.id;
 }

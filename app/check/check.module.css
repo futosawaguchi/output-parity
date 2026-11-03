@@ -1,8 +1,7 @@
 /* The page: a row of the tool's name and its subjects, then the work under a thin rule. */
+/* The whole width of the window: the outputs side by side get all of it. Running text keeps a readable measure. */
 .page {
-  max-width: 1360px;
-  margin: 0 auto;
-  padding: 0 48px 96px;
+  padding: 0 56px 96px;
 }
 
 .top {
@@ -901,6 +900,17 @@
   flex-wrap: wrap;
   gap: 6px;
   margin: 14px 0 6px;
+}
+
+/* With few inputs each square is larger, so a handful still reads as a map. */
+.caseMapFew {
+  gap: 10px;
+}
+
+.caseMapFew .square {
+  width: 52px;
+  height: 52px;
+  border-radius: 3px;
 }
 
 .square {
