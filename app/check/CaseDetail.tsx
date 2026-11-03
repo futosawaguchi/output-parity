@@ -30,46 +30,55 @@ export function CaseDetail({ report, c, cause, onClose }: { report: RunReport; c
         </button>
       </header>
       <div className={styles.panelBody}>
-      <p className={styles.runs}>
-        {run("new").request && <code className={styles.request}>{run("new").request}</code>}
-        {report.environments.old.label}: {describeOutcome(run("old").outcome)} ／ {report.environments.new.label}:{" "}
-        {describeOutcome(run("new").outcome)}
-      </p>
-      {outputKindOf(report, c).format === "html" && (
-        <div className={styles.viewSwitch} role="group" aria-label="出力の見せ方">
-          {(["page", "lines"] as const).map((v) => (
-            <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>
-              {v === "page" ? "画面で見る" : "比べた文字で見る"}
-            </button>
-          ))}
-        </div>
-      )}
-      <div className={styles.pdfs}>
-        {(["old", "new"] as const).map((slot) =>
-          run(slot).outputPath ? (
-            <OutputView key={slot} report={report} c={c} slot={slot} view={view} />
-          ) : (
-            <figure key={slot} className={styles.pdf}>
-              <figcaption className={styles.pdfLabel}>{report.environments[slot].label}</figcaption>
-              <p className={styles.noOutput}>出力なし（{describeOutcome(run(slot).outcome)}）</p>
-            </figure>
-          ),
+        <p className={styles.runs}>
+          {run("new").request && <code className={styles.request}>{run("new").request}</code>}
+          {report.environments.old.label}: {describeOutcome(run("old").outcome)} ／ {report.environments.new.label}:{" "}
+          {describeOutcome(run("new").outcome)}
+        </p>
+        {outputKindOf(report, c).format === "html" && (
+          <div className={styles.viewSwitch} role="group" aria-label="出力の見せ方">
+            {(["page", "lines"] as const).map((v) => (
+              <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>
+                {v === "page" ? "画面で見る" : "比べた文字で見る"}
+              </button>
+            ))}
+          </div>
         )}
-      </div>
-      <NaiveDiffView naive={c.naive} />
-      {c.verdict ? (
-        <VerdictBlock verdict={c.verdict} subjectId={report.subjectId} />
-      ) : c.carried ? (
-        <>
-          <p className={styles.muted}>当てたあとは判定していません。差が当てる前とまったく同じなので、当てる前の判定を出しています</p>
-          <VerdictBlock verdict={c.carried} subjectId={report.subjectId} />
-        </>
-      ) : (
-        <p className={styles.muted}>判定していません</p>
-      )}
-      <CauseSection c={c} subjectId={report.subjectId} actions={cause} />
-      <DroppedLines comparison={c.comparison} />
-      <NotCompared comparison={c.comparison} labels={[report.environments.old.label, report.environments.new.label]} />
+        <div className={styles.pdfs}>
+          {(["old", "new"] as const).map((slot) =>
+            run(slot).outputPath ? (
+              <OutputView key={slot} report={report} c={c} slot={slot} view={view} />
+            ) : (
+              <figure key={slot} className={styles.pdf}>
+                <figcaption className={styles.pdfLabel}>{report.environments[slot].label}</figcaption>
+                <p className={styles.noOutput}>出力なし（{describeOutcome(run(slot).outcome)}）</p>
+              </figure>
+            ),
+          )}
+        </div>
+        {/* Label on the left, what it says on the right: the same reading order as the subject's heading. */}
+        <dl className={styles.detailFacts}>
+          <dt>判定</dt>
+          <dd>
+            {c.verdict ? (
+              <VerdictBlock verdict={c.verdict} subjectId={report.subjectId} />
+            ) : c.carried ? (
+              <>
+                <p className={styles.muted}>当てたあとは判定していません。差が当てる前とまったく同じなので、当てる前の判定を出しています</p>
+                <VerdictBlock verdict={c.carried} subjectId={report.subjectId} />
+              </>
+            ) : (
+              <p className={styles.muted}>判定していません</p>
+            )}
+          </dd>
+          <CauseSection c={c} subjectId={report.subjectId} actions={cause} />
+          <dt>参考</dt>
+          <dd>
+            <NaiveDiffView naive={c.naive} />
+            <DroppedLines comparison={c.comparison} />
+            <NotCompared comparison={c.comparison} labels={[report.environments.old.label, report.environments.new.label]} />
+          </dd>
+        </dl>
       </div>
     </article>
   );

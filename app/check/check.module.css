@@ -313,10 +313,11 @@
 }
 
 .naive {
-  margin-bottom: 20px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
+
+.naive summary {
+  cursor: pointer;
 }
 
 .naiveHead {
@@ -553,9 +554,7 @@
 /* Cause (DESIGN 7-4) */
 
 .cause {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px dashed var(--line);
+  min-width: 0;
 }
 
 .causeHead {
@@ -1095,4 +1094,95 @@
   color: var(--muted);
   font-size: 15px;
   font-weight: 500;
+}
+
+/* The detail below the outputs: a label column and what it says, ruled between rows. */
+.detailFacts {
+  display: grid;
+  grid-template-columns: 7em minmax(0, 1fr);
+  column-gap: 32px;
+  margin-top: 28px;
+}
+
+.detailFacts > dt,
+.detailFacts > dd {
+  padding: 22px 0;
+  border-top: 1px solid var(--line);
+}
+
+.detailFacts > dt {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.detailFacts > dd > * + * {
+  margin-top: 10px;
+}
+
+/* A job under way, where its result will appear. */
+.runningWhat {
+  color: var(--muted);
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.runningNumber {
+  margin: 0 6px;
+  font-size: 88px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.runningStep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 17px;
+}
+
+/* What Claude has done so far while looking for a cause. */
+.trail {
+  list-style: none;
+  margin-top: 6px;
+  font-size: 16px;
+}
+
+.trail li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 3px 0;
+}
+
+.trail li::before {
+  content: "";
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  transform: translateY(1px);
+}
+
+.trailDone {
+  color: var(--muted);
+}
+
+.trailDone::before {
+  background: var(--harmless-bg);
+}
+
+.trailNow {
+  font-weight: 700;
+}
+
+.trailNow::before {
+  background: var(--foreground);
+  animation: pulse 0.9s ease-in-out infinite alternate;
+}
+
+.detailFacts .finding {
+  padding-top: 18px;
+  border-top: none;
 }

@@ -3,13 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { JobKind, JobState } from "@/lib/jobs";
 import type { RunReport } from "@/lib/pipeline";
-import { CASE_CHECKED } from "@/lib/progress";
 import { SAME_ORIGIN_HEADER } from "@/lib/same-origin";
 import styles from "./check.module.css";
 import type { CauseActions } from "./CauseView";
-import { CaseMap, type Square } from "./CaseMap";
 import { MANY_CASES, tally } from "./case-order";
 import { ReportView } from "./ReportView";
+import { RunningView } from "./RunningView";
 import { SubjectPicker, type ListedSubject } from "./SubjectPicker";
 import { recordUrls } from "./urls";
 
@@ -195,7 +194,7 @@ export function RunPanel() {
       busy === "cause"
         ? {
             caseId: askedCause ?? (job?.progress[0]?.caseId || null),
-            message: job?.status === "running" && job.kind === "cause" ? (job.progress.at(-1)?.message ?? "") : "",
+            steps: job?.status === "running" && job.kind === "cause" ? job.progress.map((p) => p.message) : [],
           }
         : null,
   };
@@ -220,7 +219,7 @@ export function RunPanel() {
       <main className={styles.main}>
         <p className={styles.appLead}>バージョンを上げる前と後の出力を比べ、違いを「読む人の判断が変わるか」で分けるツール</p>
         {loading && <p className={styles.loading} role="status">読み込んでいます…</p>}
-        {target && <TargetIntro target={target} showCases={!shown} />}
+        {target && <TargetIntro target={target} showCases={!shown && !running} />}
         {!loading && (
           <div className={styles.controls}>
             <button className={styles.runButton} onClick={() => start("run")} disabled={running || cannotRun !== null}>
@@ -234,10 +233,9 @@ export function RunPanel() {
             >
               {busy === "rejudge" ? "判定し直しています…" : "同梱の出力を Claude に判定し直させる"}
             </button>
-            {job?.status === "running" && job.kind !== "cause" && <Progress job={job} labelOf={(id) => target?.cases.find((c) => c.id === id)?.label ?? id} />}
           </div>
         )}
-        {job?.status === "running" && job.kind !== "cause" && target && <CaseMap squares={squaresWhileRunning(target.cases, job.progress)} />}
+        {job?.status === "running" && job.kind !== "cause" && target && <RunningView job={job} cases={target.cases} />}
         {cannotRun && !job && (
           <p className={styles.notice}>
             この環境ではまだ実行できません: {cannotRun.message}
@@ -304,33 +302,6 @@ function TargetIntro({ target, showCases }: { target: Target; showCases: boolean
       )}
     </div>
   );
-}
-
-function Progress({ job, labelOf }: { job: Extract<JobState, { status: "running" }>; labelOf: (caseId: string) => string }) {
-  const last = job.progress.at(-1);
-  return (
-    <p className={styles.progress} role="status" aria-live="polite">
-      <span className={styles.spinner} aria-hidden />
-      {last ? (
-        <>
-          {last.caseId && <span className={styles.progressCase}>{labelOf(last.caseId)}</span>}
-          {last.message}
-        </>
-      ) : (
-        "準備しています"
-      )}
-    </p>
-  );
-}
-
-/** Each input's square from the progress so far: none yet, being worked on, or checked. */
-function squaresWhileRunning(cases: Target["cases"], progress: { caseId: string; message: string }[]): Square[] {
-  const last = new Map<string, string>();
-  for (const p of progress) if (p.caseId) last.set(p.caseId, p.message);
-  return cases.map((c) => {
-    const message = last.get(c.id);
-    return { id: c.id, label: c.label, state: message === undefined ? "waiting" : message === CASE_CHECKED ? "checked" : "working" };
-  });
 }
 
 function ProblemBox({ problem }: { problem: Problem }) {

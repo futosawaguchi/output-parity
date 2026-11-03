@@ -22,8 +22,8 @@ export type CauseActions = {
    * instead of applying when this machine cannot run the programs (no PHP).
    */
   replay: { caseId: string; edit: Edit; show: () => void } | null;
-  /** A cause being looked for: which case (null until the server has answered) and the latest step. */
-  working: { caseId: string | null; message: string } | null;
+  /** A cause being looked for: which case (null until the server has answered) and every step so far. */
+  working: { caseId: string | null; steps: string[] } | null;
 };
 
 /** Where in the source a broken or doubtful case comes from (DESIGN 7-4). Asked for by a button. */
@@ -33,40 +33,57 @@ export function CauseSection({ c, subjectId, actions }: { c: CaseReport; subject
   const worthAsking = c.verdict ? c.verdict.verdict !== "harmless" : !(left.kind === "lines" && left.count === 0);
   if (!worthAsking) return null;
   const working = actions.working !== null && (actions.working.caseId === c.caseId || actions.working.caseId === null);
+  // A row of the detail's list: its label, then the button and what was found.
   return (
-    <section className={styles.cause}>
-      <div className={styles.causeHead}>
-        <h3 className={styles.causeTitle}>原因</h3>
-        <button
-          className={styles.subButton}
-          onClick={() => actions.find(c.caseId)}
-          disabled={actions.busy || actions.cannot !== null}
-          title={actions.cannot ? `${actions.cannot.message} → ${actions.cannot.nextStep}` : undefined}
-        >
-          {working ? "探しています…" : c.cause ? "もう一度探す" : "原因を探す"}
-        </button>
-      </div>
-      {working ? (
-        <p className={styles.progress} role="status" aria-live="polite">
-          <span className={styles.spinner} aria-hidden />
-          {actions.working?.message || "Claude が原因を探し始めました"}
-        </p>
-      ) : c.cause ? (
-        <CauseResult
-          cause={c.cause}
-          subjectId={subjectId}
-          onApply={(i) => actions.apply(c.caseId, i)}
-          busy={actions.busy}
-          cannotApply={actions.cannotApply}
-          replay={actions.replay?.caseId === c.caseId ? actions.replay : null}
-        />
-      ) : (
-        <p className={styles.muted}>
-          Claude がプログラムのソースと入力データを読んで、どの行が原因かを探します（プログラムを動かす環境は要りません）。
-          {actions.cannot && ` いまは押せません: ${actions.cannot.message} → ${actions.cannot.nextStep}`}
-        </p>
-      )}
-    </section>
+    <>
+      <dt>原因</dt>
+      <dd className={styles.cause}>
+        <div className={styles.causeHead}>
+          <button
+            className={styles.subButton}
+            onClick={() => actions.find(c.caseId)}
+            disabled={actions.busy || actions.cannot !== null}
+            title={actions.cannot ? `${actions.cannot.message} → ${actions.cannot.nextStep}` : undefined}
+          >
+            {working ? "探しています…" : c.cause ? "もう一度探す" : "原因を探す"}
+          </button>
+        </div>
+        {working ? (
+          <Trail steps={actions.working?.steps ?? []} />
+        ) : c.cause ? (
+          <CauseResult
+            cause={c.cause}
+            subjectId={subjectId}
+            onApply={(i) => actions.apply(c.caseId, i)}
+            busy={actions.busy}
+            cannotApply={actions.cannotApply}
+            replay={actions.replay?.caseId === c.caseId ? actions.replay : null}
+          />
+        ) : (
+          <p className={styles.muted}>
+            Claude がプログラムのソースと入力データを読んで、どの行が原因かを探します（プログラムを動かす環境は要りません）。
+            {actions.cannot && ` いまは押せません: ${actions.cannot.message} → ${actions.cannot.nextStep}`}
+          </p>
+        )}
+      </dd>
+    </>
+  );
+}
+
+/**
+ * What Claude has done so far while looking for a cause, one line per step: the files it listed,
+ * read and searched. Done steps are ticked; the latest one is marked as under way.
+ */
+function Trail({ steps }: { steps: string[] }) {
+  const shown = steps.length > 0 ? steps : ["Claude が原因を探し始めました"];
+  return (
+    <ol className={styles.trail} role="status" aria-live="polite">
+      {shown.map((step, i) => (
+        <li key={i} className={i === shown.length - 1 ? styles.trailNow : styles.trailDone}>
+          {step}
+        </li>
+      ))}
+    </ol>
   );
 }
 
