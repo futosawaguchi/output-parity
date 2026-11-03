@@ -35,9 +35,9 @@ const adapters: Record<string, (encoding: string) => Adapter> = {
   html: (encoding) => ({
     extract: (path) => extractHtml(path, encoding),
     description:
-      "HTML の画面から、人に見える文字を上から順に行にしたもの。段落や見出しなどのまとまりごとに1行、" +
-      "表は1つの行（tr）を1行にしてセルを「 | 」で区切る。「[input …]」「[select …]」「[textarea …]」「[checkbox …]」の形の部分はフォームの値（hidden を含む）。" +
-      "「title:」で始まる行はページの題名。script・style は除いてあり、色や配置などの見た目は見ていない。",
+      "HTML の画面の文字を上から順に行にしたもの（隠された要素の中の文字も含む）。段落や見出しなどのまとまりごとに1行、" +
+      "表は1つの行（tr）を1行にしてセルを「 | 」で区切る。「[input …]」「[select …]」「[textarea …]」「[checkbox …]」の形の部分はフォームの値（hidden を含む。select は選ばれている選択肢の文字）。" +
+      "「title:」で始まる行はページの題名。script・style は除いてあり、色や配置などの見た目と、リンク先・選択肢の value・押せるかどうか（disabled）などの属性は見ていない。",
   }),
 };
 
