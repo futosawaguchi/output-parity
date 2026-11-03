@@ -84,6 +84,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 | `run.type` | ⭕ | `command`（道具が旧と新のプログラムを動かす）・`files`（出力がもう手元にある。下の「ファイル型」）・`web`（道具が旧と新のサーバを立てて画面を開く。下の「Web 型」） |
 | `run.cwd` / `run.timeoutMs` | | command と web のとき。動かす場所（source の中。既定 `.`）／打ち切るまでの時間（既定 30000。web では1回の問い合わせ） |
 | `run.needs` | | command と web のとき。動かす前にあるはずのもの（source からの相対。例 `["lib-old/vendor"]`）。無ければ実行せず、依存の取り方を出します |
+| `run.parallel` | | command のとき。同時に動かす入力の数（既定 1・最大 16）。古いプログラムは一時ファイルや DB を共有していることがあるので、互いに干渉しないと分かっているときだけ増やします（TCPDF の例 65 本は 4 で約 4 分 → 約 1 分） |
 | `run.environments.old` / `.new` | ⭕ | command と web のとき。`label`・`command`（フルパス）・`args`（全入力の前に付ける引数。web ではサーバの起動の引数で `{port}` を含める）・`env`（その側だけの環境変数） |
 | `output.format` / `output.from` | ⭕ | `pdf`・`text`（ログ・CSV・標準出力など）・`html`（画面に見える文字とフォームの値）／`file`（プログラムが `{output}` に書く）か `stdout`（web では書きません） |
 | `output.encoding` | | テキストと HTML の文字コード（既定 `utf-8`。`shift_jis`・`euc-jp` など）。HTML が `<meta charset>` で宣言していれば、そちらを使います |
