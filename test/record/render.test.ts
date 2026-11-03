@@ -69,7 +69,7 @@ test("every case is in the record, the unjudged ones too, and the conclusion doe
   const md = renderRecord(reportOf([caseOf("a", [date], harmless), caseOf("b", [lost], broken), caseOf("c", [lost], null)], { judgeHeld: { count: 11, limit: 10 } }), opts);
   for (const label of ["入力 a", "入力 b", "入力 c"]) assert.match(md, new RegExp(`\\| ${label} /`));
   assert.match(md, /3 件: 壊れている 1・未判定 1・無害 1（うち差なし 1）/);
-  assert.match(md, /このままでは移せません。\*\* 壊れている 1 件・未判定 1 件を先に見てください/);
+  assert.match(md, /\*\*このままでは移せません。壊れている 1 件・未判定 1 件を先に見てください。\*\*/);
   assert.match(md, /未判定（Claude に送る件数が多いので、送る前に止めた）/);
   assert.match(md, /壊れている（Claude claude-opus-5-5）/);
 });

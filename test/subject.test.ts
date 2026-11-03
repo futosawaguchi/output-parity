@@ -89,11 +89,18 @@ test("the subjects to choose from: samples/ first, one entry per id, a broken on
   await write("targets", "broken", "{ not json");
   await write("targets", "empty", null);
   await write("targets", "Bad_Name", settings);
-  assert.deepEqual(await listSubjects(root), [
-    { id: "demo", name: "demo" },
-    { id: "broken", name: null },
-    { id: "mine", name: "mine" },
-  ]);
+  const listed = await listSubjects(root);
+  assert.deepEqual(
+    listed.map(({ id, name }) => ({ id, name })),
+    [
+      { id: "demo", name: "demo" },
+      { id: "broken", name: null },
+      { id: "mine", name: "mine" },
+    ],
+  );
+  // What the page shows on each subject's card: the environments, the output, how it runs.
+  assert.deepEqual(Object.keys(listed[0].summary ?? {}).sort(), ["encoding", "format", "new", "old", "runType"]);
+  assert.equal(listed[1].summary, undefined);
 });
 
 test("a request that names no subject is about the default one", () => {
