@@ -10,6 +10,23 @@ import { subjectIdOf } from "@/lib/subject";
 const SLOTS = new Set(["old", "new", "baseline"]);
 const CONTENT_TYPES: Record<string, string> = { pdf: "application/pdf" };
 
+/**
+ * An HTML output drawn as a page (?view=page) comes from the program under test, so it gets
+ * nothing: no script, no request to anywhere (an old page may point at a production server), no
+ * form, and it cannot be framed by another site. The page in the tool also puts it in a sandboxed
+ * frame; this header holds even if the address is opened on its own.
+ */
+const PAGE_POLICY = [
+  "default-src 'none'",
+  "style-src 'unsafe-inline'",
+  "img-src data:",
+  "font-src data:",
+  "form-action 'none'",
+  "base-uri 'none'",
+  "frame-ancestors 'self'",
+  "sandbox",
+].join("; ");
+
 /** The output file of one execution, from runs/ or from the bundled run of ?subject=. Read-only. */
 export async function GET(request: Request, ctx: RouteContext<"/api/outputs/[runId]/[caseId]/[slot]">): Promise<Response> {
   await connection();
@@ -28,9 +45,33 @@ export async function GET(request: Request, ctx: RouteContext<"/api/outputs/[run
   if (!name) return notFound();
   const data = await readFile(join(dir, name));
   const ext = name.slice("output.".length);
+  const params = new URL(request.url).searchParams;
+  if (params.get("view") === "page") {
+    if (ext !== "html") return notFound();
+    const charset = params.get("charset") ?? "utf-8";
+    if (!/^[A-Za-z0-9_-]{1,40}$/.test(charset) || !isEncoding(charset)) return notFound();
+    return new Response(data, {
+      headers: {
+        "content-type": `text/html; charset=${charset}`,
+        "content-security-policy": PAGE_POLICY,
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer",
+        "cache-control": "no-store",
+      },
+    });
+  }
   return new Response(data, {
     headers: { "content-type": CONTENT_TYPES[ext] ?? "text/plain; charset=utf-8", "cache-control": "no-store" },
   });
+}
+
+function isEncoding(label: string): boolean {
+  try {
+    new TextDecoder(label);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function notFound(): Response {

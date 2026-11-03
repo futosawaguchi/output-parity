@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type { Comparison } from "@/lib/compare/compare-case";
 import { checkArithmetic } from "@/lib/judge/arithmetic";
 import type { CaseVerdict, Finding } from "@/lib/judge/verdict";
@@ -7,12 +10,13 @@ import { Badge } from "./Badge";
 import { CauseSection, type CauseActions } from "./CauseView";
 import styles from "./check.module.css";
 import { NaiveDiffView } from "./NaiveDiffView";
-import { OutputView } from "./OutputView";
+import { OutputView, type HtmlView } from "./OutputView";
 import { SentLine } from "./SentLine";
 
 /** Everything about one case: both outputs, the plain diff, the verdict and what was set aside. */
 export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseReport; cause: CauseActions }) {
   const run = (slot: "old" | "new") => c.runs.find((r) => r.slot === slot)!;
+  const [view, setView] = useState<HtmlView>("page");
   return (
     <article className={styles.case}>
       <header className={styles.caseHeader}>
@@ -21,14 +25,24 @@ export function CaseDetail({ report, c, cause }: { report: RunReport; c: CaseRep
           <span className={styles.caseDescription}>{c.description}</span>
         </h2>
         <span className={styles.runs}>
+          {run("new").request && <code className={styles.request}>{run("new").request}</code>}
           {report.environments.old.label}: {describeOutcome(run("old").outcome)} ／ {report.environments.new.label}:{" "}
           {describeOutcome(run("new").outcome)}
         </span>
       </header>
+      {report.outputFormat === "html" && (
+        <div className={styles.viewSwitch} role="group" aria-label="出力の見せ方">
+          {(["page", "lines"] as const).map((v) => (
+            <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>
+              {v === "page" ? "画面で見る" : "比べた文字で見る"}
+            </button>
+          ))}
+        </div>
+      )}
       <div className={styles.pdfs}>
         {(["old", "new"] as const).map((slot) =>
           run(slot).outputPath ? (
-            <OutputView key={slot} report={report} c={c} slot={slot} />
+            <OutputView key={slot} report={report} c={c} slot={slot} view={view} />
           ) : (
             <figure key={slot} className={styles.pdf}>
               <figcaption className={styles.pdfLabel}>{report.environments[slot].label}</figcaption>

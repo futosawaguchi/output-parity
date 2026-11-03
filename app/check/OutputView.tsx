@@ -1,23 +1,37 @@
 import type { CaseReport, RunReport } from "@/lib/pipeline";
 import styles from "./check.module.css";
 import { PdfView } from "./PdfView";
-import { outputUrl } from "./urls";
+import { outputUrl, pageUrl } from "./urls";
+
+/** How an HTML output is shown: drawn as the page, or as the lines it was compared by. */
+export type HtmlView = "page" | "lines";
 
 /**
- * One side's output. A PDF is drawn as it is. Anything else (text, HTML) is shown as the lines it
- * was compared by, with the changed ones marked: the raw file may be in Shift_JIS, and an HTML
- * page from the program under test is never rendered inside this page.
+ * One side's output. A PDF is drawn as it is. An HTML page may be drawn too, inside a sandboxed
+ * frame with nothing allowed (no script, no request, no form: the route sets the same policy).
+ * Otherwise the output is shown as the lines it was compared by, with the changed ones marked
+ * (a text output may be in Shift_JIS, which the browser would not read right on its own).
  */
-export function OutputView({ report, c, slot }: { report: RunReport; c: CaseReport; slot: "old" | "new" }) {
+export function OutputView({ report, c, slot, view = "lines" }: { report: RunReport; c: CaseReport; slot: "old" | "new"; view?: HtmlView }) {
   const label = report.environments[slot].label;
   if (report.outputFormat === "pdf") return <PdfView src={outputUrl(report, c.caseId, slot)} label={label} />;
+  if (report.outputFormat === "html" && view === "page") {
+    return (
+      <figure className={styles.pdf}>
+        <figcaption className={styles.pdfLabel}>{label}（画面。スクリプトと外のファイルは読み込みません）</figcaption>
+        <iframe className={styles.pageFrame} src={pageUrl(report, c.caseId, slot)} sandbox="" referrerPolicy="no-referrer" title={`${label} の画面`} />
+      </figure>
+    );
+  }
 
   const comparison = c.comparison;
   if (comparison.kind !== "compared") {
     return (
       <figure className={styles.pdf}>
         <figcaption className={styles.pdfLabel}>{label}</figcaption>
-        <p className={styles.noOutput}>テキストにできませんでした（下の比較の欄を見てください）</p>
+        <p className={styles.noOutput}>
+          {comparison.kind === "missingOutput" ? "もう片方に出力が無いので、比べていません" : "テキストにできませんでした（下の比較の欄を見てください）"}
+        </p>
       </figure>
     );
   }

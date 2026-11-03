@@ -609,3 +609,40 @@
 .lineAdded {
   background: var(--review-bg);
 }
+
+/* An HTML output drawn as its page (sandboxed). Same height as a PDF frame, so the two sides line up. */
+.pageFrame {
+  display: block;
+  width: 100%;
+  height: 420px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.viewSwitch {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0 2px;
+}
+
+.viewSwitch button {
+  padding: 3px 12px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.viewSwitch button[aria-pressed="true"] {
+  border-color: var(--foreground);
+  color: var(--foreground);
+}
+
+/* The web type: the page that was opened, before how each side answered. */
+.request {
+  margin-right: 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
