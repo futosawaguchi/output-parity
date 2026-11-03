@@ -21,7 +21,8 @@ function describeOutput({ format, encoding }: { format: string; encoding: string
  */
 export function SubjectPicker({ subjects, current, disabled, onChoose }: { subjects: ListedSubject[]; current: string; disabled: boolean; onChoose: (id: string) => void }) {
   return (
-    <nav aria-label="題材">
+    <nav aria-label="題材" className={styles.subjectNav}>
+      <span className={styles.subjectsTitle}>題材</span>
       <ul className={styles.subjectList}>
         {subjects.map((s) => {
           const selected = s.id === current;

@@ -7,6 +7,7 @@
 .top {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 40px;
   padding: 22px 0;
   border-bottom: 1px solid var(--line);
@@ -268,6 +269,8 @@
 /* Side-by-side outputs and the plain diff */
 
 .pdfs {
+  /* Tall enough for a whole A4 page at the width of a column on a laptop screen. */
+  --output-height: min(76vh, 860px);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
@@ -286,7 +289,7 @@
 
 /* Documents usually start at the top; the frame shows that part and scrolls for the rest. */
 .pdfFrame {
-  max-height: 340px;
+  max-height: var(--output-height);
   overflow-y: auto;
   border: 1px solid var(--line);
 }
@@ -303,7 +306,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 340px;
+  height: var(--output-height);
   border: 1px dashed var(--line);
   color: var(--muted);
 }
@@ -520,6 +523,7 @@
 }
 
 .compareColumns {
+  --output-height: min(76vh, 860px);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
@@ -618,6 +622,17 @@
 }
 
 /* The subjects as names in a row; the one shown is underlined (as the author's site marks the page). */
+.subjectNav {
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.subjectsTitle {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .subjectList {
   list-style: none;
   display: flex;
@@ -680,15 +695,37 @@
 /* The answer of a run: how many, and how many in each group, large and in their colours. */
 .countBand {
   margin: 8px 0 24px;
-  padding: 26px 0 22px;
+  padding: 30px 0 24px;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
 
-.countLine {
-  font-size: 30px;
-  font-weight: 800;
+/* The answer, in the largest type on the page. */
+.headline {
+  font-size: 34px;
+  font-weight: 700;
   letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.headlineOf {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.headlineNumber {
+  margin: 0 6px;
+  font-size: 88px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--broken-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.countLine {
+  margin-top: 12px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .countTotal {
@@ -781,7 +818,7 @@
 
 /* Text and HTML outputs: the lines they were compared by, changed ones marked. */
 .textLines {
-  max-height: 340px;
+  max-height: var(--output-height);
   overflow: auto;
   margin: 0;
   padding: 8px 10px 8px 3.2em;
@@ -803,6 +840,7 @@
 
 /* An HTML output drawn as its page (sandboxed). Same height as a PDF frame, so the two sides line up. */
 .pageFrame {
+  height: var(--output-height);
   overflow: hidden;
   border: 1px solid var(--line);
   background: #fff;
@@ -974,4 +1012,57 @@
   to {
     opacity: 0.35;
   }
+}
+
+/* A finished result: the squares come in one after another, then the ones to look at stand out. */
+.caseMapAppear .square {
+  animation: squareIn 0.35s ease-out both;
+  animation-delay: var(--delay, 0ms);
+}
+
+.caseMapAppear .sqBroken,
+.caseMapAppear .sqReview {
+  animation:
+    squareIn 0.35s ease-out both,
+    lookHere 0.5s ease-out 0.75s both;
+  animation-delay: var(--delay, 0ms), calc(var(--delay, 0ms) + 0.75s);
+}
+
+@keyframes squareIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lookHere {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caseMapAppear .square {
+    animation: none;
+  }
+}
+
+/* The map and the list point at the same input. */
+.sqHover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px var(--foreground);
+}
+
+.rowHover {
+  background: var(--surface);
 }

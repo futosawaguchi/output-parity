@@ -30,6 +30,7 @@ export function ReportView({
   const [picked, setPicked] = useState<string[]>([]);
   // With many inputs the harmless ones are folded: the point is the few that need a look.
   const [showHarmless, setShowHarmless] = useState(false);
+  const [hoverId, setHoverId] = useState<string | null>(null);
 
   const byId = (id: string) => report.cases.find((c) => c.caseId === id);
   const togglePick = (id: string) =>
@@ -50,7 +51,7 @@ export function ReportView({
         {
           {
             run: `${finishedAt} に実行`,
-            bundled: `同梱の結果です（${finishedAt} に作者の手元で実行し、リポジトリに入れたもの）。プログラムを動かす環境も API キーも無しで見られます。`,
+            bundled: `同梱の結果（${finishedAt} に作者の手元で実行したもの。PHP も API キーも無しで見られます）`,
             rejudge: `同梱の出力（作者の手元でプログラムが出したもの）を、${finishedAt} にこの環境の Claude が判定し直した結果です。`,
           }[report.origin]
         }
@@ -60,15 +61,20 @@ export function ReportView({
       )}
       {report.judgeHeld && <HeldNotice held={report.judgeHeld} busy={cause.busy} onJudge={onJudgeHeld} />}
       <div className={styles.countBand}>
-        <CountLine cases={report.cases} />
+        <Headline cases={report.cases} />
         <CaseMap
+          key={report.runId + report.finishedAt}
           squares={report.cases.map((c) => ({ id: c.caseId, label: c.label, state: groupOf(c) }))}
           openId={openId}
           onOpen={(id) => {
             setPicked([]);
             setOpenId(id);
           }}
+          hoverId={hoverId}
+          onHover={setHoverId}
+          appear
         />
+        <CountLine cases={report.cases} />
         {record && (
           <p className={styles.recordLinks}>
             <a className={styles.pageLink} href={record.page} target="_blank" rel="noreferrer">
@@ -77,11 +83,10 @@ export function ReportView({
             <a className={styles.smallAction} href={record.markdown} download>
               Markdown で保存
             </a>
-            <span className={styles.muted}>どの入力で何を確かめたか・言えないことを1枚に</span>
           </p>
         )}
       </div>
-      <CaseTable cases={listed} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} />
+      <CaseTable cases={listed} openId={openId} onOpen={setOpenId} picked={picked} onPick={togglePick} hoverId={hoverId} onHover={setHoverId} />
       {folding && harmless > 0 && (
         <button className={styles.linkButton} onClick={() => setShowHarmless(true)}>
           無害 {harmless} 件も表示する
@@ -92,9 +97,26 @@ export function ReportView({
       ) : open ? (
         <CaseDetail report={report} c={open} cause={cause} onClose={() => setOpenId(null)} />
       ) : (
-        <p className={styles.hint}>行を押すと、その入力の出力・差・判定の根拠が出ます。「並べる」に2つチェックすると、左右に並べて見られます。</p>
+        <p className={styles.hint}>行か四角を押すと、その入力の詳細が出ます。「並べる」に2つチェックすると左右に並びます。</p>
       )}
     </div>
+  );
+}
+
+/** The answer in the largest type on the page: how many of all the inputs need a person to look. */
+function Headline({ cases }: { cases: CaseReport[] }) {
+  const look = cases.filter((c) => groupOf(c) !== "harmless").length;
+  return (
+    <p className={styles.headline}>
+      <span className={styles.headlineOf}>{cases.length} 件のうち、</span>
+      {look > 0 ? (
+        <>
+          見るべきは<span className={styles.headlineNumber}>{look}</span>件
+        </>
+      ) : (
+        "見るべきものはありません"
+      )}
+    </p>
   );
 }
 

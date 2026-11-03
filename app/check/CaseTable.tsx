@@ -10,10 +10,13 @@ type Props = {
   /** Cases ticked for the side-by-side view; at most two. */
   picked: string[];
   onPick: (caseId: string) => void;
+  /** The input pointed at here or on the map: its row is marked too. */
+  hoverId?: string | null;
+  onHover?: (caseId: string | null) => void;
 };
 
 /** One row per case: what went in and what came out, so the whole run reads at a glance. */
-export function CaseTable({ cases, openId, onOpen, picked, onPick }: Props) {
+export function CaseTable({ cases, openId, onOpen, picked, onPick, hoverId, onHover }: Props) {
   return (
     <table className={styles.table}>
       <thead>
@@ -26,7 +29,13 @@ export function CaseTable({ cases, openId, onOpen, picked, onPick }: Props) {
       </thead>
       <tbody>
         {cases.map((c) => (
-          <tr key={c.caseId} className={c.caseId === openId ? styles.rowOpen : undefined} onClick={() => onOpen(c.caseId)}>
+          <tr
+            key={c.caseId}
+            className={`${c.caseId === openId ? styles.rowOpen : ""} ${c.caseId === hoverId ? styles.rowHover : ""}`}
+            onClick={() => onOpen(c.caseId)}
+            onMouseEnter={() => onHover?.(c.caseId)}
+            onMouseLeave={() => onHover?.(null)}
+          >
             <td className={styles.pickCol} onClick={(e) => e.stopPropagation()}>
               <input
                 type="checkbox"
