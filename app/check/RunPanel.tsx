@@ -8,7 +8,7 @@ import { SAME_ORIGIN_HEADER } from "@/lib/same-origin";
 import styles from "./check.module.css";
 import type { CauseActions } from "./CauseView";
 import { CaseMap, type Square } from "./CaseMap";
-import { MANY_CASES } from "./case-order";
+import { MANY_CASES, tally } from "./case-order";
 import { ReportView } from "./ReportView";
 import { SubjectPicker, type ListedSubject } from "./SubjectPicker";
 import { recordUrls } from "./urls";
@@ -206,7 +206,13 @@ export function RunPanel() {
           <span className={styles.appMark} aria-hidden />
           output-parity
         </p>
-        <SubjectPicker subjects={subjects} current={subjectId ?? ""} disabled={running} onChoose={choose} />
+        <SubjectPicker
+          // The subject shown counts what is on the page: after an edit was applied or undone, that result.
+          subjects={subjects.map((s) => (s.id === subjectId && shown ? { ...s, latest: tally(shown.cases) } : s))}
+          current={subjectId ?? ""}
+          disabled={running}
+          onChoose={choose}
+        />
       </header>
       <main className={styles.main}>
         <p className={styles.appLead}>バージョンを上げる前と後の出力を比べ、違いを「読む人の判断が変わるか」で分けるツール</p>
