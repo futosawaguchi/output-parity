@@ -16,8 +16,8 @@
   },
   "outputFormat": "text",
   "outputEncoding": "shift_jis",
-  "startedAt": "2026-11-02T13:27:38.526Z",
-  "finishedAt": "2026-11-02T13:28:03.692Z",
+  "startedAt": "2026-11-03T05:27:58.809Z",
+  "finishedAt": "2026-11-03T05:28:26.156Z",
   "cases": [
     {
       "caseId": "case-a",
@@ -36,7 +36,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 270,
+          "durationMs": 62,
           "outputPath": "case-a/old/output.text",
           "stdoutPath": "case-a/old/stdout.txt",
           "stderrPath": "case-a/old/stderr.txt"
@@ -53,7 +53,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 340,
+          "durationMs": 50,
           "outputPath": "case-a/new/output.text",
           "stdoutPath": "case-a/new/stdout.txt",
           "stderrPath": "case-a/new/stderr.txt"
@@ -70,7 +70,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 118,
+          "durationMs": 194,
           "outputPath": "case-a/baseline/output.text",
           "stdoutPath": "case-a/baseline/stdout.txt",
           "stderrPath": "case-a/baseline/stderr.txt"
@@ -80,7 +80,7 @@
         "kind": "compared",
         "old": {
           "lines": [
-            "作業日報 総務チーム A,出力 2026-11-02 22:27:38",
+            "作業日報 総務チーム A,出力 2026-11-03 14:27:58",
             "日付,担当,作業,時間",
             "2026-10-01,佐藤,備品の棚卸し,3.5",
             "2026-10-01,鈴木,週報の作成,1.5",
@@ -93,7 +93,7 @@
         },
         "new": {
           "lines": [
-            "作業日報 総務チーム A,出力 2026-11-02 22:27:39",
+            "作業日報 総務チーム A,出力 2026-11-03 14:27:58",
             "日付,担当,作業,時間",
             "2026-10-01,佐藤,備品の棚卸し,3.5",
             "2026-10-01,鈴木,週報の作成,1.5",
@@ -107,34 +107,19 @@
         "baseline": {
           "kind": "used"
         },
-        "changes": [
-          {
-            "oldStart": 0,
-            "oldLines": [
-              "作業日報 総務チーム A,出力 2026-11-02 22:27:38"
-            ],
-            "newStart": 0,
-            "newLines": [
-              "作業日報 総務チーム A,出力 2026-11-02 22:27:39"
-            ],
-            "explainedByBaseline": true
-          }
-        ]
+        "changes": []
       },
       "naive": {
         "oldBytes": 221,
         "newBytes": 221,
-        "differingLines": 2,
+        "differingLines": 0,
         "totalLines": 8,
-        "excerpt": [
-          "< ········ ·····`·[·· A,·o·· 2026-11-02 22:27:38·",
-          "> ········ ·····`·[·· A,·o·· 2026-11-02 22:27:39·"
-        ]
+        "excerpt": []
       },
       "verdict": {
         "caseId": "case-a",
         "verdict": "harmless",
-        "summary": "旧と新の出力に違いはありません（毎回変わる値 1 か所は除外）",
+        "summary": "旧と新の出力に違いはありません",
         "findings": [],
         "judgedBy": {
           "kind": "machine"
@@ -158,7 +143,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 89,
+          "durationMs": 116,
           "outputPath": "case-b/old/output.text",
           "stdoutPath": "case-b/old/stdout.txt",
           "stderrPath": "case-b/old/stderr.txt"
@@ -175,7 +160,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 77,
+          "durationMs": 116,
           "outputPath": "case-b/new/output.text",
           "stdoutPath": "case-b/new/stdout.txt",
           "stderrPath": "case-b/new/stderr.txt"
@@ -192,7 +177,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 43,
+          "durationMs": 59,
           "outputPath": "case-b/baseline/output.text",
           "stdoutPath": "case-b/baseline/stdout.txt",
           "stderrPath": "case-b/baseline/stderr.txt"
@@ -202,7 +187,7 @@
         "kind": "compared",
         "old": {
           "lines": [
-            "作業日報 総務チーム B,出力 2026-11-02 22:27:40",
+            "作業日報 総務チーム B,出力 2026-11-03 14:28:00",
             "日付,担当,作業,時間",
             "2026-10-01,田中,請求書の確認,2.5",
             "2026-10-02,田中,週報の作成,1.0",
@@ -213,7 +198,7 @@
         },
         "new": {
           "lines": [
-            "作業日報 総務チーム B,出力 2026-11-02 22:27:40",
+            "作業日報 総務チーム B,出力 2026-11-03 14:28:00",
             "日付,担当,作業,時間",
             "2026-10-01,田中,請求書の確認,2.5",
             "2026-10-02,伊藤,名刺の発注,1.5",
@@ -266,7 +251,7 @@
       "verdict": {
         "caseId": "case-b",
         "verdict": "broken",
-        "summary": "同じ入力なのに、新では伊藤の作業2行が増え、合計が3.5から8.0に変わった。新の合計は明細と合っているが、日報の中身そのものが変わっている。",
+        "summary": "同じ入力なのに新では伊藤の作業2行が増え、合計が3.5から8.0に変わっており、集計結果そのものが異なる。",
         "findings": [
           {
             "verdict": "broken",
@@ -274,19 +259,17 @@
               "C1",
               "C2"
             ],
-            "what": "新では伊藤の明細2行（10/02 名刺の発注 1.5、10/03 研修資料の作成 3.0）が増え、合計が3.5から8.0になった。",
-            "why": "新の合計は新の明細と一致しており、新の出力の中に矛盾はない。ただし同じ入力から載る作業と総時間が変わっており、どちらが正しいかに関係なく読む人の判断は確実に変わる。",
+            "what": "新では伊藤の作業行（10-02の1.5時間、10-03の3.0時間）が2行増え、合計が3.5から8.0に変わった。",
+            "why": "新の合計は新の明細と合っており、出力の中に矛盾はない。ただし同じ入力から出した日報の明細と合計時間が変わっているため、読む人の判断は確実に変わる。旧と新のどちらが正しいかは、この出力だけでは決められない。",
             "evidence": [
               "2026-10-02,伊藤,名刺の発注,1.5",
               "2026-10-03,伊藤,研修資料の作成,3.0",
               "合計,,,3.5",
-              "合計,,,8.0"
+              "合計,,,8.0",
+              "作業日報 総務チーム B,出力 2026-11-03 14:28:00"
             ],
-            "calculation": "旧: 2.5 + 1.0 = 3.5 ／ 新: 2.5 + 1.5 + 1.0 + 3.0 = 8.0 ≠ 3.5（差 4.5 = 伊藤の2行 1.5 + 3.0）",
-            "checkHere": "見出し「作業日報 総務チーム B」の範囲に伊藤の行が入るべきかを、入力データで確認する。旧で伊藤の行が抜けていたのか、新で余分に入ったのかを見る。",
-            "machineNotes": [
-              "計算が合いません: 3.5 = 1.5 + 3.0"
-            ]
+            "calculation": "旧: 2.5 + 1.0 = 3.5／新: 2.5 + 1.5 + 1.0 + 3.0 = 8.0（差 4.5 = 伊藤の 1.5 + 3.0）",
+            "checkHere": "伊藤の2行が「総務チーム B」の日報に載るべき行かどうか（見出し行のチーム名と伊藤の所属）、および合計行の値"
           }
         ],
         "judgedBy": {
@@ -295,8 +278,8 @@
         },
         "sent": {
           "purpose": "judge",
-          "at": "2026-11-02T13:27:42.939Z",
-          "file": "20261102-222742-case-b-judge-94ab.txt",
+          "at": "2026-11-03T05:28:03.078Z",
+          "file": "20261103-142803-case-b-judge-287d.txt",
           "chars": 1661,
           "masked": 0,
           "maskedKinds": []
@@ -320,7 +303,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 40,
+          "durationMs": 66,
           "outputPath": "case-c/old/output.text",
           "stdoutPath": "case-c/old/stdout.txt",
           "stderrPath": "case-c/old/stderr.txt"
@@ -337,7 +320,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 38,
+          "durationMs": 73,
           "outputPath": "case-c/new/output.text",
           "stdoutPath": "case-c/new/stdout.txt",
           "stderrPath": "case-c/new/stderr.txt"
@@ -354,7 +337,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 45,
+          "durationMs": 52,
           "outputPath": "case-c/baseline/output.text",
           "stdoutPath": "case-c/baseline/stdout.txt",
           "stderrPath": "case-c/baseline/stderr.txt"
@@ -364,7 +347,7 @@
         "kind": "compared",
         "old": {
           "lines": [
-            "作業日報 総務チーム C,出力 2026-11-02 22:27:41",
+            "作業日報 総務チーム C,出力 2026-11-03 14:28:01",
             "日付,担当,作業,時間",
             "2026-10-01,渡辺,新人研修の準備,4.0",
             "2026-10-02,山本,社内報の編集,2.0",
@@ -376,7 +359,7 @@
         },
         "new": {
           "lines": [
-            "作業日報 総務チーム C,出力 2026-11-02 22:27:41",
+            "作業日報 総務チーム C,出力 2026-11-03 14:28:01",
             "日付,担当,作業,時間",
             "2026-10-01,渡辺,新人研修の準備,4.0",
             "2026-10-01,渡辺,新人研修の準備,4.0",
@@ -438,28 +421,36 @@
       "verdict": {
         "caseId": "case-c",
         "verdict": "broken",
-        "summary": "新では10/01と10/02の作業行が重複して出力され、同じ入力なのに合計時間が7.0から13.0に増えています。",
+        "summary": "新しい出力では2件の作業行がまったく同じ内容で重複し、合計時間が7.0から13.0に増えている。",
         "findings": [
           {
             "verdict": "broken",
             "changeIds": [
               "C1",
-              "C2",
-              "C3"
+              "C2"
             ],
-            "what": "渡辺(10/01)と山本(10/02)の作業行がそれぞれ2回出力され、合計も7.0から13.0に増えました。",
-            "why": "新の合計は重複行を含めた和と一致するため、文書の中では辻褄が合っています。しかし同じ入力から旧は7.0時間を出しており、日報の作業時間が倍近くに水増しされているので、読む人の判断は確実に変わります。",
+            "what": "10/01渡辺と10/02山本の作業行が、日付・担当・作業・時間まで同じ内容で2回ずつ出ている。",
+            "why": "入力は同じなのに、旧にはなかった完全に同じ行が増えている。日報としては同じ作業を二重に計上していることになり、担当者ごとの作業時間の読み方が確実に変わる。",
             "evidence": [
               "2026-10-01,渡辺,新人研修の準備,4.0",
-              "2026-10-02,山本,社内報の編集,2.0",
-              "合計,,,7.0",
-              "合計,,,13.0"
+              "2026-10-02,山本,社内報の編集,2.0"
             ],
-            "calculation": "旧: 4.0 + 2.0 + 1.0 = 7.0／新: 4.0 + 4.0 + 2.0 + 2.0 + 1.0 = 13.0 ≠ 7.0（差 6.0 = 重複した2行の4.0 + 2.0）",
-            "checkHere": "見出し行「日付,担当,作業,時間」の直後にある2026-10-01と2026-10-02の行。それぞれ同じ内容が2行続いていないか、また最終行の合計値を確認してください。",
-            "machineNotes": [
-              "計算が合いません: 7.0 = 0 + 2.0"
-            ]
+            "calculation": "渡辺: 4.0 + 1.0 = 5.0 → 4.0 + 4.0 + 1.0 = 9.0、山本: 2.0 → 2.0 + 2.0 = 4.0",
+            "checkHere": "3〜6行目（2026-10-01 と 2026-10-02 の行がそれぞれ2回出ている）"
+          },
+          {
+            "verdict": "broken",
+            "changeIds": [
+              "C3"
+            ],
+            "what": "合計時間が7.0から13.0に変わった。",
+            "why": "13.0は重複した行も足した値で、重複を除くと旧と同じ7.0になる。合計の工数は読む人が最も使う数字なので、判断が確実に変わる。",
+            "evidence": [
+              "合計,,,13.0",
+              "2026-10-03,渡辺,週報の作成,1.0"
+            ],
+            "calculation": "4.0 + 4.0 + 2.0 + 2.0 + 1.0 = 13.0、重複を除くと 4.0 + 2.0 + 1.0 = 7.0（差 6.0 は重複した2行の 4.0 + 2.0 に一致）",
+            "checkHere": "最終行の「合計」と、その上の明細行"
           }
         ],
         "judgedBy": {
@@ -468,8 +459,8 @@
         },
         "sent": {
           "purpose": "judge",
-          "at": "2026-11-02T13:27:54.827Z",
-          "file": "20261102-222754-case-c-judge-d150.txt",
+          "at": "2026-11-03T05:28:15.885Z",
+          "file": "20261103-142815-case-c-judge-8f6d.txt",
           "chars": 1706,
           "masked": 0,
           "maskedKinds": []
@@ -477,18 +468,18 @@
       },
       "cause": {
         "kind": "found",
-        "summary": "Python 3.11 から datetime.fromisoformat が末尾「Z」の日付を読めるようになりました。そのため、旧では飛ばされていた「…T00:00:00Z」の重複行2件が新では取り込まれ、出力と合計に加わっています。",
+        "summary": "Python 3.11 から datetime.fromisoformat が末尾「Z」付きの日付も読めるようになりました。そのため、旧環境では読めずに飛ばされていた「2026-10-01T00:00:00Z」と「2026-10-02T00:00:00Z」の2行が集計に入り、重複して出ています。",
         "candidates": [
           {
             "file": "worklog.py",
             "line": 14,
             "code": "            day = datetime.fromisoformat(entry[\"date\"])",
-            "change": "3.10 の fromisoformat は isoformat() が出す形式しか受け付けず、「Z」で終わる文字列には ValueError を出していました。3.11 以降はほぼすべての ISO 8601 形式を受け付けるため、「Z」も「20261002」のような区切りなしの形式も読めます。",
-            "why": "case-c.json の6・7行目「2026-10-01T00:00:00Z」(4.0) と「2026-10-02T00:00:00Z」(2.0) は、旧では15〜16行目の except で飛ばされていました。新では読めるので行として出力され、合計も 7.0+4.0+2.0=13.0 になりました。",
+            "change": "Python 3.10 の fromisoformat は「YYYY-MM-DD[THH:MM:SS][+HH:MM]」の形しか読めず、末尾の「Z」や区切りのない「20261002」は ValueError でした。3.11 からはほぼすべての ISO 8601 の形を読めます。",
+            "why": "case-c の6行目「2026-10-01T00:00:00Z」と7行目「2026-10-02T00:00:00Z」は、旧では ValueError になり continue で飛ばされていました。新では読めるため、4.0 と 2.0 の行が二重に出て、合計が 7.0 から 13.0 になりました。case-b の「20261002」「20261003」も、新では同じ理由で集計に入るはずです。",
             "edit": {
               "file": "worklog.py",
-              "oldText": "        try:\n            day = datetime.fromisoformat(entry[\"date\"])",
-              "newText": "        s = entry[\"date\"]\n        try:\n            # 3.10 の fromisoformat が受け付けなかった形式（末尾Z・区切りなし等）は従来どおり飛ばす\n            if s.endswith(\"Z\") or s[4:5] != \"-\" or s[7:8] != \"-\" or not s[5:7].isdigit():\n                raise ValueError(s)\n            day = datetime.fromisoformat(s)"
+              "oldText": "            day = datetime.fromisoformat(entry[\"date\"])",
+              "newText": "            s = entry[\"date\"]\n            if s[4:5] != \"-\" or s[7:8] != \"-\" or s.endswith(\"Z\"):\n                raise ValueError(s)  # 3.10 の fromisoformat が読めなかった形は飛ばす\n            day = datetime.fromisoformat(s)"
             },
             "steps": [],
             "lineCheck": "matches",
@@ -502,9 +493,9 @@
         ],
         "sent": {
           "purpose": "cause",
-          "at": "2026-11-02T13:30:48.844Z",
-          "file": "20261102-223048-case-c-cause-47ec.txt",
-          "chars": 4446,
+          "at": "2026-11-03T05:28:46.305Z",
+          "file": "20261103-142846-case-c-cause-b3fc.txt",
+          "chars": 4634,
           "masked": 0,
           "maskedKinds": []
         }

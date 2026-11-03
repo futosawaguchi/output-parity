@@ -16,8 +16,8 @@
   },
   "outputFormat": "text",
   "outputEncoding": "shift_jis",
-  "startedAt": "2026-11-02T13:31:06.738Z",
-  "finishedAt": "2026-11-02T13:31:11.129Z",
+  "startedAt": "2026-11-03T05:28:46.624Z",
+  "finishedAt": "2026-11-03T05:28:50.276Z",
   "cases": [
     {
       "caseId": "case-a",
@@ -36,7 +36,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 270,
+          "durationMs": 62,
           "outputPath": "case-a/old/output.text",
           "stdoutPath": "case-a/old/stdout.txt",
           "stderrPath": "case-a/old/stderr.txt"
@@ -53,7 +53,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 100,
+          "durationMs": 55,
           "outputPath": "case-a/new/output.text",
           "stdoutPath": "case-a/new/stdout.txt",
           "stderrPath": "case-a/new/stderr.txt"
@@ -70,7 +70,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 143,
+          "durationMs": 102,
           "outputPath": "case-a/baseline/output.text",
           "stdoutPath": "case-a/baseline/stdout.txt",
           "stderrPath": "case-a/baseline/stderr.txt"
@@ -80,7 +80,7 @@
         "kind": "compared",
         "old": {
           "lines": [
-            "作業日報 総務チーム A,出力 2026-11-02 22:27:38",
+            "作業日報 総務チーム A,出力 2026-11-03 14:27:58",
             "日付,担当,作業,時間",
             "2026-10-01,佐藤,備品の棚卸し,3.5",
             "2026-10-01,鈴木,週報の作成,1.5",
@@ -93,7 +93,7 @@
         },
         "new": {
           "lines": [
-            "作業日報 総務チーム A,出力 2026-11-02 22:31:07",
+            "作業日報 総務チーム A,出力 2026-11-03 14:28:46",
             "日付,担当,作業,時間",
             "2026-10-01,佐藤,備品の棚卸し,3.5",
             "2026-10-01,鈴木,週報の作成,1.5",
@@ -111,11 +111,11 @@
           {
             "oldStart": 0,
             "oldLines": [
-              "作業日報 総務チーム A,出力 2026-11-02 22:27:38"
+              "作業日報 総務チーム A,出力 2026-11-03 14:27:58"
             ],
             "newStart": 0,
             "newLines": [
-              "作業日報 総務チーム A,出力 2026-11-02 22:31:07"
+              "作業日報 総務チーム A,出力 2026-11-03 14:28:46"
             ],
             "explainedByBaseline": true
           }
@@ -127,8 +127,8 @@
         "differingLines": 2,
         "totalLines": 8,
         "excerpt": [
-          "< ········ ·····`·[·· A,·o·· 2026-11-02 22:27:38·",
-          "> ········ ·····`·[·· A,·o·· 2026-11-02 22:31:07·"
+          "< ········ ·····`·[·· A,·o·· 2026-11-03 14:27:58·",
+          "> ········ ·····`·[·· A,·o·· 2026-11-03 14:28:46·"
         ]
       },
       "verdict": {
@@ -158,7 +158,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 89,
+          "durationMs": 116,
           "outputPath": "case-b/old/output.text",
           "stdoutPath": "case-b/old/stdout.txt",
           "stderrPath": "case-b/old/stderr.txt"
@@ -175,7 +175,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 99,
+          "durationMs": 41,
           "outputPath": "case-b/new/output.text",
           "stdoutPath": "case-b/new/stdout.txt",
           "stderrPath": "case-b/new/stderr.txt"
@@ -192,7 +192,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 73,
+          "durationMs": 44,
           "outputPath": "case-b/baseline/output.text",
           "stdoutPath": "case-b/baseline/stdout.txt",
           "stderrPath": "case-b/baseline/stderr.txt"
@@ -202,7 +202,7 @@
         "kind": "compared",
         "old": {
           "lines": [
-            "作業日報 総務チーム B,出力 2026-11-02 22:27:40",
+            "作業日報 総務チーム B,出力 2026-11-03 14:28:00",
             "日付,担当,作業,時間",
             "2026-10-01,田中,請求書の確認,2.5",
             "2026-10-02,田中,週報の作成,1.0",
@@ -213,7 +213,7 @@
         },
         "new": {
           "lines": [
-            "作業日報 総務チーム B,出力 2026-11-02 22:31:08",
+            "作業日報 総務チーム B,出力 2026-11-03 14:28:47",
             "日付,担当,作業,時間",
             "2026-10-01,田中,請求書の確認,2.5",
             "2026-10-02,田中,週報の作成,1.0",
@@ -229,11 +229,11 @@
           {
             "oldStart": 0,
             "oldLines": [
-              "作業日報 総務チーム B,出力 2026-11-02 22:27:40"
+              "作業日報 総務チーム B,出力 2026-11-03 14:28:00"
             ],
             "newStart": 0,
             "newLines": [
-              "作業日報 総務チーム B,出力 2026-11-02 22:31:08"
+              "作業日報 総務チーム B,出力 2026-11-03 14:28:47"
             ],
             "explainedByBaseline": true
           }
@@ -245,8 +245,8 @@
         "differingLines": 2,
         "totalLines": 6,
         "excerpt": [
-          "< ········ ·····`·[·· B,·o·· 2026-11-02 22:27:40·",
-          "> ········ ·····`·[·· B,·o·· 2026-11-02 22:31:08·"
+          "< ········ ·····`·[·· B,·o·· 2026-11-03 14:28:00·",
+          "> ········ ·····`·[·· B,·o·· 2026-11-03 14:28:47·"
         ]
       },
       "verdict": {
@@ -276,7 +276,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 40,
+          "durationMs": 66,
           "outputPath": "case-c/old/output.text",
           "stdoutPath": "case-c/old/stdout.txt",
           "stderrPath": "case-c/old/stderr.txt"
@@ -293,7 +293,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 208,
+          "durationMs": 45,
           "outputPath": "case-c/new/output.text",
           "stdoutPath": "case-c/new/stdout.txt",
           "stderrPath": "case-c/new/stderr.txt"
@@ -310,7 +310,7 @@
             "kind": "exited",
             "exitCode": 0
           },
-          "durationMs": 82,
+          "durationMs": 39,
           "outputPath": "case-c/baseline/output.text",
           "stdoutPath": "case-c/baseline/stdout.txt",
           "stderrPath": "case-c/baseline/stderr.txt"
@@ -320,7 +320,7 @@
         "kind": "compared",
         "old": {
           "lines": [
-            "作業日報 総務チーム C,出力 2026-11-02 22:27:41",
+            "作業日報 総務チーム C,出力 2026-11-03 14:28:01",
             "日付,担当,作業,時間",
             "2026-10-01,渡辺,新人研修の準備,4.0",
             "2026-10-02,山本,社内報の編集,2.0",
@@ -332,7 +332,7 @@
         },
         "new": {
           "lines": [
-            "作業日報 総務チーム C,出力 2026-11-02 22:31:09",
+            "作業日報 総務チーム C,出力 2026-11-03 14:28:49",
             "日付,担当,作業,時間",
             "2026-10-01,渡辺,新人研修の準備,4.0",
             "2026-10-02,山本,社内報の編集,2.0",
@@ -349,11 +349,11 @@
           {
             "oldStart": 0,
             "oldLines": [
-              "作業日報 総務チーム C,出力 2026-11-02 22:27:41"
+              "作業日報 総務チーム C,出力 2026-11-03 14:28:01"
             ],
             "newStart": 0,
             "newLines": [
-              "作業日報 総務チーム C,出力 2026-11-02 22:31:09"
+              "作業日報 総務チーム C,出力 2026-11-03 14:28:49"
             ],
             "explainedByBaseline": true
           }
@@ -365,8 +365,8 @@
         "differingLines": 2,
         "totalLines": 7,
         "excerpt": [
-          "< ········ ·····`·[·· C,·o·· 2026-11-02 22:27:41·",
-          "> ········ ·····`·[·· C,·o·· 2026-11-02 22:31:09·"
+          "< ········ ·····`·[·· C,·o·· 2026-11-03 14:28:01·",
+          "> ········ ·····`·[·· C,·o·· 2026-11-03 14:28:49·"
         ]
       },
       "verdict": {
@@ -384,13 +384,13 @@
     "caseId": "case-c",
     "edit": {
       "file": "worklog.py",
-      "oldText": "        try:\n            day = datetime.fromisoformat(entry[\"date\"])",
-      "newText": "        s = entry[\"date\"]\n        try:\n            # 3.10 の fromisoformat が受け付けなかった形式（末尾Z・区切りなし等）は従来どおり飛ばす\n            if s.endswith(\"Z\") or s[4:5] != \"-\" or s[7:8] != \"-\" or not s[5:7].isdigit():\n                raise ValueError(s)\n            day = datetime.fromisoformat(s)"
+      "oldText": "            day = datetime.fromisoformat(entry[\"date\"])",
+      "newText": "            s = entry[\"date\"]\n            if s[4:5] != \"-\" or s[7:8] != \"-\" or s.endswith(\"Z\"):\n                raise ValueError(s)  # 3.10 の fromisoformat が読めなかった形は飛ばす\n            day = datetime.fromisoformat(s)"
     },
     "applied": {
       "kind": "applied",
       "file": "worklog.py",
-      "line": 13
+      "line": 14
     },
     "verification": {
       "outcome": "fixed",
