@@ -1,13 +1,6 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
-// The landing page comes later (PROGRESS 6.5). For now it only leads to the tool.
+// The tool itself is the first page; README explains what it is.
 export default function Home() {
-  return (
-    <main style={{ padding: "40px 32px" }}>
-      <h1>output-parity</h1>
-      <p>
-        <Link href="/check">比較の画面へ</Link>
-      </p>
-    </main>
-  );
+  redirect("/check");
 }
