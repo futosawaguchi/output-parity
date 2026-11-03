@@ -586,19 +586,10 @@
 
 /* Cause (DESIGN 7-4) */
 
-.cause {
-  min-width: 0;
-}
-
 .causeHead {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 10px;
-}
-
-.causeTitle {
-  font-size: 17px;
+  gap: 18px;
 }
 
 .location {
@@ -1129,27 +1120,20 @@
   font-weight: 500;
 }
 
-/* The detail below the outputs: a label column and what it says, ruled between rows. */
-.detailFacts {
-  display: grid;
-  grid-template-columns: 7em minmax(0, 1fr);
-  column-gap: 32px;
-  margin-top: 28px;
+/* The parts below the outputs: each under one full-width rule, with its heading above it. */
+.detailSection {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid #c9c9c3;
 }
 
-.detailFacts > dt,
-.detailFacts > dd {
-  padding: 22px 0;
-  border-top: 1px solid var(--line);
+.detailSection > * + * {
+  margin-top: 12px;
 }
 
-.detailFacts > dt {
-  font-size: 19px;
+.detailHeading {
+  font-size: 20px;
   font-weight: 700;
-}
-
-.detailFacts > dd > * + * {
-  margin-top: 10px;
 }
 
 /* A job under way, where its result will appear. */
@@ -1215,7 +1199,7 @@
   animation: pulse 0.9s ease-in-out infinite alternate;
 }
 
-.detailFacts .finding {
+.detailSection .finding {
   padding-top: 18px;
   border-top: none;
 }

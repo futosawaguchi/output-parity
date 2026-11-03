@@ -33,40 +33,38 @@ export function CauseSection({ c, subjectId, actions }: { c: CaseReport; subject
   const worthAsking = c.verdict ? c.verdict.verdict !== "harmless" : !(left.kind === "lines" && left.count === 0);
   if (!worthAsking) return null;
   const working = actions.working !== null && (actions.working.caseId === c.caseId || actions.working.caseId === null);
-  // A row of the detail's list: its label, then the button and what was found.
+  // A part of the detail: its heading with the button beside it, then what was found.
   return (
-    <>
-      <dt>原因</dt>
-      <dd className={styles.cause}>
-        <div className={styles.causeHead}>
-          <button
-            className={styles.subButton}
-            onClick={() => actions.find(c.caseId)}
-            disabled={actions.busy || actions.cannot !== null}
-            title={actions.cannot ? `${actions.cannot.message} → ${actions.cannot.nextStep}` : undefined}
-          >
-            {working ? "探しています…" : c.cause ? "もう一度探す" : "原因を探す"}
-          </button>
-        </div>
-        {working ? (
-          <Trail steps={actions.working?.steps ?? []} />
-        ) : c.cause ? (
-          <CauseResult
-            cause={c.cause}
-            subjectId={subjectId}
-            onApply={(i) => actions.apply(c.caseId, i)}
-            busy={actions.busy}
-            cannotApply={actions.cannotApply}
-            replay={actions.replay?.caseId === c.caseId ? actions.replay : null}
-          />
-        ) : (
-          <p className={styles.muted}>
-            Claude がプログラムのソースと入力データを読んで、どの行が原因かを探します（プログラムを動かす環境は要りません）。
-            {actions.cannot && ` いまは押せません: ${actions.cannot.message} → ${actions.cannot.nextStep}`}
-          </p>
-        )}
-      </dd>
-    </>
+    <section className={styles.detailSection}>
+      <div className={styles.causeHead}>
+        <h3 className={styles.detailHeading}>原因</h3>
+        <button
+          className={styles.subButton}
+          onClick={() => actions.find(c.caseId)}
+          disabled={actions.busy || actions.cannot !== null}
+          title={actions.cannot ? `${actions.cannot.message} → ${actions.cannot.nextStep}` : undefined}
+        >
+          {working ? "探しています…" : c.cause ? "もう一度探す" : "原因を探す"}
+        </button>
+      </div>
+      {working ? (
+        <Trail steps={actions.working?.steps ?? []} />
+      ) : c.cause ? (
+        <CauseResult
+          cause={c.cause}
+          subjectId={subjectId}
+          onApply={(i) => actions.apply(c.caseId, i)}
+          busy={actions.busy}
+          cannotApply={actions.cannotApply}
+          replay={actions.replay?.caseId === c.caseId ? actions.replay : null}
+        />
+      ) : (
+        <p className={styles.muted}>
+          Claude がプログラムのソースと入力データを読んで、どの行が原因かを探します（プログラムを動かす環境は要りません）。
+          {actions.cannot && ` いまは押せません: ${actions.cannot.message} → ${actions.cannot.nextStep}`}
+        </p>
+      )}
+    </section>
   );
 }
 

@@ -56,29 +56,27 @@ export function CaseDetail({ report, c, cause, onClose }: { report: RunReport; c
             ),
           )}
         </div>
-        {/* Label on the left, what it says on the right: the same reading order as the subject's heading. */}
-        <dl className={styles.detailFacts}>
-          <dt>判定</dt>
-          <dd>
-            {c.verdict ? (
-              <VerdictBlock verdict={c.verdict} subjectId={report.subjectId} />
-            ) : c.carried ? (
-              <>
-                <p className={styles.muted}>当てたあとは判定していません。差が当てる前とまったく同じなので、当てる前の判定を出しています</p>
-                <VerdictBlock verdict={c.carried} subjectId={report.subjectId} />
-              </>
-            ) : (
-              <p className={styles.muted}>判定していません</p>
-            )}
-          </dd>
-          <CauseSection c={c} subjectId={report.subjectId} actions={cause} />
-          <dt>参考</dt>
-          <dd>
-            <NaiveDiffView naive={c.naive} />
-            <DroppedLines comparison={c.comparison} />
-            <NotCompared comparison={c.comparison} labels={[report.environments.old.label, report.environments.new.label]} />
-          </dd>
-        </dl>
+        {/* Each part under a full-width rule and its heading, as the sections of the author's site read. */}
+        <section className={styles.detailSection}>
+          <h3 className={styles.detailHeading}>判定</h3>
+          {c.verdict ? (
+            <VerdictBlock verdict={c.verdict} subjectId={report.subjectId} />
+          ) : c.carried ? (
+            <>
+              <p className={styles.muted}>当てたあとは判定していません。差が当てる前とまったく同じなので、当てる前の判定を出しています</p>
+              <VerdictBlock verdict={c.carried} subjectId={report.subjectId} />
+            </>
+          ) : (
+            <p className={styles.muted}>判定していません</p>
+          )}
+        </section>
+        <CauseSection c={c} subjectId={report.subjectId} actions={cause} />
+        <section className={styles.detailSection}>
+          <h3 className={styles.detailHeading}>参考</h3>
+          <NaiveDiffView naive={c.naive} />
+          <DroppedLines comparison={c.comparison} />
+          <NotCompared comparison={c.comparison} labels={[report.environments.old.label, report.environments.new.label]} />
+        </section>
       </div>
     </article>
   );
