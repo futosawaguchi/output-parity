@@ -16,7 +16,7 @@ test("text is decoded in the encoding the settings name, line by line, CRLF or L
   // "日報\r\n合計,8\r\n" in Shift_JIS
   const sjis = Buffer.from([0x93, 0xfa, 0x95, 0xf1, 0x0d, 0x0a, 0x8d, 0x87, 0x8c, 0x76, 0x2c, 0x38, 0x0d, 0x0a]);
   const doc = await adapterFor({ format: "text", encoding: "shift_jis" }).extract(await file(sjis));
-  assert.deepEqual(doc, { lines: ["日報", "合計,8"], pages: [], unreadable: [] });
+  assert.deepEqual(doc, { lines: ["日報", "合計,8"], pages: [], unreadable: [], undecodable: 0 });
 });
 
 test("bytes the encoding cannot read are counted, not dropped (a wrong setting shows in the report)", async () => {
@@ -24,6 +24,7 @@ test("bytes the encoding cannot read are counted, not dropped (a wrong setting s
   const doc = await adapterFor({ format: "text" }).extract(await file(sjis));
   assert.equal(doc.lines.length, 1);
   assert.match(doc.unreadable[0], /utf-8 として読めない部分が \d+ か所/);
+  assert.ok((doc.undecodable ?? 0) > 0);
 });
 
 test("empty lines inside the text are kept; only the final line end makes no extra line", async () => {

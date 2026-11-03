@@ -72,6 +72,29 @@ test("no difference left: harmless without asking Claude", async () => {
   assert.equal(v.judgedBy.kind, "machine");
 });
 
+test("the same output with a different ending is needs review, with both endings as evidence", async () => {
+  const c = compared([]);
+  (c.runs[1] as { outcome: unknown }).outcome = { kind: "exited", exitCode: 255 };
+  const v = await judgeByMachine(c, { oldLabel: "旧", newLabel: "新" });
+  assert.equal(v?.verdict, "needs_review");
+  assert.deepEqual(v?.findings[0].evidence.slice(0, 2), ["旧: 終了コード 0", "新: 終了コード 255"]);
+});
+
+test("a page that now redirects elsewhere is not harmless, even with the same body", async () => {
+  const c = compared([]);
+  (c.runs[0] as { outcome: unknown }).outcome = { kind: "http", status: 302, location: "/order.php?id=1" };
+  (c.runs[1] as { outcome: unknown }).outcome = { kind: "http", status: 302, location: "/index.php" };
+  assert.equal((await judgeByMachine(c, { oldLabel: "旧", newLabel: "新" }))?.verdict, "needs_review");
+});
+
+test("no difference in text the encoding could not read is needs review, not harmless", async () => {
+  const c = compared([]);
+  if (c.comparison.kind === "compared") c.comparison.new.undecodable = 4;
+  const v = await judgeByMachine(c, { oldLabel: "旧", newLabel: "新" });
+  assert.equal(v?.verdict, "needs_review");
+  assert.match(v?.findings[0].checkHere ?? "", /output\.encoding/);
+});
+
 const harmless: Finding = { verdict: "harmless", changeIds: ["C1"], what: "w", why: "y", evidence: ["合計 23,000"], calculation: "15,000 + 8,000 = 23,000", checkHere: "h" };
 
 test("a harmless finding whose grounds hold stays harmless", () => {
