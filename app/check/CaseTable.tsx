@@ -52,7 +52,7 @@ export function CaseTable({ cases, openId, onOpen, picked, onPick }: Props) {
                 <span className={styles.muted}>未判定</span>
               )}
             </td>
-            <td className={styles.rowSummary}>{(c.verdict ?? c.carried)?.summary ?? describeRemaining(remainingOf(c.comparison))}</td>
+            <td className={styles.rowSummary}>{(c.verdict ?? c.carried)?.summary ?? describeRemaining(remainingOf(c))}</td>
           </tr>
         ))}
       </tbody>

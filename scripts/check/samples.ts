@@ -17,7 +17,7 @@ export const LOG_DIR = join(runsRoot, "check");
 export function describeCase(c: CaseReport): string {
   const v = c.verdict;
   const verdict = v ? `${VERDICT_LABEL[v.verdict]}（${v.judgedBy.kind === "claude" ? "Claude" : v.judgedBy.kind === "machine" ? "機械" : "判定できず"}）` : "判定なし";
-  return `${describeRemaining(remainingOf(c.comparison))} / ${verdict}`;
+  return `${describeRemaining(remainingOf(c))} / ${verdict}`;
 }
 
 /** Runs `npm run samples` for one subject and returns the report it wrote. The output goes to runs/check/. */

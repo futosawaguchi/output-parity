@@ -1,10 +1,11 @@
-import { describeRemaining, type FixAttempt, type FixOutcome } from "@/lib/fix/verify";
+import { describeDelta, describeRemaining, type FixAttempt, type FixOutcome } from "@/lib/fix/verify";
 import styles from "./check.module.css";
 
 const HEADLINE: Record<FixOutcome, string> = {
   fixed: "直りました",
   notFixed: "まだ直っていません",
   worse: "ほかの入力が悪くなりました",
+  changed: "ほかの入力の差が変わりました",
 };
 
 /** The answer to "did the edit work?", decided by running everything again (DESIGN 7-4). */
@@ -49,7 +50,7 @@ export function FixResult({ attempt, labelOf, onUndo, busy, bundled }: Props) {
       <ul className={styles.deltas}>
         {verification.deltas.map((d) => (
           <li key={d.caseId}>
-            <span className={styles.caseLabel}>{d.label}</span> {describeRemaining(d.before)} → {describeRemaining(d.after)}
+            <span className={styles.caseLabel}>{d.label}</span> {describeDelta(d)}
           </li>
         ))}
       </ul>

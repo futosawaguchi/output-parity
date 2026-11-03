@@ -29,7 +29,7 @@ export type CauseActions = {
 /** Where in the source a broken or doubtful case comes from (DESIGN 7-4). Asked for by a button. */
 export function CauseSection({ c, subjectId, actions }: { c: CaseReport; subjectId: string; actions: CauseActions }) {
   // Judged cases that are not harmless; unjudged ones (the run after an edit) while a difference is left.
-  const left = remainingOf(c.comparison);
+  const left = remainingOf(c);
   const worthAsking = c.verdict ? c.verdict.verdict !== "harmless" : !(left.kind === "lines" && left.count === 0);
   if (!worthAsking) return null;
   const working = actions.working !== null && (actions.working.caseId === c.caseId || actions.working.caseId === null);

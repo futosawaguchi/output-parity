@@ -1,7 +1,7 @@
 import { VERDICT_LABEL, type CaseVerdict } from "../judge/verdict";
 import type { CaseReport, RunReport } from "../pipeline";
 import { describeOutcome } from "../runner/outcome";
-import { describeRemaining, remainingOf } from "../fix/verify";
+import { describeDelta, describeRemaining, remainingOf } from "../fix/verify";
 import type { SentRecord } from "../sent-log";
 import type { NewOnly } from "./deprecations";
 import { toMarkdown, type Block, type Cell, type RecordDoc } from "./doc";
@@ -66,7 +66,7 @@ function conclusion(report: RunReport): Block[] {
 }
 
 function isSame(c: CaseReport): boolean {
-  const r = remainingOf(c.comparison);
+  const r = remainingOf(c);
   return r.kind === "lines" && r.count === 0;
 }
 
@@ -101,7 +101,7 @@ function caseTable(report: RunReport): Block[] {
     const neu = c.runs.find((r) => r.slot === "new");
     const input = [c.label, c.description, inputOf(c)].filter(Boolean).join(" / ");
     const ran = `${old ? describeOutcome(old.outcome) : "—"} / ${neu ? describeOutcome(neu.outcome) : "—"}`;
-    return [input, ran, describeRemaining(remainingOf(c.comparison)), dropped(c), { verdict: groupOf(c), text: verdictOf(c, report) }, summaryOf(c)];
+    return [input, ran, describeRemaining(remainingOf(c)), dropped(c), { verdict: groupOf(c), text: verdictOf(c, report) }, summaryOf(c)];
   });
   return [
     { kind: "heading", text: "入力ごとの結果" },
@@ -175,10 +175,10 @@ function fix(report: RunReport): Block[] {
   if (a.applied.kind === "refused") {
     blocks.push({ kind: "paragraph", text: `当てられませんでした: ${a.applied.message}` });
   } else if (a.verification) {
-    const outcome = { fixed: "直りました", notFixed: "差が残りました", worse: "ほかの入力が悪くなりました" }[a.verification.outcome];
-    const changed = a.verification.deltas.filter((d) => describeRemaining(d.before) !== describeRemaining(d.after));
+    const outcome = { fixed: "直りました", notFixed: "差が残りました", worse: "ほかの入力が悪くなりました", changed: "ほかの入力の差が変わりました" }[a.verification.outcome];
+    const changed = a.verification.deltas.filter((d) => d.changed || describeRemaining(d.before) !== describeRemaining(d.after));
     blocks.push({ kind: "paragraph", text: `結果: ${outcome}`, strong: true });
-    if (changed.length > 0) blocks.push({ kind: "list", items: changed.map((d) => ({ text: `${d.label}: ${describeRemaining(d.before)} → ${describeRemaining(d.after)}` })) });
+    if (changed.length > 0) blocks.push({ kind: "list", items: changed.map((d) => ({ text: `${d.label}: ${describeDelta(d)}` })) });
   }
   blocks.push({ kind: "paragraph", text: "当てたのは work/ の写しです。本番へ移すのは人です（この道具は本番に触りません）。" });
   return blocks;
