@@ -39,7 +39,7 @@
 
 .appLead {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 15px;
   margin-bottom: 10px;
 }
 
@@ -176,7 +176,7 @@
 }
 
 .summary {
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 600;
 }
 
@@ -188,21 +188,22 @@
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
+  font-size: 17px;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .badge::before {
   content: "";
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   border-radius: 2px;
   background: currentColor;
 }
 
 .badgeSmall {
-  font-size: 14px;
+  font-size: 15px;
   margin-right: 10px;
 }
 
@@ -325,7 +326,7 @@
 .naiveExcerpt {
   margin-top: 8px;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--muted);
   white-space: pre;
@@ -336,7 +337,7 @@
 
 .calcOk,
 .calcWrong {
-  font-size: 14px;
+  font-size: 15px;
   margin-top: 2px;
 }
 
@@ -351,7 +352,7 @@
 
 .dropped {
   margin-top: 12px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--muted);
 }
 
@@ -362,7 +363,7 @@
 .droppedLines {
   margin-top: 6px;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -427,7 +428,7 @@
 .sentLine {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* Overview table */
@@ -440,7 +441,7 @@
 
 .table th {
   text-align: left;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--muted);
   padding: 6px 10px;
@@ -448,7 +449,7 @@
 }
 
 .table td {
-  padding: 12px 10px;
+  padding: 16px 12px;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
@@ -483,6 +484,7 @@
 }
 
 .caseLabel {
+  font-size: 17px;
   font-weight: 700;
   margin-right: 10px;
   white-space: nowrap;
@@ -490,16 +492,16 @@
 
 .caseDescription {
   color: var(--muted);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 400;
 }
 
 .rowSummary {
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .caseTitle {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
 }
 
@@ -538,13 +540,13 @@
 }
 
 .compareLabel {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--muted);
 }
 
 .changedLines {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 15px;
   white-space: pre-wrap;
 }
 
@@ -579,7 +581,7 @@
   border-radius: 4px;
   background: var(--background);
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 15px;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -622,39 +624,44 @@
 }
 
 /* The subjects as names in a row; the one shown is underlined (as the author's site marks the page). */
+/* The subjects as one row of joined, square-cornered buttons; the one shown is filled in ink. */
 .subjectNav {
   display: flex;
-  align-items: baseline;
-  gap: 20px;
+  align-items: center;
+  gap: 14px;
 }
 
 .subjectsTitle {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .subjectList {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 28px;
+  border: 1px solid var(--foreground);
+}
+
+.subjectList li + li {
+  border-left: 1px solid var(--foreground);
 }
 
 .subjectItem {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 0;
+  padding: 9px 18px;
   border: none;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--muted);
-  font-size: 15px;
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .subjectItem:hover:not(:disabled) {
-  color: var(--foreground);
+  background: var(--surface);
 }
 
 .subjectItem:disabled {
@@ -664,9 +671,8 @@
 
 .subjectItemSelected,
 .subjectItemSelected:hover:not(:disabled) {
-  color: var(--foreground);
-  font-weight: 700;
-  border-bottom-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
   cursor: default;
 }
 
@@ -676,16 +682,20 @@
   align-items: center;
   gap: 4px;
   color: var(--broken-fg);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
+}
+
+.subjectItemSelected .subjectBroken {
+  color: #ff8a80;
 }
 
 .subjectBroken::before {
   content: "";
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 1px;
-  background: var(--broken-fg);
+  background: currentColor;
 }
 
 .notice button {
@@ -724,7 +734,7 @@
 
 .countLine {
   margin-top: 12px;
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 700;
 }
 
@@ -824,7 +834,7 @@
   padding: 8px 10px 8px 3.2em;
   border: 1px solid var(--line);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -874,7 +884,7 @@
 .request {
   margin-right: 10px;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* After an edit: a verdict carried over from before it (the difference is the same). */
@@ -882,7 +892,7 @@
   display: block;
   margin-top: 2px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* One case, or two side by side: a framed panel under the list, with its own title bar. */
