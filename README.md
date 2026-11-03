@@ -39,7 +39,7 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
 - 入力 C の原因（`estimate.php` の行）と直し方。「同梱の『当てて確かめた結果』を見る」で、直し方を当てて流し直した結果が見られます
 - 判定と原因探しで Claude に送った全文（伏せ字のあと）
 - API キーがあれば、同梱の PDF を Claude に判定し直させられます（php は要りません）
-- 題材「架空書店の注文管理」（Web 型）も同梱しています。注文 31 画面の判定、旧と新の画面を左右に描いたもの、注文 21 の原因と直したあとの結果が見られます
+- 題材「架空書店の注文管理」（Web 型）も同梱しています。一覧と注文 30 件の画面・注文の書き出し（CSV）の 32 件の判定、旧と新の画面を左右に描いたもの、注文 21 の原因と直したあとの結果が見られます
 
 ## 全部動かす
 
@@ -96,6 +96,7 @@ npm run check:all      # 上の全部 ＋ Claude を呼ぶ往復・php が無い
 | `run.environments.old` / `.new` | ⭕ | command と web のとき。`label`・`command`（フルパス）・`args`（全入力の前に付ける引数。web ではサーバの起動の引数で `{port}` を含める）・`env`（その側だけの環境変数） |
 | `output.format` / `output.from` | ⭕ | `pdf`・`text`（ログ・CSV・標準出力など）・`html`（画面に見える文字とフォームの値）／`file`（プログラムが `{output}` に書く）か `stdout`（web では書きません） |
 | `output.encoding` | | テキストと HTML の文字コード（既定 `utf-8`。`shift_jis`・`euc-jp` など）。HTML が `<meta charset>` で宣言していれば、そちらを使います |
+| `cases[].output` / `caseGroups[].output` | | その入力だけ形式と文字コードを変える（`format`・`encoding`。書かないほうは `output` のまま）。Web アプリの画面（html）の中に CSV の書き出し（text）がある、など |
 | `cases[]` | ※ | `id`・`label`・`description`・`args`。`args` の `{output}` は出力ファイルのパスに置き換わります。web では `args` の代わりに `request`（開くページ） |
 | `caseGroups[]` | ※ | まとめ書き。`each.file`（例 `"example_*.php"`）に当てはまる `run.cwd` のファイルごとに入力を1つ作ります。`id`・`label`・`description`・`args` の `{file}` はファイル名、`{name}` は拡張子を除いた名前に置き換わります（既定は id `{name}`・label `{file}`）。`each.range`（例 `[1, 30]`）なら番号ごとに作り、`{n}` が番号になります |
 
@@ -133,7 +134,11 @@ npm run check:all      # 上の全部 ＋ Claude を呼ぶ往復・php が無い
   "database": { "file": "data/shop.sqlite" }  // 任意。問い合わせのたびに、この原本から写しへ戻す
 },
 "output": { "format": "html" },
-"cases": [{ "id": "list", "label": "注文の一覧", "request": { "path": "/" } }],
+"cases": [
+  { "id": "list", "label": "注文の一覧", "request": { "path": "/" } },
+  // CSV を返すページは、この入力だけテキスト（Shift_JIS）として読む
+  { "id": "export", "label": "注文の書き出し", "request": { "path": "/export.php" }, "output": { "format": "text", "encoding": "shift_jis" } }
+],
 "caseGroups": [{ "each": { "range": [1, 30] }, "id": "order-{n}", "label": "注文 {n}", "request": { "path": "/order.php?id={n}" } }]
 ```
 
@@ -242,7 +247,7 @@ npm run check:all      # 上の全部 ＋ Claude を呼ぶ往復・php が無い
 - 同梱の見積書と入力データは、**この作品のために作った架空のもの**です。実在の取引先・案件・金額は含みません
 - PDF ライブラリは本物の公開 OSS です（TCPDF 6.2.26 / 6.3.0、FPDI 1.6.2）。アプリ（`samples/estimate/app/estimate.php`）は自分で書きました
 - 作業日報の題材（`samples/worklog/`）も架空です。Python 3.11 で `datetime.fromisoformat` が受け付ける日付の形が広がったため、3.10 では読めずに飛ばされていた行が、3.12 では集計に入ります。落ちず、警告も出ず、合計だけが変わります
-- 架空書店の注文管理（`samples/bookshop/`。Web 型）も架空です。書名・お客様・注文は作ったものです。PHP 8.1 から SQLite の数が文字列ではなく数として返るため、ギフト包装の行が消えたり、在庫切れの本が「残りわずか」になったりします。画面は普通に出て、HTTP も 200 のままです。明細の無い注文は 0 で割り、PHP 8 では 500 になります
+- 架空書店の注文管理（`samples/bookshop/`。Web 型）も架空です。書名・お客様・注文は作ったものです。PHP 8.1 から SQLite の数が文字列ではなく数として返るため、ギフト包装の行が消えたり、在庫切れの本が「残りわずか」になったりします。画面は普通に出て、HTTP も 200 のままです。明細の無い注文は 0 で割り、PHP 8 では 500 になります。注文の書き出し（会計ソフト向けの CSV・Shift_JIS）では、クーポンの割引率が「10.0」から「10」になります
 - もう1つの題材は、TCPDF 6.3.0 に付属する公式の例 65 本そのものです（書き換えずに動かします）。手元の測定では 64 本が差なし、`example_050`（2次元バーコード PDF417）だけが PHP 8.5 で構文エラーになり、PDF が出ません。この題材は同梱していません（composer で取得します）
 - TCPDF は LGPL-3.0 です。MIT のこのリポジトリに実体を入れないよう、`vendor/` は同梱せず composer で取得します。古い版を使うので、composer の脆弱性の勧告はパッケージ名で無視しています
 
