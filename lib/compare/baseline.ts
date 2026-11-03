@@ -40,9 +40,13 @@ function changedTokens(a: string, b: string): Unstable {
   return ta.map((t, i) => t !== tb[i]);
 }
 
-/** Whether `oldLine` equals `newLine` once the parts that change on every run are set aside. */
+/**
+ * Whether `oldLine` equals `newLine` once the parts that change on every run are set aside.
+ * A line the second run could not pair up ("whole") says nothing about which parts change, so
+ * any difference in it is kept: setting it aside could hide a changed amount.
+ */
 export function sameApartFromUnstable(oldLine: string, newLine: string, unstable: Unstable): boolean {
-  if (unstable === "whole") return true;
+  if (unstable === "whole") return oldLine === newLine;
   const to = tokens(oldLine);
   const tn = tokens(newLine);
   return to.length === tn.length && tn.every((t, i) => unstable[i] || t === to[i]);
