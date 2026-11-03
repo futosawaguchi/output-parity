@@ -8,8 +8,8 @@ import { summarizeEnvironments, type CaseOutput, type EnvironmentSummaries, type
 import { judgeByMachine, judgeCase } from "./judge/judge-case";
 import type { CauseReport } from "./fix/locate-cause";
 import type { FixAttempt } from "./fix/verify";
-import type { CaseVerdict } from "./judge/verdict";
-import { CASE_CHECKED } from "./progress";
+import type { CaseVerdict, Verdict } from "./judge/verdict";
+import { CASE_CHECKED, CASE_JUDGING } from "./progress";
 import { preflight } from "./runner/preflight";
 import { collectCase } from "./runner/files";
 import { runCase, type CaseResult, type SlotResult } from "./runner/run-case";
@@ -18,7 +18,11 @@ import { createRunDir } from "./runner/run-dir";
 import { sentRecorder, type SentRecorder } from "./sent-log";
 import { prepareWorkspace } from "./workspace";
 
-export type ProgressEvent = { caseId: string; message: string };
+/**
+ * A step of a job, for the page. verdict comes with CASE_CHECKED; judging, when Claude starts on
+ * the cases the machine could not settle, says how many there are.
+ */
+export type ProgressEvent = { caseId: string; message: string; verdict?: Verdict | null; judging?: number };
 
 export type CaseReport = {
   caseId: string;
@@ -197,6 +201,7 @@ export async function judgeWaiting(
     opts.onProgress?.({ caseId: "", message: `Claude に判定させる入力が ${waiting} 件あるので、送らずに止めました` });
     return { cases: checked.map((c) => c.report), held: { count: waiting, limit } };
   }
+  opts.onProgress?.({ caseId: "", message: `機械で決まらなかった ${waiting} 件を、Claude が1件ずつ判定します`, judging: waiting });
   const cases: CaseReport[] = [];
   for (const c of checked) cases.push(c.report.verdict === null ? await checkCase(c.result, c.report, opts) : c.report);
   return { cases, held: null };
@@ -234,7 +239,7 @@ export async function checkCase(
   // stays unjudged rather than guessed.
   let verdict: CaseVerdict | null = await judgeByMachine(compared, { oldLabel: environments.old.label, newLabel: environments.new.label });
   if (client && !verdict) {
-    report("Claude が新しい出力の全文を読んで判定しています");
+    report(CASE_JUDGING);
     verdict = await judgeCase(compared, {
       client,
       oldLabel: environments.old.label,
@@ -244,6 +249,6 @@ export async function checkCase(
     });
   }
   const output = about.output ? { output: about.output } : {};
-  report(CASE_CHECKED);
+  opts.onProgress?.({ caseId, message: CASE_CHECKED, verdict: verdict?.verdict ?? null });
   return { caseId, label: about.label, description: about.description, ...output, runs: result.slots, comparison: compared.comparison, naive, verdict };
 }

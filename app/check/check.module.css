@@ -1029,10 +1029,6 @@
   animation: pulse 0.9s ease-in-out infinite alternate;
 }
 
-.sqChecked {
-  background: #9b9b95;
-}
-
 .sqOpen {
   outline: 3px solid var(--foreground);
   outline-offset: 2px;

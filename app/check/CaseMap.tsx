@@ -1,11 +1,8 @@
-import type { Group } from "./case-order";
 import { GROUP_LABEL } from "./case-order";
 import styles from "./check.module.css";
+import type { Square, SquareState } from "./progress-squares";
 
-/** A square's state: a verdict once there is one; while running, waiting, being worked on or checked. */
-export type SquareState = Group | "waiting" | "working" | "checked";
-
-export type Square = { id: string; label: string; state: SquareState };
+export type { Square } from "./progress-squares";
 
 const STATE_CLASS: Record<SquareState, string> = {
   broken: styles.sqBroken,
@@ -14,13 +11,12 @@ const STATE_CLASS: Record<SquareState, string> = {
   harmless: styles.sqHarmless,
   waiting: styles.sqWaiting,
   working: styles.sqWorking,
-  checked: styles.sqChecked,
 };
 
 /** At most this many inputs, the squares are drawn twice as large. */
 const FEW = 10;
 
-const STATE_LABEL: Record<SquareState, string> = { ...GROUP_LABEL, waiting: "まだ", working: "いま確かめています", checked: "確かめ終わり" };
+const STATE_LABEL: Record<SquareState, string> = { ...GROUP_LABEL, waiting: "まだ", working: "いま確かめています" };
 
 /**
  * Every input as one square, in the order of the settings, coloured by its verdict: the few that
