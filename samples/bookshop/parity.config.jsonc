@@ -3,7 +3,7 @@
 {
   "version": 1,
   "name": "架空書店の注文管理 Web アプリ（PHP 7.4 → 8.5）",
-  "description": "架空の書店の注文管理画面（samples/bookshop/app/。PHP・SQLite）を、道具が PHP 7.4 と PHP 8.5 の内蔵サーバで手元（127.0.0.1）に立て、注文の一覧と注文 30 件の画面を開いて比べます。注文・書名・お客様は今回作った架空のものです。",
+  "description": "架空の書店の注文管理画面（samples/bookshop/app/。PHP・SQLite）を、道具が PHP 7.4 と PHP 8.5 の内蔵サーバで手元（127.0.0.1）に立て、注文の一覧と注文 30 件の画面、注文の書き出し（CSV）を開いて比べます。注文・書名・お客様は今回作った架空のものです。",
 
   "source": "app",
   "fixes": "apply",
@@ -26,7 +26,15 @@
 
   // id・label・description は、画面に出たり Claude に渡ったりする。期待する判定が分からない名前にする
   "cases": [
-    { "id": "list", "label": "注文の一覧", "description": "注文 30 件の一覧（注文日の順）", "request": { "path": "/" } }
+    { "id": "list", "label": "注文の一覧", "description": "注文 30 件の一覧（注文日の順）", "request": { "path": "/" } },
+    // 画面ではなく CSV を返すページ。この入力だけ、テキスト（Shift_JIS）として読む
+    {
+      "id": "export",
+      "label": "注文の書き出し",
+      "description": "注文 30 件を会計ソフトに取り込む CSV（Shift_JIS）",
+      "request": { "path": "/export.php" },
+      "output": { "format": "text", "encoding": "shift_jis" }
+    }
   ],
   "caseGroups": [
     { "each": { "range": [1, 30] }, "id": "order-{n}", "label": "注文 {n}", "description": "注文 {n} の詳細", "request": { "path": "/order.php?id={n}" } }
