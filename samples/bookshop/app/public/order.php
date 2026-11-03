@@ -38,20 +38,20 @@ echo '</dl>';
 if (count($items) === 0) {
     echo '<p>明細がありません。</p>';
 } else {
-    echo '<table><thead><tr><th>書名</th><th>単価</th><th>冊数</th><th>小計</th><th>在庫</th></tr></thead><tbody>';
+    echo '<table class="items"><thead><tr><th>書名</th><th>単価</th><th>冊数</th><th>小計</th><th>在庫</th></tr></thead><tbody>';
     foreach ($items as $item) {
         echo '<tr>';
         echo '<td>' . h($item['title']) . '</td>';
-        echo '<td>' . yen($item['price']) . '</td>';
-        echo '<td>' . $item['qty'] . '</td>';
-        echo '<td>' . yen($item['price'] * $item['qty']) . '</td>';
+        echo '<td class="num">' . yen($item['price']) . '</td>';
+        echo '<td class="num">' . $item['qty'] . '</td>';
+        echo '<td class="num">' . yen($item['price'] * $item['qty']) . '</td>';
         echo '<td>' . stock_label($item['stock']) . '</td>';
         echo '</tr>';
     }
     echo '</tbody></table>';
 }
 
-echo '<table><tbody>';
+echo '<table class="totals"><tbody>';
 echo '<tr><th>小計</th><td>' . yen($totals['subtotal']) . '</td></tr>';
 if ($order['coupon_rate'] !== null) {
     echo '<tr><th>クーポン割引 ' . $order['coupon_rate'] . '%</th><td>-' . yen($totals['discount']) . '</td></tr>';

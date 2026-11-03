@@ -16,12 +16,40 @@ function yen($n)
 function page_header($title)
 {
     echo '<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">';
-    echo '<title>' . h($title) . ' - 架空書店 注文管理</title></head><body>';
-    echo '<header><p>架空書店 注文管理</p><nav><a href="/">注文の一覧</a></nav></header>';
+    echo '<title>' . h($title) . ' - 架空書店 注文管理</title>';
+    echo '<style>' . page_style() . '</style></head><body>';
+    echo '<header><p>架空書店 <span>注文管理</span></p><nav><a href="/">注文の一覧</a></nav></header>';
     echo '<main><h1>' . h($title) . '</h1>';
 }
 
 function page_footer()
 {
     echo '</main><footer><p>表示 ' . date('Y-m-d H:i:s') . '</p></footer></body></html>';
+}
+
+// 生成りの紙とこげ茶のインク。画像や外のファイルは使わない
+function page_style()
+{
+    return <<<CSS
+body { margin: 0; background: #f3ecdf; color: #3b2a1e; font: 15px/1.7 "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif; }
+header { display: flex; align-items: baseline; gap: 40px; padding: 14px 40px; background: #5a3b28; border-bottom: 4px solid #8b5e3c; }
+header p { margin: 0; color: #f3ecdf; font: 600 22px "Hiragino Mincho ProN", "Yu Mincho", serif; letter-spacing: 0.2em; }
+header p span { font-size: 14px; letter-spacing: 0.1em; color: #e3cfae; }
+header a { color: #e3cfae; text-decoration: none; }
+main { max-width: 880px; margin: 28px auto; padding: 24px 40px 32px; background: #fffaf1; border: 1px solid #dccab0; }
+h1 { margin: 0 0 20px; padding-bottom: 6px; border-bottom: 2px solid #8b5e3c; font: 600 24px "Hiragino Mincho ProN", "Yu Mincho", serif; }
+table { width: 100%; margin: 16px 0; border-collapse: collapse; }
+th, td { padding: 6px 12px; border: 1px solid #dccab0; text-align: left; }
+thead th, .totals th { background: #ecdcc0; font-weight: 600; }
+tbody tr:nth-child(even) td { background: #f8f0e2; }
+td.num { text-align: right; }
+.totals { width: auto; margin-left: auto; }
+.totals td { min-width: 9em; text-align: right; }
+dl { display: grid; grid-template-columns: 7em 1fr; gap: 4px 16px; margin: 0 0 8px; }
+dt { color: #7a5a40; }
+dd { margin: 0; }
+a { color: #7a3e1d; }
+button { padding: 8px 20px; background: #5a3b28; color: #f3ecdf; border: 0; font-size: 14px; cursor: pointer; }
+footer { padding: 12px; color: #8b6f55; font-size: 12px; text-align: center; }
+CSS;
 }

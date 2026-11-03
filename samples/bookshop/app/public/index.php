@@ -17,8 +17,8 @@ foreach ($orders as $order) {
     echo '<td><a href="/order.php?id=' . $order['id'] . '">' . $order['id'] . '</a></td>';
     echo '<td>' . h($order['ordered_on']) . '</td>';
     echo '<td>' . h($order['customer']) . ' 様</td>';
-    echo '<td>' . $totals['books'] . '</td>';
-    echo '<td>' . yen($totals['total']) . '</td>';
+    echo '<td class="num">' . $totals['books'] . '</td>';
+    echo '<td class="num">' . yen($totals['total']) . '</td>';
     echo '</tr>';
 }
 echo '</tbody></table>';
