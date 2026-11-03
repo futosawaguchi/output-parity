@@ -70,6 +70,7 @@ npm run check:all      # 上の全部 ＋ Claude を呼ぶ往復・php が無い
 
 ## 自分のシステムで試す
 
+- ⭐ **設定は Claude Code と一緒に書けます。** このリポジトリを Claude Code で開いて「自分のシステムで試したい」と言うと、スキル `.claude/skills/try-your-system` が動きます。読んでよい範囲を聞いてからソースを読み、つなぎ方・環境・出力・入力を聞きながら `targets/<名前>/parity.config.jsonc` を書き、Claude を呼ばずに1回流して動くところまで確かめます（書くのは `targets/` の中だけ。本人のソースは書き換えません。Claude に何を送るかは本人が選びます）
 - `targets/<名前>/parity.config.jsonc` を書きます。`targets/` は `.gitignore` 済みなので、社内のパスや名前を書いても公開されません
 - 画面の上の「題材」で切り替えます（`/check?subject=<名前>`）。コマンドなら `npm run samples -- --subject <名前>` です
 - 一度に動かせる題材は1つです。別の題材を実行している間は、理由が出て押せません
@@ -98,7 +99,7 @@ npm run check:all      # 上の全部 ＋ Claude を呼ぶ往復・php が無い
 | `output.encoding` | | テキストと HTML の文字コード（既定 `utf-8`。`shift_jis`・`euc-jp` など）。HTML が `<meta charset>` で宣言していれば、そちらを使います |
 | `cases[].output` / `caseGroups[].output` | | その入力だけ形式と文字コードを変える（`format`・`encoding`。書かないほうは `output` のまま）。Web アプリの画面（html）の中に CSV の書き出し（text）がある、など |
 | `cases[]` | ※ | `id`・`label`・`description`・`args`。`args` の `{output}` は出力ファイルのパスに置き換わります。web では `args` の代わりに `request`（開くページ） |
-| `caseGroups[]` | ※ | まとめ書き。`each.file`（例 `"example_*.php"`）に当てはまる `run.cwd` のファイルごとに入力を1つ作ります。`id`・`label`・`description`・`args` の `{file}` はファイル名、`{name}` は拡張子を除いた名前に置き換わります（既定は id `{name}`・label `{file}`）。`each.range`（例 `[1, 30]`）なら番号ごとに作り、`{n}` が番号になります |
+| `caseGroups[]` | ※ | まとめ書き。`each.file`（例 `"example_*.php"`）に当てはまる `run.cwd` のファイルごとに入力を1つ作ります（`run.cwd` の直下だけを探します）。`id`・`label`・`description`・`args` の `{file}` はファイル名、`{name}` は拡張子を除いた名前に置き換わります（既定は id `{name}`・label `{file}`）。`each.range`（例 `[1, 30]`）なら番号ごとに作り、`{n}` が番号になります |
 
 ※ `cases` と `caseGroups` のどちらかに、入力が1つ以上要ります（ファイル型では、書かなければフォルダのファイルが全部入力になります）。
 
@@ -159,6 +160,7 @@ npm run check:all      # 上の全部 ＋ Claude を呼ぶ往復・php が無い
 
 - **本番環境には接続しません。** 出力を手元で作って比べる道具です
 - 書き換えるのは作業用のコピー `work/` だけです。原本にも本番にも触れません
+  - `work/<名前>/` は `source` を丸ごと写したもので、このリポジトリの中にあります（`.gitignore` 済み）。`.env` などもそのまま写ります（Claude には読ませません）。写したくなければ `fixes: "suggest-only"` にします（その場で動かし、何も書きません）
 - **Claude にファイルを書く道具を渡していません。** 書くのは、人がボタンを押したときの道具のコードです
 - 画面は `127.0.0.1` だけで開きます。手元の名前以外の Host で来た要求は断ります（DNS リバインディング対策）
 
@@ -267,6 +269,7 @@ npm run check:all      # 上の全部 ＋ Claude を呼ぶ往復・php が無い
 - `CLAUDE.md` に、鍵・公開してよいもの・判定プロンプトに書かないことを最初に読ませる
 - 引き継ぎ1枚とコンパクトで、何度会話を切っても同じ規則・同じ判断で続けた
 - **スキル**（`.claude/skills/regression-check`）: 大きく変えるたびに、既存機能が壊れていないかを同じ順と期待値で確かめた
+- **スキル**（`.claude/skills/try-your-system`）: こちらは使う人のためのもの。自分のシステムの設定を、Claude Code が本人に聞きながら書く。経緯を知らない Claude にこのスキルだけを渡し、初めて見る架空のプログラムで、設定が無い状態から1回で流せるところまで進むことを確かめた
 - **サブエージェント**（`.claude/agents/blank-reviewer`）: 経緯を知らない Claude に審査員の目で読ませ、判定が黙って間違う不具合を見つけた
 - **フック**（`.claude/settings.json`）: `git commit` の前に鍵の文字列を探して止める
 - **MCP**（Claude in Chrome）: 画面の不具合を、直す前に実際のブラウザで再現してから直した
