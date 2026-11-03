@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { checkArithmetic } from "../../lib/judge/arithmetic";
+import { checkArithmetic, readCalculation } from "../../lib/judge/arithmetic";
 
 // The inputs are shapes Claude actually wrote in `calculation` during the 2026-11-02 runs.
 
@@ -104,4 +104,17 @@ test("a quoted name is one label, even with a number at its end, and a term may 
   ]);
   assert.ok(checkArithmetic("57,000 − 値引き 5,000 = 52,000").every((c) => c.ok));
   assert.ok(!checkArithmetic("28 = 『A』9 + 『B』10").every((c) => c.ok), "a wrong sum is still wrong");
+});
+
+test("「、」 ends a step, so the step after a multiplication is still checked", () => {
+  assert.deepEqual(checkArithmetic("4,400 × 10% = 440、4,400 − 440 = 3,960（合計と一致）"), [{ text: "4,400 − 440 = 3,960", ok: true }]);
+  assert.deepEqual(checkArithmetic("4,800 × 5% = 240、4,800 − 240 = 4,650"), [{ text: "4,800 − 240 = 4,650", ok: false }]);
+});
+
+test("statements that multiply or divide are counted as not checked, not passed", () => {
+  assert.deepEqual(readCalculation("4,800 × 5% = 240、4,800 − 240 = 4,560、4,560 ÷ 3 = 1,520"), {
+    checks: [{ text: "4,800 − 240 = 4,560", ok: true }],
+    skipped: 2,
+  });
+  assert.deepEqual(readCalculation("3,800 × 0.15 = 570"), { checks: [], skipped: 1 });
 });
