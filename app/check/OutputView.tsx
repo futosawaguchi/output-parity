@@ -1,5 +1,6 @@
 import type { CaseReport, RunReport } from "@/lib/pipeline";
 import styles from "./check.module.css";
+import { PageFrame } from "./PageFrame";
 import { PdfView } from "./PdfView";
 import { outputUrl, pageUrl } from "./urls";
 
@@ -19,7 +20,7 @@ export function OutputView({ report, c, slot, view = "lines" }: { report: RunRep
     return (
       <figure className={styles.pdf}>
         <figcaption className={styles.pdfLabel}>{label}（画面。スクリプトと外のファイルは読み込みません）</figcaption>
-        <iframe className={styles.pageFrame} src={pageUrl(report, c.caseId, slot)} sandbox="" referrerPolicy="no-referrer" title={`${label} の画面`} />
+        <PageFrame src={pageUrl(report, c.caseId, slot)} title={`${label} の画面`} />
       </figure>
     );
   }
