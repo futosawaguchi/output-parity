@@ -117,3 +117,16 @@ test("the built record has no local path and no secret, and counts the deprecati
   assert.match(md, /in lib\/x\.php on line 3/);
   assert.match(md, /値 1 個を \*\*\* にしました/);
 });
+
+test("after an edit, what was sent before it is still listed, once, as before the edit", () => {
+  const judgeSent = { purpose: "judge" as const, at: "", file: "j.txt", chars: 100, masked: 0, maskedKinds: [] };
+  const causeSent = { purpose: "cause" as const, at: "", file: "c.txt", chars: 50, masked: 0, maskedKinds: [] };
+  const before = reportOf([caseOf("b", [lost], { ...broken, sent: judgeSent }, { cause: { kind: "failed", reason: "r", nextStep: "n", sent: causeSent } })]);
+  const after = reportOf([caseOf("b", [lost], null, { carried: { ...broken, sent: judgeSent } })], {
+    fixAttempt: { caseId: "b", edit: { file: "app.php", oldText: "a", newText: "b" }, applied: { kind: "applied", file: "app.php", line: 3 }, original: before },
+  });
+  const md = renderRecord(after, opts);
+  assert.match(md, /2 回・合わせて 150 字/);
+  assert.match(md, /入力 b・判定（当てる前）: 100 字（j\.txt）/);
+  assert.match(md, /入力 b・原因探し（当てる前）: 50 字（c\.txt）/);
+});
