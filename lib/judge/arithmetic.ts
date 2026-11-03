@@ -22,11 +22,22 @@ type Token =
  * Returns nothing for text it cannot read; a missing check is not a failed check.
  */
 export function checkArithmetic(calculation: string): ArithmeticCheck[] {
+  return readCalculation(calculation).checks;
+}
+
+/**
+ * The checks, and how many statements were left alone because they multiply or divide, so the
+ * page can say what was not checked instead of staying silent (a missing check is not a pass).
+ */
+export function readCalculation(calculation: string): { checks: ArithmeticCheck[]; skipped: number } {
   // Each chain (between separators such as "／") is checked on its own; one with a
   // multiplication in it is skipped whole, rather than half-read and wrongly called false.
-  return chains(tokenize(calculation))
-    .filter((chain) => !chain.some((t) => t.kind === "unsupported"))
-    .flatMap(checkChain);
+  const all = chains(tokenize(calculation));
+  const unsupported = (chain: Token[]) => chain.some((t) => t.kind === "unsupported");
+  return {
+    checks: all.filter((chain) => !unsupported(chain)).flatMap(checkChain),
+    skipped: all.filter((chain) => unsupported(chain) && chain.some((t) => t.kind === "rel")).length,
+  };
 }
 
 function chains(tokens: Token[]): Token[][] {
@@ -139,8 +150,9 @@ function same(a: number, b: number): boolean {
   return Math.abs(a - b) < 1e-9;
 }
 
-// Separators that end a chain: "／" between the old and new side, sentence ends, and so on.
-const BREAK = /^[／/;；。\n|]$/;
+// Separators that end a chain: "／" between the old and new side, sentence ends, "、" between
+// steps ("4,400 × 10% = 440、4,400 − 440 = 3,960"), and so on.
+const BREAK = /^[／/;；。、\n|]$/;
 
 function tokenize(text: string): Token[] {
   const tokens: Token[] = [];

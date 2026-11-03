@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Comparison } from "@/lib/compare/compare-case";
-import { checkArithmetic } from "@/lib/judge/arithmetic";
+import { readCalculation } from "@/lib/judge/arithmetic";
 import type { CaseVerdict, Finding } from "@/lib/judge/verdict";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
 import { describeOutcome } from "@/lib/runner/outcome";
@@ -149,12 +149,21 @@ function FindingItem({ finding }: { finding: Finding }) {
   );
 }
 
-/** DESIGN 8-3: the machine re-does Claude's arithmetic. Silent when there is nothing it can read. */
+/** DESIGN 8-3: the machine re-does Claude's arithmetic, and says what it did not check. */
 export function CalcCheck({ calculation }: { calculation: string }) {
-  const checks = checkArithmetic(calculation);
-  if (checks.length === 0) return null;
+  const { checks, skipped } = readCalculation(calculation);
+  const notChecked = skipped > 0 ? `掛け算・割り算を含む式 ${skipped} 本は確かめていません` : "";
+  if (checks.length === 0) {
+    return <p className={styles.muted}>機械の検算: 確かめられませんでした（{notChecked || "足し算・引き算の式として読めませんでした"}）</p>;
+  }
   const wrong = checks.filter((c) => !c.ok);
-  if (wrong.length === 0) return <p className={styles.calcOk}>機械の検算: 合っています（{checks.length} か所）</p>;
+  if (wrong.length === 0) {
+    return (
+      <p className={styles.calcOk}>
+        機械の検算: 合っています（{checks.length} か所{notChecked && `。${notChecked}`}）
+      </p>
+    );
+  }
   return (
     <p className={styles.calcWrong}>
       機械の検算: 合わない式があります — {wrong.map((c) => c.text).join("、")}
