@@ -2,7 +2,7 @@ import { outputKindOf } from "@/lib/case-output";
 import type { CaseReport, RunReport } from "@/lib/pipeline";
 import styles from "./check.module.css";
 import { PageFrame } from "./PageFrame";
-import { PdfView } from "./PdfView";
+import { PdfView, type PdfMark } from "./PdfView";
 import { outputUrl, pageUrl } from "./urls";
 
 /** How an HTML output is shown: drawn as the page, or as the lines it was compared by. */
@@ -17,7 +17,7 @@ export type HtmlView = "page" | "lines";
 export function OutputView({ report, c, slot, view = "lines" }: { report: RunReport; c: CaseReport; slot: "old" | "new"; view?: HtmlView }) {
   const label = report.environments[slot].label;
   const format = outputKindOf(report, c).format;
-  if (format === "pdf") return <PdfView src={outputUrl(report, c.caseId, slot)} label={label} />;
+  if (format === "pdf") return <PdfView src={outputUrl(report, c.caseId, slot)} label={label} marks={changedLines(c, slot)} />;
   if (format === "html" && view === "page") {
     return (
       <figure className={styles.pdf}>
@@ -58,4 +58,22 @@ export function OutputView({ report, c, slot, view = "lines" }: { report: RunRep
       </ol>
     </figure>
   );
+}
+
+/**
+ * What to mark on one side's PDF, from the changes the baseline does not explain: the changed
+ * lines themselves, and on the new side, where lines went missing (under the line before them).
+ */
+function changedLines(c: CaseReport, slot: "old" | "new"): PdfMark[] {
+  const comparison = c.comparison;
+  if (comparison.kind !== "compared") return [];
+  return comparison.changes
+    .filter((ch) => !ch.explainedByBaseline)
+    .flatMap((ch): PdfMark[] => {
+      const lines = slot === "old" ? ch.oldLines : ch.newLines;
+      const changed = lines.map((text): PdfMark => ({ kind: "changed", text }));
+      const before = comparison.new.lines[ch.newStart - 1];
+      const gone = slot === "new" && ch.newLines.length === 0 && ch.oldLines.length > 0 && before !== undefined;
+      return gone ? [...changed, { kind: "goneAfter", text: before, count: ch.oldLines.length }] : changed;
+    });
 }

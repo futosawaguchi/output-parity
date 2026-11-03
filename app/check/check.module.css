@@ -296,7 +296,40 @@
 }
 
 .pdfPage {
+  position: relative;
   display: block;
+}
+
+.pdfPage canvas {
+  display: block;
+}
+
+/* A line that changed, framed where it is drawn on the page. */
+.pdfMark {
+  position: absolute;
+  border: 2.5px solid var(--broken-fg);
+  border-radius: 3px;
+  background: rgba(180, 35, 24, 0.08);
+  pointer-events: none;
+}
+
+/* Where lines went missing: a red rule under the line before them, saying how many. */
+.pdfGone {
+  position: absolute;
+  border-top: 3px solid var(--broken-fg);
+  pointer-events: none;
+}
+
+.pdfGoneNote {
+  position: absolute;
+  transform: translateY(-50%);
+  padding: 1px 6px;
+  background: var(--broken-fg);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .pdfPage + .pdfPage {
