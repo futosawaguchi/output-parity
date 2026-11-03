@@ -99,14 +99,18 @@ function readExpression(tokens: Token[], start: number): { value: number; text: 
   parts.push(head.text);
   i++;
   for (;;) {
-    // A term may carry a note before the next one: "9（A-101 出張費）+ 10（A-102 夜間割増）".
+    // A term may carry a note before the next one: "9（A-101 出張費）+ 10（A-102 夜間割増）",
+    // and a name after the sign: "+ 「A-102夜間割増0」10", "− 値引き 5,000".
     const j = skipLabels(tokens, i);
-    if (tokens[j]?.kind !== "op" || tokens[j + 1]?.kind !== "num") break;
+    if (tokens[j]?.kind !== "op") break;
+    let k = j + 1;
+    while (tokens[k]?.kind === "label") k++;
+    if (tokens[k]?.kind !== "num") break;
     const op = tokens[j] as Extract<Token, { kind: "op" }>;
-    const num = tokens[j + 1] as Extract<Token, { kind: "num" }>;
+    const num = tokens[k] as Extract<Token, { kind: "num" }>;
     value += op.sign * num.value;
     parts.push(op.text, num.text);
-    i = j + 2;
+    i = k + 1;
   }
   return { value, text: parts.join(" "), end: i };
 }
@@ -140,9 +144,10 @@ const BREAK = /^[／/;；。\n|]$/;
 
 function tokenize(text: string): Token[] {
   const tokens: Token[] = [];
-  // Times (06:07:02) and dates (2026-11-02) come first so their parts are not read as arithmetic.
+  // Times (06:07:02), dates (2026-11-02) and quoted text (「A-101出張費0」) come first so their
+  // parts are not read as arithmetic: a quotation is a name, whatever digits it holds.
   const re =
-    /(\s+)|(\d{1,2}(?::\d{2}){1,2}|\d{4}-\d{1,2}-\d{1,2})|((?<![A-Za-z\d.])\d[\d,]*(?:\.\d+)?円?(?![\p{L}\d]))|([+＋\-−－])|([=＝])|(≠)|(差)|([×*＊÷%％^]|(?<=\d\s?)[xX](?=\s?\d))|([（(])|([）)])|([A-Za-z][\w-]*|\p{L}+)|(.)/gu;
+    /(\s+)|(\d{1,2}(?::\d{2}){1,2}|\d{4}-\d{1,2}-\d{1,2}|「[^」]*」|『[^』]*』)|((?<![A-Za-z\d.])\d[\d,]*(?:\.\d+)?円?(?![\p{L}\d]))|([+＋\-−－])|([=＝])|(≠)|(差)|([×*＊÷%％^]|(?<=\d\s?)[xX](?=\s?\d))|([（(])|([）)])|([A-Za-z][\w-]*|\p{L}+)|(.)/gu;
   // A number may follow Japanese text directly ("2行の4.0"); one glued to Latin letters ("A101") is a name.
   for (const m of text.matchAll(re)) {
     const [whole, space, stamp, num, op, eq, ne, diff, mul, open, close, word, other] = m;
