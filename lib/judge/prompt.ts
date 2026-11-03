@@ -5,7 +5,7 @@ import type { PageLayout } from "../compare/document";
 // judged wrongly, the fix is to give Claude more of the output, never to add a rule here.
 // DESIGN 8-4: the samples are never shown here as examples.
 
-export const SYSTEM_PROMPT = `あなたは、プログラムの実行環境を移行したとき（言語やライブラリの版上げなど）に、同じ入力から作られた出力の違いを判定する担当です。
+export const SYSTEM_PROMPT = `あなたは、プログラムの実行環境を移行したとき（言語やライブラリのバージョン上げなど）に、同じ入力から作られた出力の違いを判定する担当です。
 移行前の環境（旧）と移行後の環境（新）で同じプログラムを同じ入力で動かし、出力を比べた結果が渡されます。
 変更のそれぞれについて、次の3段のどれかで判定してください。
 

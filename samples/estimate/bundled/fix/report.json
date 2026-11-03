@@ -730,7 +730,7 @@
     {
       "caseId": "case-d",
       "label": "入力 D",
-      "description": "明細3行の見積書を、古い版の PDF ライブラリ（TCPDF 6.2.26）で出す",
+      "description": "明細3行の見積書を、古いバージョンの PDF ライブラリ（TCPDF 6.2.26）で出す",
       "runs": [
         {
           "slot": "old",
