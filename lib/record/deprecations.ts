@@ -3,7 +3,8 @@
 // ("every version becomes an old version"). Only deprecations are counted: other warnings are
 // reworded between versions (PHP 7.4 "Invalid argument supplied for foreach()" is PHP 8's
 // "foreach() argument must be of type array|object"), so "new only" would mostly be rewording.
-// No Node imports: the record is built from text the caller has read.
+
+import { STDERR_CUT_MARK } from "../runner/exec";
 
 /** The shapes of a deprecation line: PHP (CLI and built-in server log), Python, Node. */
 const PATTERNS = [/\bDeprecated:\s+\S/, /\b(?:Pending)?DeprecationWarning:\s+\S/, /\bFutureWarning:\s+\S/];
@@ -19,8 +20,14 @@ export type Deprecation = {
   caseIds: string[];
 };
 
+export type NewOnly = {
+  deprecations: Deprecation[];
+  /** Cases whose new stderr was cut at its size limit: what came after was not counted. */
+  cutCaseIds: string[];
+};
+
 /** Deprecations printed by a new run and never by an old one, in the order first seen. */
-export function newOnlyDeprecations(texts: StderrText[]): Deprecation[] {
+export function newOnlyDeprecations(texts: StderrText[]): NewOnly {
   const seenInOld = new Set(texts.filter((t) => t.slot === "old").flatMap((t) => linesOf(t.text).map(keyOf)));
   const found = new Map<string, Deprecation>();
   for (const t of texts.filter((t) => t.slot === "new")) {
@@ -32,13 +39,18 @@ export function newOnlyDeprecations(texts: StderrText[]): Deprecation[] {
       found.set(key, item);
     }
   }
-  return [...found.values()];
+  const cutCaseIds = texts.filter((t) => t.slot === "new" && t.text.includes(STDERR_CUT_MARK)).map((t) => t.caseId);
+  return { deprecations: [...found.values()], cutCaseIds: [...new Set(cutCaseIds)] };
 }
 
-/** The deprecation lines of one stderr, without the timestamp a server log puts in front. */
+/**
+ * The deprecation lines of one stderr, without the timestamp a server log puts in front. A stderr
+ * cut at its limit ends in a line cut part-way, just before the note saying so: that line is left out.
+ */
 function linesOf(text: string): string[] {
-  return text
-    .split(/\r?\n/)
+  const lines = text.split(/\r?\n/);
+  const cut = lines.findIndex((line) => line.startsWith(STDERR_CUT_MARK));
+  return (cut === -1 ? lines : lines.slice(0, Math.max(cut - 1, 0)))
     .filter((line) => PATTERNS.some((p) => p.test(line)))
     .map((line) => line.replace(/^\[[^\]]*\]\s*/, "").trim());
 }

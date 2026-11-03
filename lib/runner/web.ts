@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { PORT_PLACEHOLDER, type Case, type EnvironmentName, type ParityConfig, type WebRun } from "../config";
 import { ConfigError, ServerStartError } from "../errors";
 import { childEnv } from "./child-env";
+import { STDERR_CUT_MARK } from "./exec";
 import type { ExecOutcome } from "./outcome";
 import { MAX_STDERR_BYTES, MAX_STDOUT_BYTES, runSlots, type CaseResult, type Slot, type SlotResult } from "./run-case";
 
@@ -180,7 +181,8 @@ async function readFrom(path: string, from: number, max: number): Promise<Buffer
     const length = Math.min(Math.max(size - from, 0), max);
     const buf = Buffer.alloc(length);
     await file.read(buf, 0, length, from);
-    return buf;
+    // Cut like a command's stderr (exec.ts), with the same note, so nothing reads the cut line as whole.
+    return size - from > max ? Buffer.concat([buf, Buffer.from(`\n${STDERR_CUT_MARK} ${max} バイトを超えたので、以降を省きました）\n`)]) : buf;
   } finally {
     await file.close();
   }

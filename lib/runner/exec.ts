@@ -21,6 +21,9 @@ export type ExecRequest = {
   env?: Record<string, string>;
 };
 
+/** How the note that stderr was cut begins; the line before it is cut part-way (lib/record/deprecations.ts). */
+export const STDERR_CUT_MARK = "…（標準エラー出力が";
+
 export type ExecResult = {
   outcome: ExecOutcome;
   durationMs: number;
@@ -79,7 +82,7 @@ export function execOnce(req: ExecRequest): Promise<ExecResult> {
       if (finished) return;
       finished = true;
       clearTimeout(timer);
-      if (stderrTruncated) stderr.write(`\n…（標準エラー出力が ${req.maxStderrBytes} バイトを超えたので、以降を省きました）\n`);
+      if (stderrTruncated) stderr.write(`\n${STDERR_CUT_MARK} ${req.maxStderrBytes} バイトを超えたので、以降を省きました）\n`);
       await Promise.all([close(stdout), close(stderr)]);
       const outcome: ExecOutcome = spawnError
         ? { kind: "spawnFailed", code: String(spawnError.code ?? "UNKNOWN"), message: spawnError.message }

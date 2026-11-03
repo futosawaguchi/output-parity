@@ -3,7 +3,7 @@ import type { CaseReport, RunReport } from "../pipeline";
 import { describeOutcome } from "../runner/outcome";
 import { describeRemaining, remainingOf } from "../fix/verify";
 import type { SentRecord } from "../sent-log";
-import type { Deprecation } from "./deprecations";
+import type { NewOnly } from "./deprecations";
 
 // The record of what was checked (DESIGN 4-5 "1 への答え"): the document the previous person never
 // left. One Markdown page from a report. It says where the outputs came from, every case (none is
@@ -13,7 +13,7 @@ import type { Deprecation } from "./deprecations";
 export type RecordOptions = {
   createdAt: Date;
   /** Deprecation warnings only the new environment printed (deprecations.ts). */
-  deprecations: Deprecation[];
+  deprecations: NewOnly;
 };
 
 /** How many deprecation lines are quoted; the rest are counted. */
@@ -206,13 +206,18 @@ function sent(report: RunReport): string[] {
   ];
 }
 
-function deprecations(report: RunReport, found: Deprecation[]): string[] {
+function deprecations(report: RunReport, { deprecations: found, cutCaseIds }: NewOnly): string[] {
   const heading = "## 新の環境でだけ出た「廃止予定」の警告（参考）";
+  const labelOf = (id: string) => report.cases.find((c) => c.caseId === id)?.label ?? id;
+  const cut =
+    cutCaseIds.length > 0
+      ? `標準エラー出力が長すぎて途中で切った入力が ${cutCaseIds.length} 件あり（${cutCaseIds.slice(0, 3).map(labelOf).join("・")}${cutCaseIds.length > 3 ? " ほか" : ""}）、切ったあとの警告は数えていません。`
+      : "";
   const note =
     "判定には使っていません（Claude にも送っていません）。いまの出力に影響していなくても、次に版を上げたときに壊れる候補です。" +
-    "警告を出さない設定（PHP の error_reporting、Python の既定の警告フィルタなど）では数えられません。";
+    "警告を出さない設定（PHP の error_reporting、Python の既定の警告フィルタなど）では数えられません。" +
+    cut;
   if (found.length === 0) return [heading, `見つかりませんでした。${note}`];
-  const labelOf = (id: string) => report.cases.find((c) => c.caseId === id)?.label ?? id;
   const byFile = new Map<string, number>();
   for (const d of found) byFile.set(d.file ?? "（ファイル名なし）", (byFile.get(d.file ?? "（ファイル名なし）") ?? 0) + 1);
   const cases = new Set(found.flatMap((d) => d.caseIds));
