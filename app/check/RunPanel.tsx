@@ -8,7 +8,8 @@ import styles from "./check.module.css";
 import type { CauseActions } from "./CauseView";
 import { MANY_CASES } from "./case-order";
 import { ReportView } from "./ReportView";
-import { recordUrl } from "./urls";
+import { SubjectPicker } from "./SubjectPicker";
+import { recordUrls } from "./urls";
 
 type Problem = { message: string; nextStep: string };
 
@@ -196,7 +197,7 @@ export function RunPanel() {
         <ReportView
           report={shown}
           // The job's own report, or a bundled one shown in its place (before any job, or replayed).
-          recordUrl={running ? null : recordUrl(shown, job?.status === "done" && job.report === shown ? job.jobId : null)}
+          record={running ? null : recordUrls(shown, job?.status === "done" && job.report === shown ? job.jobId : null)}
           cause={causeActions}
           // A shipped result is only being looked at: going back is showing the bundled report again.
           onUndo={() => (shown.origin === "bundled" && shown.fixAttempt ? setReport(shown.fixAttempt.original) : start("undo"))}
@@ -204,29 +205,6 @@ export function RunPanel() {
         />
       )}
     </section>
-  );
-}
-
-/** Choosing another subject loads the page for it. Not while a job runs: it belongs to this subject. */
-function SubjectPicker({ subjects, current, disabled }: { subjects: SubjectEntry[]; current: string; disabled: boolean }) {
-  return (
-    <label className={styles.subjectPicker}>
-      題材
-      <select
-        value={current}
-        disabled={disabled}
-        onChange={(e) => {
-          window.location.search = new URLSearchParams({ subject: e.target.value }).toString();
-        }}
-      >
-        {subjects.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.name ?? `${s.id}（設定が読めません）`}
-          </option>
-        ))}
-        {!subjects.some((s) => s.id === current) && <option value={current}>{current}（見つかりません）</option>}
-      </select>
-    </label>
   );
 }
 

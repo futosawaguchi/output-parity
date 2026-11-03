@@ -2,7 +2,7 @@ import { readdir, realpath, stat } from "node:fs/promises";
 import { isAbsolute, join, relative, sep } from "node:path";
 import { expandCaseGroups } from "./case-groups";
 import { withFileCases } from "./runner/files";
-import { loadConfig, type ParityConfig } from "./config";
+import { loadConfig, summarizeEnvironments, type ParityConfig, type RunSpec } from "./config";
 import { ConfigError } from "./errors";
 
 // A subject is one system connected to the tool by one settings file (DESIGN 7-4c):
@@ -27,8 +27,15 @@ export type Subject = {
   bundledDir: string;
 };
 
-/** A subject as offered on the page: its id, and its name when its settings can be read. */
-export type SubjectEntry = { id: string; name: string | null };
+/**
+ * A subject as offered on the page: its id, and, when its settings can be read, its name and what
+ * kind of subject it is (the environments, the output, how the outputs are made).
+ */
+export type SubjectEntry = {
+  id: string;
+  name: string | null;
+  summary?: { old: string; new: string; format: string; encoding: string; runType: RunSpec["type"] };
+};
 
 /** The subject a request names, or the default one when it names none. Checked by loadSubject. */
 export function subjectIdOf(value: unknown): string {
@@ -51,7 +58,17 @@ export async function listSubjects(root: string): Promise<SubjectEntry[]> {
       if (entries.some((e) => e.id === id)) continue;
       const path = join(root, place, id, CONFIG_FILE);
       if (!(await stat(path).catch(() => null))?.isFile()) continue;
-      entries.push({ id, name: await loadConfig(path).then((c) => c.name, () => null) });
+      const config = await loadConfig(path).catch(() => null);
+      if (!config) {
+        entries.push({ id, name: null });
+        continue;
+      }
+      const envs = summarizeEnvironments(config.run);
+      entries.push({
+        id,
+        name: config.name,
+        summary: { old: envs.old.label, new: envs.new.label, format: config.output.format, encoding: config.output.encoding, runType: config.run.type },
+      });
     }
   }
   return entries;

@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 // Everything sent to Claude is kept, as sent (after redaction), under runs/sent/ (DESIGN 7-4e ④):
@@ -38,4 +38,24 @@ export function sentRecorder(sentDir: string): SentRecorder {
 function stamp(d: Date): string {
   const p = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+}
+
+/**
+ * What was sent, read back by file name: from runs/sent/, then from the bundle's sent/ (the
+ * bundled results). null when the name is not one of ours or the file is gone.
+ */
+export async function readSent(places: string[], file: string): Promise<string | null> {
+  if (!SENT_FILE_PATTERN.test(file)) return null;
+  for (const dir of places) {
+    const text = await readFile(join(dir, file), "utf8").catch(() => null);
+    if (text !== null) return text;
+  }
+  return null;
+}
+
+/** What a sent file's name says: when, for which case, for what. Names are checked by SENT_FILE_PATTERN. */
+export function describeSentFile(file: string): { at: string; caseId: string; purpose: SentPurpose } | null {
+  const m = /^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-(.+)-(judge|cause)-[0-9a-f]{4}\.txt$/.exec(file);
+  if (!m) return null;
+  return { at: `${m[1]}/${Number(m[2])}/${Number(m[3])} ${m[4]}:${m[5]}:${m[6]}`, caseId: m[7], purpose: m[8] as SentPurpose };
 }

@@ -13,16 +13,17 @@ export function pageUrl(report: RunReport, caseId: string, slot: string): string
 }
 
 /**
- * The record of what was checked for the report on the page: the finished job's, or the bundled
- * run's. null when the page shows neither (a report the server no longer holds).
+ * The record of what was checked for the report on the page, to read and to save: the finished
+ * job's, or the bundled run's. null when the page shows neither (a report the server no longer holds).
  */
-export function recordUrl(report: RunReport, jobId: string | null): string | null {
-  const subject = `subject=${encodeURIComponent(report.subjectId)}`;
-  if (jobId) return `/api/record?${subject}&job=${encodeURIComponent(jobId)}`;
-  if (report.origin === "bundled") return `/api/record?${subject}&from=${report.fixAttempt ? "bundled-fix" : "bundled"}`;
-  return null;
+export function recordUrls(report: RunReport, jobId: string | null): { page: string; markdown: string } | null {
+  const which: [string, string] | null = jobId ? ["job", jobId] : report.origin === "bundled" ? ["from", report.fixAttempt ? "bundled-fix" : "bundled"] : null;
+  if (!which) return null;
+  const query = new URLSearchParams([["subject", report.subjectId], which]).toString();
+  return { page: `/check/record?${query}`, markdown: `/api/record?${query}` };
 }
 
+/** What was sent to Claude, as a page to read. */
 export function sentUrl(subjectId: string, file: string): string {
-  return `/api/sent/${file}?subject=${encodeURIComponent(subjectId)}`;
+  return `/check/sent/${encodeURIComponent(file)}?subject=${encodeURIComponent(subjectId)}`;
 }

@@ -13,14 +13,14 @@ import { FixResult } from "./FixResult";
 /** The overview of one run, and below it either one case in detail or two side by side. */
 export function ReportView({
   report,
-  recordUrl,
+  record,
   cause,
   onUndo,
   onJudgeHeld,
 }: {
   report: RunReport;
   /** The record of what was checked (DESIGN 4-5), when it can be made for this report. */
-  recordUrl: string | null;
+  record: { page: string; markdown: string } | null;
   cause: CauseActions;
   onUndo: () => void;
   onJudgeHeld: () => void;
@@ -59,12 +59,14 @@ export function ReportView({
       )}
       {report.judgeHeld && <HeldNotice held={report.judgeHeld} busy={cause.busy} onJudge={onJudgeHeld} />}
       <p className={styles.countLine}>{countLine(report.cases)}</p>
-      {recordUrl && (
+      {record && (
         <p className={styles.recordLinks}>
-          <a href={recordUrl} target="_blank" rel="noreferrer">
+          <a className={styles.smallAction} href={record.page} target="_blank" rel="noreferrer">
             確かめた記録を見る
           </a>
-          <a href={`${recordUrl}&download=1`}>記録を保存（Markdown）</a>
+          <a className={styles.smallAction} href={record.markdown} download>
+            Markdown で保存
+          </a>
           <span className={styles.muted}>どの入力で何を確かめたか・言えないことを1枚に</span>
         </p>
       )}

@@ -1,0 +1,204 @@
+/* Pages opened from the tool to read: the record of what was checked, and what was sent to Claude.
+   Same light page and type as the tool; colour only for verdicts (DESIGN 5). */
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 32px 80px;
+}
+
+.top {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.home {
+  font-weight: 700;
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.home:hover {
+  text-decoration: underline;
+}
+
+.kind {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin: 0 0 20px;
+}
+
+.action {
+  display: inline-block;
+  padding: 6px 14px;
+  border: 1px solid var(--foreground);
+  border-radius: 8px;
+  color: var(--foreground);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.action:hover {
+  background: var(--surface);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.problem {
+  padding: 16px 20px;
+  background: var(--surface);
+  border-radius: 8px;
+}
+
+/* The record */
+
+.doc {
+  font-size: 16px;
+}
+
+.docTitle {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.heading {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 32px 0 10px;
+}
+
+.paragraph {
+  margin: 6px 0;
+}
+
+.strong {
+  margin: 6px 0;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.list {
+  margin: 6px 0;
+  padding-left: 1.4em;
+}
+
+.list li + li {
+  margin-top: 4px;
+}
+
+.subList {
+  padding-left: 1.2em;
+  color: var(--muted);
+}
+
+.doc code,
+.meta {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+}
+
+.doc code {
+  padding: 1px 5px;
+  background: var(--surface);
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--foreground);
+}
+
+.table td {
+  vertical-align: top;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.table td:nth-child(5) {
+  min-width: 150px;
+}
+
+.table td:first-child {
+  min-width: 200px;
+}
+
+.judgedBy {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.code {
+  margin: 10px 0;
+}
+
+.codeLabel {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.code pre,
+.sentText {
+  padding: 12px 14px;
+  background: var(--surface);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* What was sent */
+
+.meta {
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.sentText {
+  margin: 14px 0 18px;
+  font-size: 13.5px;
+}
