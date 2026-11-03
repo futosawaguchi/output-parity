@@ -99,7 +99,7 @@ test("the subjects to choose from: samples/ first, one entry per id, a broken on
     ],
   );
   // What the page shows on each subject's card: the environments, the output, how it runs.
-  assert.deepEqual(Object.keys(listed[0].summary ?? {}).sort(), ["encoding", "format", "new", "old", "runType"]);
+  assert.deepEqual(Object.keys(listed[0].summary ?? {}).sort(), ["new", "old", "outputs", "runType"]);
   assert.equal(listed[1].summary, undefined);
 });
 

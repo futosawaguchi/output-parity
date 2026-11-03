@@ -4,7 +4,7 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { adapterFor } from "../lib/compare/adapters";
+import { adaptersFor } from "../lib/compare/adapters";
 import type { JudgeResponse } from "../lib/judge/schema";
 import { checkCase, judgeWaiting, type CheckOptions, type Checked } from "../lib/pipeline";
 import type { CaseResult, SlotResult } from "../lib/runner/run-case";
@@ -40,7 +40,7 @@ function countingClient() {
 async function setUp() {
   const client = countingClient();
   const opts: CheckOptions = {
-    adapter: adapterFor({ format: "pdf" }),
+    adapters: adaptersFor({ format: "pdf" }, []),
     client: client as unknown as Anthropic,
     environments: { old: { label: "旧", command: "a" }, new: { label: "新", command: "b" } },
     record: sentRecorder(await mkdtemp(join(tmpdir(), "output-parity-"))),
