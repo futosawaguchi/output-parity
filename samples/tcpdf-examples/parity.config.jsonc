@@ -16,6 +16,8 @@
     "type": "command",
     "cwd": "vendor/tecnickcom/tcpdf/examples",
     "timeoutMs": 30000,
+    // 例どうしは一時ファイルも DB も共有しないので、4 本ずつ同時に動かす（既定は 1 本ずつ）
+    "parallel": 4,
     "environments": {
       // display_errors を切る: PHP の CLI は警告を標準出力に混ぜるので、PDF の先頭に入って開けなくなる
       "old": { "label": "PHP 7.4", "command": "/opt/homebrew/opt/php@7.4/bin/php", "args": ["-d", "display_errors=0"] },

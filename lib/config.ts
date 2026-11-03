@@ -43,6 +43,11 @@ export type CommandRun = {
    * fetched, not committed (composer's vendor/). Without them every case would fail the same way.
    */
   needs: string[];
+  /**
+   * How many cases run at the same time. 1 unless written: an old program may share a temporary
+   * file or a database between runs, and two at once would make differences of the tool's own.
+   */
+  parallel: number;
 };
 
 /**
@@ -157,6 +162,7 @@ const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_LINKED = ["vendor", "node_modules"];
 /** each.range is for a few dozen inputs, not a typo that runs a million. */
 const MAX_RANGE = 1000;
+const MAX_PARALLEL = 16;
 export const CASE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const ENV_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
@@ -373,8 +379,14 @@ function parseRun(run: unknown, base: string, fail: (what: string) => never): Ru
   const timeoutMs = (run.timeoutMs as number | undefined) ?? DEFAULT_TIMEOUT_MS;
   if (!web) {
     if (run.database !== undefined) fail("run.database は Web 型（run.type が web）のときだけ書けます");
-    return { type: "command", cwd: cwd as string, timeoutMs, environments, needs: needs as string[] };
+    const parallel = run.parallel ?? 1;
+    if (!Number.isInteger(parallel) || (parallel as number) < 1 || (parallel as number) > MAX_PARALLEL) {
+      fail(`run.parallel は 1〜${MAX_PARALLEL} の整数にしてください（同時に動かす入力の数）`);
+    }
+    return { type: "command", cwd: cwd as string, timeoutMs, environments, needs: needs as string[], parallel: parallel as number };
   }
+  // The servers and their database are shared by every request: one at a time.
+  if (run.parallel !== undefined && run.parallel !== 1) fail("run.parallel は Web 型では使えません（サーバと DB を全部の入力で共有するので、1つずつ問い合わせます）");
   let database: string | null = null;
   if (run.database !== undefined) {
     const file = isObject(run.database) ? run.database.file : undefined;

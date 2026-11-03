@@ -106,13 +106,15 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
   const startedAt = new Date();
   const run = await createRunDir(opts.runsRoot, startedAt);
 
-  const checked: Checked[] = [];
   const environments = summarizeEnvironments(config.run);
   const checkOpts: CheckOptions = { adapter, client, environments, record: sentRecorder(join(opts.runsRoot, "sent")), onProgress: opts.onProgress };
   const web = runSpec.type === "web" ? webRunner(config, runSpec, opts.root, run.path) : null;
   const verb = web ? "開いています" : "実行しています";
+  // Cases may run side by side (run.parallel); the report keeps the order of the settings.
+  const checked: Checked[] = new Array(config.cases.length);
+  const parallel = runSpec.type === "command" ? runSpec.parallel : 1;
   try {
-    for (const testCase of config.cases) {
+    await eachWithLimit(config.cases, parallel, async (testCase, index) => {
       const caseId = testCase.id;
       let result: CaseResult;
       if (runSpec.type === "files") {
@@ -129,8 +131,8 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
         const keepOld = opts.keepOld?.get(caseId);
         result = web ? await web.runCase(testCase, caseDir, keepOld) : await runCase(config, testCase, join(opts.root, runSpec.cwd), caseDir, keepOld);
       }
-      checked.push({ result, report: await checkCase(result, testCase, { ...checkOpts, client: null }) });
-    }
+      checked[index] = { result, report: await checkCase(result, testCase, { ...checkOpts, client: null }) };
+    });
   } finally {
     await web?.stop();
   }
@@ -153,6 +155,23 @@ export async function runPipeline(opts: PipelineOptions): Promise<RunReport> {
   await writeFile(join(run.path, "report.json"), JSON.stringify(runReport, null, 2) + "\n");
   report("終わりました");
   return runReport;
+}
+
+/**
+ * Calls `work` on every item, at most `limit` at a time. After a failure no new item starts (as
+ * with one at a time); the ones already running finish, then the first failure is thrown.
+ */
+export async function eachWithLimit<T>(items: T[], limit: number, work: (item: T, index: number) => Promise<void>): Promise<void> {
+  let next = 0;
+  const failures: unknown[] = [];
+  const worker = async () => {
+    while (next < items.length && failures.length === 0) {
+      const index = next++;
+      await work(items[index], index).catch((e) => failures.push(e));
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  if (failures.length > 0) throw failures[0];
 }
 
 /** A case that has run and been compared, with what is needed to judge it later. */
