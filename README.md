@@ -60,6 +60,14 @@ php が無くても、同梱の結果（`samples/estimate/bundled/`）が最初�
    npm run samples -- --subject bookshop         # Web 型。架空書店の注文管理（PHP の内蔵サーバ・SQLite）
    ```
 
+### 壊れていないかの確かめ方（開発する人向け）
+
+```sh
+npm run check          # テスト・型・lint ＋ 題材を Claude なしで流し、入力ごとに期待値と照らし合わせる（約1分）
+npm run check:screen   # 組み立てた画面を手元の Chrome で動かして確かめる（約1分。Google Chrome が要る）
+npm run check:all      # 上の全部 ＋ Claude を呼ぶ往復・php が無いとき・TCPDF・clone した状態（約5分。Claude を6回ほど呼ぶ）
+```
+
 ## 自分のシステムで試す
 
 - `targets/<名前>/parity.config.jsonc` を書きます。`targets/` は `.gitignore` 済みなので、社内のパスや名前を書いても公開されません
