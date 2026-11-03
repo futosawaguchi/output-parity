@@ -45,3 +45,17 @@ test("nothing is carried to a case that has a verdict now, or had none before", 
   assert.equal(carryVerdicts(report(caseOf(same, verdict)), report(caseOf(same, machine))).cases[0].carried, undefined);
   assert.equal(carryVerdicts(report(caseOf(same, null)), report(caseOf(same, null))).cases[0].carried, undefined);
 });
+
+test("the same lines with a run that now ends differently leave the case unjudged", () => {
+  const same = [change(["在庫切れ"], ["残りわずか"])];
+  const ended = (exitCode: number): CaseReport => ({
+    ...caseOf(same, null),
+    runs: [
+      { slot: "old", outcome: { kind: "exited", exitCode: 0 } },
+      { slot: "new", outcome: { kind: "exited", exitCode } },
+    ] as CaseReport["runs"],
+  });
+  const before = { ...ended(0), verdict };
+  assert.deepEqual(carryVerdicts(report(before), report(ended(0))).cases[0].carried, verdict);
+  assert.equal(carryVerdicts(report(before), report(ended(255))).cases[0].carried, undefined);
+});
