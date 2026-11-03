@@ -14,6 +14,11 @@ if (!$order) {
     exit;
 }
 
+session_start();
+if (!isset($_SESSION['token'])) {
+    $_SESSION['token'] = bin2hex(random_bytes(16));
+}
+
 count_view($id);
 $order = find_order($id);
 $items = order_items($id);
@@ -61,7 +66,7 @@ echo '<p>この注文を開いた回数: ' . $order['views'] . '</p>';
 if ($order['paid_on'] === null) {
     echo '<form method="post" action="/record-payment.php">';
     echo '<input type="hidden" name="id" value="' . $order['id'] . '">';
-    echo '<input type="hidden" name="token" value="' . bin2hex(random_bytes(8)) . '">';
+    echo '<input type="hidden" name="token" value="' . $_SESSION['token'] . '">';
     echo '<button type="submit">入金を記録する</button>';
     echo '</form>';
 }
