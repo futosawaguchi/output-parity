@@ -2,14 +2,10 @@ import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { SetupError } from "../errors";
 import { ExtractionError, type ExtractedDocument, type PageLayout } from "./document";
+import { groupIntoLines, type TextItem } from "./pdf-lines";
 
 // The only file that knows about PDF. pdfjs-dist is the single extractor: both sides of a
 // comparison go through it, so what matters is that it is deterministic, not perfect (DESIGN 4-2).
-
-type TextItem = { str: string; transform: number[]; width: number };
-
-/** Items whose baselines differ by less than this many points are on the same line. */
-const SAME_LINE_TOLERANCE = 1;
 
 export async function extractPdf(path: string): Promise<ExtractedDocument> {
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
@@ -84,27 +80,6 @@ async function metadataLines(doc: PdfDocument): Promise<string[]> {
     if (id) lines.push(`id ${i}: ${id}`);
   });
   return lines;
-}
-
-/** Joins text items into lines: top to bottom, then left to right. */
-export function groupIntoLines(items: TextItem[]): string[] {
-  const indexed = items.map((item, index) => ({ item, index, x: item.transform[4], y: item.transform[5] }));
-  // Stable order: by y descending (PDF y grows upward), then x, then original order.
-  indexed.sort((a, b) => b.y - a.y || a.x - b.x || a.index - b.index);
-
-  const rows: (typeof indexed)[] = [];
-  for (const entry of indexed) {
-    const row = rows.at(-1);
-    if (row && Math.abs(row[0].y - entry.y) < SAME_LINE_TOLERANCE) row.push(entry);
-    else rows.push([entry]);
-  }
-  return rows.map((row) =>
-    row
-      .sort((a, b) => a.x - b.x || a.index - b.index)
-      .map((e) => e.item.str.trim())
-      .join(" ")
-      .replace(/\s+/g, " "),
-  );
 }
 
 function layoutOf(page: number, width: number, height: number, items: TextItem[]): PageLayout {
