@@ -7,7 +7,7 @@ import type { Change } from "../../lib/compare/baseline";
 import type { CaseVerdict } from "../../lib/judge/verdict";
 import type { CaseReport, RunReport } from "../../lib/pipeline";
 import { buildRecord } from "../../lib/record/build";
-import { renderRecord } from "../../lib/record/render";
+import { recordDoc, renderRecord } from "../../lib/record/render";
 import type { SlotResult } from "../../lib/runner/run-case";
 
 // The record of what was checked (DESIGN 4-5): every case, where the outputs came from, and what
@@ -129,4 +129,12 @@ test("after an edit, what was sent before it is still listed, once, as before th
   assert.match(md, /2 回・合わせて 150 字/);
   assert.match(md, /入力 b・判定（当てる前）: 100 字（j\.txt）/);
   assert.match(md, /入力 b・原因探し（当てる前）: 50 字（c\.txt）/);
+});
+
+test("each item of what was sent names its file for the page to link to, and the Markdown keeps only the text", () => {
+  const judgeSent = { purpose: "judge" as const, at: "", file: "j.txt", chars: 100, masked: 0, maskedKinds: [] };
+  const report = reportOf([caseOf("b", [lost], { ...broken, sent: judgeSent })]);
+  const items = recordDoc(report, opts).flatMap((b) => (b.kind === "list" ? b.items : []));
+  assert.deepEqual(items.filter((i) => i.sent).map((i) => i.sent), ["j.txt"]);
+  assert.doesNotMatch(renderRecord(report, opts), /送った全文を見る/);
 });

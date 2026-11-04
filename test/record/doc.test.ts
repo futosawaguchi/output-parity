@@ -32,3 +32,8 @@ test("a sent file's name says when, for which case and for what", () => {
   assert.deepEqual(describeSentFile("20261103-103652-order-8-judge-872a.txt"), { at: "2026/11/3 10:36:52", caseId: "order-8", purpose: "judge" });
   assert.equal(describeSentFile("../../etc/passwd"), null);
 });
+
+test("the tidying keeps which sent file a list item is about", () => {
+  const [list] = mapText([{ kind: "list", items: [{ text: "入力 /home/x", sent: "a.txt" }] }], (s) => s.replaceAll("/home/x", "~"));
+  assert.deepEqual(list, { kind: "list", items: [{ text: "入力 ~", sent: "a.txt", children: undefined }] });
+});
