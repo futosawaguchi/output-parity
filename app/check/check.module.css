@@ -6,9 +6,10 @@
 
 .top {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 40px;
+  gap: 14px 40px;
   padding: 22px 0;
   border-bottom: 1px solid var(--line);
 }
@@ -650,7 +651,6 @@
   margin: 8px 0;
 }
 
-/* The subjects as names in a row; the one shown is underlined (as the author's site marks the page). */
 /* The subjects as one row of joined, square-cornered buttons; the one shown is filled in ink. */
 .subjectNav {
   display: flex;
@@ -661,16 +661,16 @@
 .subjectsTitle {
   color: var(--muted);
   font-size: 15px;
+  white-space: nowrap;
 }
 
 .subjectList {
   list-style: none;
   display: flex;
-  flex-wrap: wrap;
   border: 1px solid var(--foreground);
 }
 
-.subjectList li + li {
+.subjectList > li + li {
   border-left: 1px solid var(--foreground);
 }
 
@@ -679,6 +679,7 @@
   align-items: center;
   gap: 8px;
   padding: 9px 18px;
+  white-space: nowrap;
   border: none;
   background: var(--background);
   color: var(--foreground);
@@ -723,6 +724,57 @@
   height: 9px;
   border-radius: 1px;
   background: currentColor;
+}
+
+/* "ほか N つ": the folded subjects open as a list under the row, in the same ruled box. */
+.subjectMore {
+  position: relative;
+}
+
+.subjectMoreList {
+  position: absolute;
+  top: calc(100% + 1px);
+  right: -1px;
+  z-index: 10;
+  min-width: 320px;
+  list-style: none;
+  border: 1px solid var(--foreground);
+  background: var(--background);
+}
+
+.subjectMoreList li + li {
+  border-top: 1px solid var(--line);
+}
+
+.subjectMoreItem {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: var(--background);
+  color: var(--foreground);
+  text-align: left;
+  cursor: pointer;
+}
+
+.subjectMoreItem:hover {
+  background: var(--surface);
+}
+
+.subjectMoreName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.subjectMoreAbout {
+  display: block;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .notice button {
