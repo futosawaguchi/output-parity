@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Comparison } from "../../lib/compare/compare-case";
-import { assessFix, remainingOf } from "../../lib/fix/verify";
+import { assessFix, editsIn, remainingOf } from "../../lib/fix/verify";
 import type { CaseReport, RunReport } from "../../lib/pipeline";
 import type { ExecOutcome } from "../../lib/runner/outcome";
 
@@ -70,4 +70,13 @@ test("another case keeping a part of the same difference is not a change", () =>
   const r = assessFix("c", report({ b: lines(3), c: lines(3) }), report({ b: lines(1), c: lines(0) }));
   assert.equal(r.outcome, "fixed");
   assert.equal(r.deltas.find((d) => d.caseId === "b")?.changed, undefined);
+});
+
+test("the edits a copy holds: the earlier ones, then this one when it was applied", () => {
+  const a = { file: "a.py", oldText: "1", newText: "2" };
+  const b = { file: "a.py", oldText: "2", newText: "3" };
+  const withAttempt = (attempt: object) => ({ fixAttempt: attempt }) as unknown as RunReport;
+  assert.deepEqual(editsIn({} as RunReport), []);
+  assert.deepEqual(editsIn(withAttempt({ edit: b, earlier: [a], applied: { kind: "applied", file: "a.py", line: 1 } })), [a, b]);
+  assert.deepEqual(editsIn(withAttempt({ edit: b, earlier: [a], applied: { kind: "refused", message: "", nextStep: "" } })), [a]);
 });
