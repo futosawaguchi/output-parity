@@ -21,7 +21,7 @@ export function ReportView({
 }: {
   report: RunReport;
   /** The record of what was checked (DESIGN 4-5), when it can be made for this report. */
-  record: { page: string; markdown: string } | null;
+  record: { page: string; markdown: string; patch: string } | null;
   cause: CauseActions;
   onUndo: () => void;
   onJudgeHeld: () => void;
@@ -57,7 +57,14 @@ export function ReportView({
         }
       </p>
       {report.fixAttempt && (
-        <FixResult attempt={report.fixAttempt} labelOf={(id) => byId(id)?.label ?? id} onUndo={onUndo} busy={cause.busy} bundled={report.origin === "bundled"} />
+        <FixResult
+          attempt={report.fixAttempt}
+          labelOf={(id) => byId(id)?.label ?? id}
+          onUndo={onUndo}
+          busy={cause.busy}
+          bundled={report.origin === "bundled"}
+          patchUrl={record?.patch ?? null}
+        />
       )}
       {report.judgeHeld && <HeldNotice held={report.judgeHeld} busy={cause.busy} onJudge={onJudgeHeld} />}
       <div className={styles.countBand}>

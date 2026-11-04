@@ -14,14 +14,15 @@ export function pageUrl(report: RunReport, c: CaseReport, slot: string): string 
 }
 
 /**
- * The record of what was checked for the report on the page, to read and to save: the finished
+ * The record of what was checked for the report on the page, to read and to save, and the edit it
+ * was checked with as a patch (when there is one): the finished
  * job's, or the bundled run's. null when the page shows neither (a report the server no longer holds).
  */
-export function recordUrls(report: RunReport, jobId: string | null): { page: string; markdown: string } | null {
+export function recordUrls(report: RunReport, jobId: string | null): { page: string; markdown: string; patch: string } | null {
   const which: [string, string] | null = jobId ? ["job", jobId] : report.origin === "bundled" ? ["from", report.fixAttempt ? "bundled-fix" : "bundled"] : null;
   if (!which) return null;
   const query = new URLSearchParams([["subject", report.subjectId], which]).toString();
-  return { page: `/check/record?${query}`, markdown: `/api/record?${query}` };
+  return { page: `/check/record?${query}`, markdown: `/api/record?${query}`, patch: `/api/patch?${query}` };
 }
 
 /** What was sent to Claude, as a page to read. */

@@ -1199,3 +1199,23 @@
   padding-top: 18px;
   border-top: none;
 }
+
+/* After a fix: how to put it into the original source (the tool writes only the copy). */
+.nextSteps {
+  margin: 18px 0 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.nextStepsTitle {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.nextStepsList {
+  margin: 8px 0 0 1.4em;
+}
+
+.nextStepsList li + li {
+  margin-top: 6px;
+}
