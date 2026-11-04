@@ -651,6 +651,14 @@
   margin: 8px 0;
 }
 
+/* After "直りました": the cases the edit did not touch that still hold a difference. */
+.leftOver {
+  margin: 10px 0 14px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
 /* The subjects as one row of joined, square-cornered buttons; the one shown is filled in ink. */
 .subjectNav {
   display: flex;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Edit } from "@/lib/fix/apply-edit";
-import { describeDelta, describeRemaining, type FixAttempt, type FixOutcome } from "@/lib/fix/verify";
+import { type CaseDelta, describeDelta, describeRemaining, type FixAttempt, type FixOutcome, leftAsTheyWere } from "@/lib/fix/verify";
 import styles from "./check.module.css";
 
 const HEADLINE: Record<FixOutcome, string> = {
@@ -65,11 +65,25 @@ export function FixResult({ attempt, labelOf, onUndo, busy, bundled, patchUrl }:
           </li>
         ))}
       </ul>
+      {verification.outcome === "fixed" && <LeftOver cases={leftAsTheyWere(verification.deltas, attempt.caseId)} />}
       {verification.outcome === "fixed" && (
         <IntoTheSource where={earlier.length > 0 ? [...new Set([...earlier, edit].map((e) => e.file))].join("・") : `${applied.file}:${applied.line}`} patchUrl={patchUrl} />
       )}
       <UndoRow onUndo={onUndo} busy={busy} bundled={bundled} />
     </section>
+  );
+}
+
+/** The cases this edit did not touch that still hold a difference, so "直りました" is not read as the whole run. */
+function LeftOver({ cases }: { cases: CaseDelta[] }) {
+  if (cases.length === 0) return null;
+  return (
+    <div className={styles.leftOver}>
+      <p>
+        まだ差が残っている入力: {cases.map((d) => `${d.label}（${describeRemaining(d.after)}）`).join("・")}。この直しの前と後で変わっていません
+      </p>
+      <p className={styles.nextStep}>→ 一覧で開いて、別に確かめてください</p>
+    </div>
   );
 }
 

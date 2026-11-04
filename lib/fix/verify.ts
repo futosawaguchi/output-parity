@@ -83,6 +83,15 @@ export function describeDelta(d: CaseDelta): string {
   return `${describeRemaining(d.before)} → ${describeRemaining(d.after)}${d.changed ? "（差の中身が変わりました）" : ""}`;
 }
 
+/**
+ * The other cases the edit left as they were, with something still in them. After "直りました" the
+ * run can still have a broken case, and without naming it the page reads as "not fixed" (11/4).
+ */
+export function leftAsTheyWere(deltas: CaseDelta[], caseId: string): CaseDelta[] {
+  const clear = (r: Remaining) => r.kind === "lines" && r.count === 0;
+  return deltas.filter((d) => d.caseId !== caseId && !d.changed && !clear(d.after) && JSON.stringify(d.before) === JSON.stringify(d.after));
+}
+
 /** No output is worse than any number of differing lines; more lines are worse than fewer; a different ending counts as one. */
 function severity(r: Remaining): number {
   if (r.kind === "lines") return r.count;
