@@ -43,9 +43,24 @@ export type FixAttempt = {
    * row it is still the one before the first: undo returns work/ to the original, not one step.
    */
   original: RunReport;
+  /**
+   * Edits already in work/ when this one was applied (the ones pressed before it, in order), so
+   * what the copy holds can be told in full: a second edit is made on top of the first.
+   */
+  earlier?: Edit[];
   /** Present only when the edit was applied and everything ran again. */
   verification?: { outcome: FixOutcome; deltas: CaseDelta[] };
 };
+
+/**
+ * Every edit the copy in work/ holds after this report's run, in the order applied: the earlier
+ * ones and this one (when it was applied). None for a report with no edit.
+ */
+export function editsIn(report: RunReport): Edit[] {
+  const a = report.fixAttempt;
+  if (!a) return [];
+  return [...(a.earlier ?? []), ...(a.applied.kind === "applied" ? [a.edit] : [])];
+}
 
 export function remainingOf({ comparison, runs }: Compared): Remaining {
   if (comparison.kind === "missingOutput") return { kind: "noOutput" };

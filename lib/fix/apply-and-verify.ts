@@ -6,7 +6,7 @@ import { runPipeline, type ProgressEvent, type RunReport } from "../pipeline";
 import { prepareWorkspace } from "../workspace";
 import { applyEdit } from "./apply-edit";
 import { carryVerdicts } from "./carry";
-import { assessFix, type FixAttempt } from "./verify";
+import { assessFix, editsIn, type FixAttempt } from "./verify";
 
 export type ApplyOptions = {
   config: ParityConfig;
@@ -38,7 +38,9 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
   }
   say("直し方を work/ に当てています");
   const applied = await applyEdit(opts.workDir, edit);
-  const attempt: FixAttempt = { caseId, edit, applied, original };
+  // On a run made here, work/ still holds the edits applied before this one; a bundled report starts from a fresh copy.
+  const earlier = base.origin === "run" ? editsIn(base) : [];
+  const attempt: FixAttempt = { caseId, edit, applied, original, ...(earlier.length > 0 ? { earlier } : {}) };
   if (applied.kind === "refused") return { ...base, fixAttempt: attempt };
 
   const rerun = await runPipeline({

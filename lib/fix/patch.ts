@@ -1,6 +1,8 @@
 // The edit a run was checked with, as a patch for the original source: what a person applies with
 // their usual steps (a branch, a review, a commit). The tool never writes the original itself.
 
+import type { Edit } from "./apply-edit";
+
 /** Lines of unchanged text shown around a change, as diff -u does. */
 const CONTEXT = 3;
 
@@ -45,4 +47,19 @@ function linesOf(text: string): string[] {
   const lines = text.split("\n");
   if (text.endsWith("\n")) lines.pop();
   return lines;
+}
+
+/**
+ * Applies edits one after another to the original texts of their files, as they were applied to
+ * the copy. Each must find its text before exactly once, or nothing is made: the original has
+ * changed since the copy was made (or is already fixed). Returns each changed file's text after.
+ */
+export function applyAll(edits: Edit[], originals: Map<string, string>): { ok: true; after: Map<string, string> } | { ok: false; file: string } {
+  const after = new Map(originals);
+  for (const e of edits) {
+    const text = after.get(e.file);
+    if (text === undefined || text.split(e.oldText).length !== 2) return { ok: false, file: e.file };
+    after.set(e.file, text.replace(e.oldText, () => e.newText));
+  }
+  return { ok: true, after };
 }

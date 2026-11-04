@@ -2,7 +2,8 @@ import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { connection } from "next/server";
 import { SetupError } from "@/lib/errors";
-import { makePatch } from "@/lib/fix/patch";
+import { applyAll, makePatch } from "@/lib/fix/patch";
+import { editsIn } from "@/lib/fix/verify";
 import { reportForRecord } from "@/lib/record/build";
 import { insideRoot } from "@/lib/safe-path";
 import { loadSubject, subjectIdOf } from "@/lib/subject";
@@ -18,8 +19,9 @@ export async function GET(request: Request): Promise<Response> {
   const subjectId = subjectIdOf(params.get("subject"));
   const root = process.cwd();
   const report = await reportForRecord(root, subjectId, { from: params.get("from"), job: params.get("job") });
-  const edit = report?.fixAttempt?.applied.kind === "applied" ? report.fixAttempt.edit : null;
-  if (!edit) {
+  // Every edit the copy holds, in order: a second press of "apply" builds on the first.
+  const edits = report && report.fixAttempt?.applied.kind === "applied" ? editsIn(report) : [];
+  if (edits.length === 0) {
     return problem(404, "当てた直し方が見つかりません", "画面を読み込み直してください。サーバを起動し直した場合は、もう一度当てて確かめてください");
   }
   let source;
@@ -29,19 +31,26 @@ export async function GET(request: Request): Promise<Response> {
     if (e instanceof SetupError) return problem(400, e.message, e.nextStep);
     throw e;
   }
-  const file = insideRoot(source, edit.file);
-  const original = file ? await readFile(file, "utf-8").catch(() => null) : null;
-  if (original === null) return problem(404, `元のソースに ${edit.file} がありません`, "設定の source が元のソースを指しているか確かめてください");
-  // The original may have been edited since the copy was made: a patch is only made where it still applies as checked.
-  if (original.split(edit.oldText).length !== 2) {
-    return problem(409, `元のソースの ${edit.file} に、書き換える前の文がそのままの形で1か所だけありません（写しを作ったあとに変わったか、もう直してあります）`, "元のソースを開いて、画面の差分のとおりに直してください");
+  const files = [...new Set(edits.map((e) => e.file))];
+  const originals = new Map<string, string>();
+  for (const name of files) {
+    const path = insideRoot(source, name);
+    const text = path ? await readFile(path, "utf-8").catch(() => null) : null;
+    if (text === null) return problem(404, `元のソースに ${name} がありません`, "設定の source が元のソースを指しているか確かめてください");
+    originals.set(name, text);
   }
-  const patch = makePatch(edit.file, original, original.replace(edit.oldText, () => edit.newText));
-  if (!patch) return problem(409, "直し方を当てても元のソースが変わりません", "画面の差分を見て、元のソースが直っているか確かめてください");
+  // The original may have been edited since the copy was made: a patch is only made where it still applies as checked.
+  const result = applyAll(edits, originals);
+  if (!result.ok) {
+    return problem(409, `元のソースの ${result.file} に、書き換える前の文がそのままの形で1か所だけありません（写しを作ったあとに変わったか、もう直してあります）`, "元のソースを開いて、画面の差分のとおりに直してください");
+  }
+  const patch = files.flatMap((name) => makePatch(name, originals.get(name)!, result.after.get(name)!) ?? []).join("");
+  if (patch === "") return problem(409, "直し方を当てても元のソースが変わりません", "画面の差分を見て、元のソースが直っているか確かめてください");
+  const fileName = files.length === 1 ? `kawarime-${basename(files[0])}.patch` : "kawarime.patch";
   return new Response(patch, {
     headers: {
       "content-type": "text/x-diff; charset=utf-8",
-      "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(`kawarime-${basename(edit.file)}.patch`)}`,
+      "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
       "cache-control": "no-store",
       "x-content-type-options": "nosniff",
     },

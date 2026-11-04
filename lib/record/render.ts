@@ -173,6 +173,13 @@ function fix(report: RunReport): Block[] {
     { kind: "code", label: "書き換える前", text: a.edit.oldText },
     { kind: "code", label: "書き換えたあと", text: a.edit.newText },
   ];
+  // A second edit is made on top of the first: the copy holds all of them, so the record names them all.
+  if (a.earlier && a.earlier.length > 0) {
+    blocks.splice(2, 0, { kind: "paragraph", text: `この前に、次の直し方を順に当ててありました（${a.earlier.length} つ）。` }, ...a.earlier.flatMap((e, i): Block[] => [
+      { kind: "code", label: `${i + 1} つ目（${e.file}）書き換える前`, text: e.oldText },
+      { kind: "code", label: `${i + 1} つ目（${e.file}）書き換えたあと`, text: e.newText },
+    ]), { kind: "paragraph", text: "そのうえで、最後に当てた直し方:" });
+  }
   if (a.applied.kind === "refused") {
     blocks.push({ kind: "paragraph", text: `当てられませんでした: ${a.applied.message}` });
   } else if (a.verification) {

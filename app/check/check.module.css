@@ -1219,3 +1219,8 @@
 .nextStepsList li + li {
   margin-top: 6px;
 }
+
+.patchProblem {
+  color: var(--broken-fg);
+  font-size: 15px;
+}
