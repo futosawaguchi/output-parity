@@ -13,9 +13,12 @@ export type Block =
   | { kind: "note"; text: string }
   | { kind: "heading"; text: string }
   | { kind: "paragraph"; text: string; strong?: boolean }
-  | { kind: "list"; ordered?: boolean; items: { text: string; children?: string[] }[] }
+  | { kind: "list"; ordered?: boolean; items: ListItem[] }
   | { kind: "table"; head: string[]; rows: Cell[][] }
   | { kind: "code"; label: string; text: string };
+
+/** sent: the file in runs/sent/ the item is about; the page links to it, the Markdown keeps only the text. */
+export type ListItem = { text: string; children?: string[]; sent?: string };
 
 export type RecordDoc = Block[];
 
@@ -58,7 +61,7 @@ export function mapText(doc: RecordDoc, f: (s: string) => string): RecordDoc {
   return doc.map((b): Block => {
     switch (b.kind) {
       case "list":
-        return { ...b, items: b.items.map((i) => ({ text: f(i.text), children: i.children?.map(f) })) };
+        return { ...b, items: b.items.map((i) => ({ ...i, text: f(i.text), children: i.children?.map(f) })) };
       case "table":
         return { ...b, head: b.head.map(f), rows: b.rows.map((r) => r.map(mapCell)) };
       case "code":

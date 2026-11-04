@@ -222,7 +222,7 @@ function sent(report: RunReport): Block[] {
         (masked > 0 ? `パスワードや鍵に見える値 ${masked} 個を *** にしてから送りました。` : "パスワードや鍵に見える値はありませんでした。") +
         `送った全文は ${folder} にあります。`,
     },
-    { kind: "list", items: items.map((i) => ({ text: `${i.label}・${i.what}: ${i.rec.chars.toLocaleString("ja-JP")} 字（${i.rec.file}）` })) },
+    { kind: "list", items: items.map((i) => ({ text: `${i.label}・${i.what}: ${i.rec.chars.toLocaleString("ja-JP")} 字（${i.rec.file}）`, sent: i.rec.file })) },
   ];
 }
 

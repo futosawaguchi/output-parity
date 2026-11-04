@@ -1,17 +1,19 @@
 import { VERDICT_LABEL } from "@/lib/judge/verdict";
 import type { Block, Cell } from "@/lib/record/doc";
 import { Badge } from "./Badge";
+import checkStyles from "./check.module.css";
 import styles from "./doc.module.css";
+import { sentUrl } from "./urls";
 
 /**
  * The record of what was checked (lib/record/doc.ts) as a page to read. Every text is a text node:
  * summaries from Claude and excerpts of outputs are shown, never interpreted as HTML.
  */
-export function RecordView({ doc }: { doc: Block[] }) {
-  return <article className={styles.doc}>{doc.map((b, i) => <BlockView key={i} block={b} />)}</article>;
+export function RecordView({ doc, subjectId }: { doc: Block[]; subjectId: string }) {
+  return <article className={styles.doc}>{doc.map((b, i) => <BlockView key={i} block={b} subjectId={subjectId} />)}</article>;
 }
 
-function BlockView({ block: b }: { block: Block }) {
+function BlockView({ block: b, subjectId }: { block: Block; subjectId: string }) {
   switch (b.kind) {
     case "title":
       return <h1 className={styles.docTitle}>{b.text}</h1>;
@@ -28,6 +30,14 @@ function BlockView({ block: b }: { block: Block }) {
           {b.items.map((item, i) => (
             <li key={i}>
               <Inline text={item.text} />
+              {item.sent && (
+                <>
+                  {" "}
+                  <a className={checkStyles.pageLink} href={sentUrl(subjectId, item.sent)} target="_blank" rel="noreferrer">
+                    送った全文を見る
+                  </a>
+                </>
+              )}
               {item.children && (
                 <ul className={styles.subList}>
                   {item.children.map((c, j) => (

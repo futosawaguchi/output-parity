@@ -49,7 +49,7 @@ async function Record({ searchParams }: Pick<PageProps<"/check/record">, "search
         </a>
         <span className={styles.muted}>保存したファイルは、この画面と同じ中身です</span>
       </p>
-      <RecordView doc={await buildRecordDoc(report, root)} />
+      <RecordView doc={await buildRecordDoc(report, root)} subjectId={subjectId} />
     </>
   );
 }
