@@ -30,7 +30,7 @@ export function renderRecord(report: RunReport, opts: RecordOptions): string {
 export function recordDoc(report: RunReport, opts: RecordOptions): RecordDoc {
   return [
     { kind: "title", text: `確かめた入力の記録 — ${report.configName}` },
-    { kind: "note", text: "output-parity が実行の結果から作った記録です。出力の抜き書き（金額・名前など）を含むことがあります。人に渡す前に読んでください。" },
+    { kind: "note", text: "かわりめが実行の結果から作った記録です。出力の抜き書き（金額・名前など）を含むことがあります。人に渡す前に読んでください。" },
     ...conclusion(report),
     ...where(report, opts.createdAt),
     ...caseTable(report),

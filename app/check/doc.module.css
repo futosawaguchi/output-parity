@@ -1,34 +1,39 @@
 /* Pages opened from the tool to read: the record of what was checked, and what was sent to Claude.
-   Same light page and type as the tool; colour only for verdicts (DESIGN 5). */
+   The tool's page as it is: full width with the same top row, white with rules, colour only for
+   verdicts (DESIGN 5). Only running text stops at about 46 characters a line, to be read. */
 
 .page {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 28px 32px 80px;
+  padding: 0 56px 96px;
 }
 
-.top {
+.page > header {
+  margin-bottom: 40px;
+}
+
+.where {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 14px;
-  padding-bottom: 14px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--line);
-}
-
-.home {
-  font-weight: 700;
-  color: var(--foreground);
-  text-decoration: none;
-}
-
-.home:hover {
-  text-decoration: underline;
+  justify-content: flex-end;
+  gap: 4px 20px;
 }
 
 .kind {
   color: var(--muted);
   font-size: 15px;
+}
+
+.back {
+  color: var(--foreground);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--muted);
+  text-underline-offset: 4px;
+}
+
+.back:hover {
+  text-decoration-color: var(--foreground);
 }
 
 .actions {
@@ -43,7 +48,7 @@
   display: inline-block;
   padding: 6px 14px;
   border: 1px solid var(--foreground);
-  border-radius: 8px;
+  border-radius: 4px;
   color: var(--foreground);
   font-size: 15px;
   font-weight: 600;
@@ -60,9 +65,10 @@
 }
 
 .problem {
+  max-width: 46em;
   padding: 16px 20px;
-  background: var(--surface);
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
 }
 
 /* The record */
@@ -72,10 +78,20 @@
 }
 
 .docTitle {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 700;
-  line-height: 1.4;
-  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+/* Running text: about 46 characters a line. Tables and the text as sent use the full width. */
+.note,
+.paragraph,
+.strong,
+.list,
+.meta {
+  max-width: 46em;
 }
 
 .note {
@@ -84,10 +100,13 @@
   margin-bottom: 8px;
 }
 
+/* Like the sections of a case's details: a rule across the page, the heading under it. */
 .heading {
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 700;
-  margin: 32px 0 10px;
+  margin: 36px 0 12px;
+  padding-top: 20px;
+  border-top: 1px solid #c9c9c3;
 }
 
 .paragraph {
@@ -121,9 +140,6 @@
 }
 
 .doc code {
-  padding: 1px 5px;
-  background: var(--surface);
-  border-radius: 4px;
   overflow-wrap: anywhere;
 }
 
@@ -182,8 +198,8 @@
 .code pre,
 .sentText {
   padding: 12px 14px;
-  background: var(--surface);
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 13px;
   line-height: 1.6;

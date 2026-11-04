@@ -5,6 +5,7 @@ import type { JobKind, JobState } from "@/lib/jobs";
 import type { RunReport } from "@/lib/pipeline";
 import { SAME_ORIGIN_HEADER } from "@/lib/same-origin";
 import styles from "./check.module.css";
+import { Brand } from "./Brand";
 import type { CauseActions } from "./CauseView";
 import { MANY_CASES, tally } from "./case-order";
 import { ReportView } from "./ReportView";
@@ -202,12 +203,7 @@ export function RunPanel() {
   return (
     <div className={styles.page}>
       <header className={styles.top}>
-        <p className={styles.appName}>
-          <span className={styles.appMark} aria-hidden />
-          <span className={styles.brandKana}>かわりめ</span>
-          <span className={styles.brandRoman}>kawarime</span>
-          <span className={styles.brandLine}>バージョンの変わり目で、見落とさない。</span>
-        </p>
+        <Brand />
         <SubjectPicker
           // The subject shown counts what is on the page: after an edit was applied or undone, that result.
           subjects={subjects.map((s) => (s.id === subjectId && shown ? { ...s, latest: tally(shown.cases) } : s))}
