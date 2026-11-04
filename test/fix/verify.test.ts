@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Comparison } from "../../lib/compare/compare-case";
-import { assessFix, editsIn, remainingOf } from "../../lib/fix/verify";
+import { assessFix, editsIn, leftAsTheyWere, remainingOf } from "../../lib/fix/verify";
 import type { CaseReport, RunReport } from "../../lib/pipeline";
 import type { ExecOutcome } from "../../lib/runner/outcome";
 
@@ -79,4 +79,15 @@ test("the edits a copy holds: the earlier ones, then this one when it was applie
   assert.deepEqual(editsIn({} as RunReport), []);
   assert.deepEqual(editsIn(withAttempt({ edit: b, earlier: [a], applied: { kind: "applied", file: "a.py", line: 1 } })), [a, b]);
   assert.deepEqual(editsIn(withAttempt({ edit: b, earlier: [a], applied: { kind: "refused", message: "", nextStep: "" } })), [a]);
+});
+
+test("after a fix, the cases the edit left as they were with a difference still in them are named", () => {
+  const { deltas } = assessFix("c", report({ a: lines(0), b: lines(3), c: lines(3), d: noOutput }), report({ a: lines(0), b: lines(0), c: lines(0), d: noOutput }));
+  // a has nothing, b got better, c is the one fixed: only d is still left, as it was.
+  assert.deepEqual(leftAsTheyWere(deltas, "c").map((d) => d.caseId), ["d"]);
+});
+
+test("a case whose difference changed is not one left as it was", () => {
+  const { deltas } = assessFix("c", report({ b: lines(2, "p"), c: lines(3) }), report({ b: lines(2, "q"), c: lines(0) }));
+  assert.deepEqual(leftAsTheyWere(deltas, "c"), []);
 });
