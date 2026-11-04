@@ -30,12 +30,12 @@ export async function claudeFlows(results: Results, base: string, browser: Brows
     if (!ran) return;
     const found = await results.step("4c", "入力 C の原因を探す（Claude を呼ぶ）", async () => {
       await page.getByRole("button", { name: /原因を探す/ }).click();
-      await page.getByRole("button", { name: /work\/ に当てて/ }).waitFor({ timeout: 5 * MINUTES });
+      await page.getByRole("button", { name: /コピー（work\/）に直しを入れて/ }).waitFor({ timeout: 5 * MINUTES });
       for (const want of ["estimate.php:18", "この行は実在し", "1か所だけあり"]) await waitForText(page, want, 10_000);
     });
     if (!found) return;
-    const applied = await results.step("4d", "work/ に当てて確かめる", async () => {
-      await page.getByRole("button", { name: /work\/ に当てて/ }).click();
+    const applied = await results.step("4d", "コピー（work/）に直しを入れて確かめる", async () => {
+      await page.getByRole("button", { name: /コピー（work\/）に直しを入れて/ }).click();
       await waitForText(page, "直りました: 入力 C は 残った差 3 行 → 差なし", 3 * MINUTES);
       const count = await countLine(page);
       expect(count === "4 件: 壊れている 1・無害 3", `当てたあとの件数「${count}」`);
@@ -45,14 +45,14 @@ export async function claudeFlows(results: Results, base: string, browser: Brows
       return count;
     });
     if (applied) {
-      await results.step("4e", "元に戻す（work/ が原本と同じに戻る）", async () => {
+      await results.step("4e", "元に戻す（work/ が元のソースと同じに戻る）", async () => {
         await page.getByRole("button", { name: "元に戻す" }).first().click();
         await page.waitForFunction(() => [...document.querySelectorAll("p")].some((p) => p.textContent?.trim() === "4 件: 壊れている 2・要確認 1・無害 1"), undefined, { timeout: 3 * MINUTES });
         const [original, work] = await Promise.all([
           readFile(join(root, "samples/estimate/app/estimate.php"), "utf8"),
           readFile(join(root, "work/estimate/estimate.php"), "utf8"),
         ]);
-        expect(original === work, "work/estimate/estimate.php が原本と違います");
+        expect(original === work, "work/estimate/estimate.php が元のソースと違います");
       });
     }
     await results.step("4f", "同梱の出力を Claude に判定し直させる（Claude を呼ぶ）", async () => {

@@ -282,7 +282,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   });
 
   if (runSpec.type === "web" && runSpec.database !== null && fixes === "suggest-only") {
-    fail("run.database と fixes: \"suggest-only\" は一緒に使えません（suggest-only はその場で動かすので、元の DB を毎回書き戻すことになります。fixes を \"apply\" にすると work/ の写しの中で戻します）");
+    fail("run.database と fixes: \"suggest-only\" は一緒に使えません（suggest-only はその場で動かすので、元の DB を毎回書き戻すことになります。fixes を \"apply\" にすると コピー（work/）の中で戻します）");
   }
 
   return {

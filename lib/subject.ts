@@ -126,8 +126,8 @@ export function whyNoApplying(subject: Subject): { message: string; nextStep: st
     };
   }
   return {
-    message: "この題材は、直し方を提案するところまでの設定です（fixes が suggest-only。写しを作らず、何も書き換えません）",
-    nextStep: "当てて確かめるには、設定の fixes を apply にしてください（work/ に写しを作り、そこに当てます）",
+    message: "この題材は、直し方を提案するところまでの設定です（fixes が suggest-only。コピーを作らず、何も書き換えません）",
+    nextStep: "当てて確かめるには、設定の fixes を apply にしてください（work/ にコピーを作り、そこに当てます）",
   };
 }
 

@@ -168,7 +168,7 @@ function ApplyRow({ onApply, busy, cannotApply, replay }: { onApply: () => void 
           同梱の「当てて確かめた結果」を見る
         </button>
         <span className={styles.muted}>
-          この環境では当てて流し直せません（{cannotApply.message}）。作者の手元で同じ直し方を work/ に当て、全部の入力を流し直した結果を見せます
+          この環境では当てて流し直せません（{cannotApply.message}）。開発者の手元で同じ直し方をコピー（work/）に入れ、全部の入力を流し直した結果を見せます
         </span>
       </div>
     );
@@ -176,10 +176,10 @@ function ApplyRow({ onApply, busy, cannotApply, replay }: { onApply: () => void 
   return (
     <div className={styles.applyRow}>
       <button className={styles.subButton} onClick={onApply} disabled={busy || cannotApply !== null}>
-        work/ に当てて、もう一度流して確かめる
+        コピー（work/）に直しを入れて、もう一度動かして確かめる
       </button>
       <span className={styles.muted}>
-        {cannotApply ? `いまは押せません: ${cannotApply.message} → ${cannotApply.nextStep}` : "原本は書き換えません。当てるのは写しの work/ です"}
+        {cannotApply ? `いまは押せません: ${cannotApply.message} → ${cannotApply.nextStep}` : "元のソースは書き換えません"}
       </span>
     </div>
   );

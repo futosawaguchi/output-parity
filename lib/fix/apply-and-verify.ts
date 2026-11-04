@@ -36,7 +36,7 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
     say("work/ を作っています");
     await prepareWorkspace(opts.config.source, opts.workDir, opts.config.workspace.link);
   }
-  say("直し方を work/ に当てています");
+  say("コピー（work/）に直しを入れています");
   const applied = await applyEdit(opts.workDir, edit);
   // On a run made here, work/ still holds the edits applied before this one; a bundled report starts from a fresh copy.
   const earlier = base.origin === "run" ? editsIn(base) : [];

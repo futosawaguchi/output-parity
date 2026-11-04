@@ -74,10 +74,10 @@ function isSame(c: CaseReport): boolean {
 function where(report: RunReport, createdAt: Date): Block[] {
   const origin = {
     run: "この手元で、旧と新のプログラムを実行して比べました。",
-    rejudge: "出力は同梱のもの（作者の手元で実行したもの）です。この手元では実行していません。判定だけを、この手元で Claude にし直しました。",
-    bundled: "同梱の結果です（作者の手元で実行・判定し、リポジトリに入れたもの）。この手元では実行も判定もしていません。",
+    rejudge: "出力は同梱のもの（開発者の手元で実行したもの）です。この手元では実行していません。判定だけを、この手元で Claude にし直しました。",
+    bundled: "同梱の結果です（開発者の手元で実行・判定し、リポジトリに入れたもの）。この手元では実行も判定もしていません。",
   }[report.origin];
-  const fixed = report.fixAttempt ? "直し方を work/ の写しに当てて、全入力を流し直した結果です（旧の出力は当てる前のもの）。" : "";
+  const fixed = report.fixAttempt ? "直し方をコピー（work/）に当てて、全入力を流し直した結果です（旧の出力は当てる前のもの）。" : "";
   const env = report.environments;
   return [
     { kind: "heading", text: "どこで・何を確かめたか" },
@@ -188,7 +188,7 @@ function fix(report: RunReport): Block[] {
     blocks.push({ kind: "paragraph", text: `結果: ${outcome}`, strong: true });
     if (changed.length > 0) blocks.push({ kind: "list", items: changed.map((d) => ({ text: `${d.label}: ${describeDelta(d)}` })) });
   }
-  blocks.push({ kind: "paragraph", text: "当てたのは work/ の写しです。本番へ移すのは人です（この道具は本番に触りません）。" });
+  blocks.push({ kind: "paragraph", text: "直しを入れたのはコピー（work/）だけです。元のソースへ入れるのは人です（このツールは元のソースを書き換えません）。" });
   return blocks;
 }
 

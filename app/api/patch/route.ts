@@ -42,7 +42,7 @@ export async function GET(request: Request): Promise<Response> {
   // The original may have been edited since the copy was made: a patch is only made where it still applies as checked.
   const result = applyAll(edits, originals);
   if (!result.ok) {
-    return problem(409, `元のソースの ${result.file} に、書き換える前の文がそのままの形で1か所だけありません（写しを作ったあとに変わったか、もう直してあります）`, "元のソースを開いて、画面の差分のとおりに直してください");
+    return problem(409, `元のソースの ${result.file} に、書き換える前の文がそのままの形で1か所だけありません（コピーを作ったあとに変わったか、もう直してあります）`, "元のソースを開いて、画面の差分のとおりに直してください");
   }
   const patch = files.flatMap((name) => makePatch(name, originals.get(name)!, result.after.get(name)!) ?? []).join("");
   if (patch === "") return problem(409, "直し方を当てても元のソースが変わりません", "画面の差分を見て、元のソースが直っているか確かめてください");

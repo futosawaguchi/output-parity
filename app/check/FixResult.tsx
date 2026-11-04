@@ -45,13 +45,13 @@ export function FixResult({ attempt, labelOf, onUndo, busy, bundled, patchUrl }:
         {target && `: ${labelOf(attempt.caseId)} は ${describeRemaining(target.before)} → ${describeRemaining(target.after)}`}
       </p>
       <p className={styles.muted}>
-        {bundled && "同梱の結果です（作者の手元で当てて流し直したもの）。"}
+        {bundled && "同梱の結果です（開発者の手元で当てて流し直したもの）。"}
         <code className={styles.location}>
           {applied.file}:{applied.line}
         </code>{" "}
         に当てて、新の環境で全部の入力を流し直し、<strong>当てる前の旧の出力</strong>（元のコード）と比べました。直ったかは差の有無で決まります（判定は呼んでいません）。言えるのは、この {verification.deltas.length} 件の入力についてだけです
       </p>
-      {earlier.length > 0 && <p className={styles.muted}>この写しには、前に当てた直し方も入っています（{earlier.length + 1} つ。上から順に当てました）</p>}
+      {earlier.length > 0 && <p className={styles.muted}>このコピーには、前に当てた直し方も入っています（{earlier.length + 1} つ。上から順に当てました）</p>}
       {[...earlier, edit].map((e, i) => (
         <pre key={i} className={styles.code}>
           {earlier.length > 0 && `${e.file}\n`}
@@ -82,7 +82,7 @@ function IntoTheSource({ where, patchUrl }: { where: string; patchUrl: string | 
   return (
     <div className={styles.nextSteps}>
       <p className={styles.nextStepsTitle}>元のソースに入れるには</p>
-      <p className={styles.muted}>かわりめが書き換えたのは写し（work/）だけです。元のソースは、いつもの手順（ブランチ・レビュー・コミット）で直してください。</p>
+      <p className={styles.muted}>かわりめが書き換えたのはコピー（work/）だけです。元のソースは、いつもの手順（ブランチ・レビュー・コミット）で直してください。</p>
       <ol className={styles.nextStepsList}>
         <li>
           元のソースの <code className={styles.location}>{where}</code> を開く
@@ -104,7 +104,7 @@ function IntoTheSource({ where, patchUrl }: { where: string; patchUrl: string | 
             </span>
           )}
         </li>
-        <li>もう一度「実行して判定する」を押す。毎回、元のソースから写しを作り直して動かすので、直した元のコードで比べ直せます。差なしになったら、確かめた記録を残して本番へ</li>
+        <li>もう一度「実行して判定する」を押す。毎回、元のソースからコピーを作り直して動かすので、直した元のコードで比べ直せます。差なしになったら、確かめた記録を残して本番へ</li>
       </ol>
     </div>
   );
@@ -117,7 +117,7 @@ function UndoRow({ onUndo, busy, bundled }: { onUndo: () => void; busy: boolean;
         元に戻す
       </button>
       <span className={styles.muted}>
-        {bundled ? "当てる前の同梱の結果に戻ります（何も動かしません）" : "work/ を原本から作り直し、当てる前の結果に戻します（プログラムも Claude も動かしません）"}
+        {bundled ? "当てる前の同梱の結果に戻ります（何も動かしません）" : "work/ を元のソースから作り直し、当てる前の結果に戻します（プログラムも Claude も動かしません）"}
       </span>
     </div>
   );

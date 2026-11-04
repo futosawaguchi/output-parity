@@ -51,8 +51,8 @@ export function ReportView({
         {
           {
             run: `${finishedAt} に実行`,
-            bundled: `同梱の結果（${finishedAt} に作者の手元で実行したもの。PHP も API キーも無しで見られます）`,
-            rejudge: `同梱の出力（作者の手元でプログラムが出したもの）を、${finishedAt} にこの環境の Claude が判定し直した結果です。`,
+            bundled: `同梱の結果（${finishedAt} に開発者の手元で実行したもの。PHP も API キーも無しで見られます）`,
+            rejudge: `同梱の出力（開発者の手元でプログラムが出したもの）を、${finishedAt} にこの環境の Claude が判定し直した結果です。`,
           }[report.origin]
         }
       </p>
