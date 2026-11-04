@@ -144,7 +144,7 @@ async function checkPlaces(source: string, workRoot: string, bundledDir: string)
   const work = await realpathOfPossiblyMissing(workRoot);
   if (contains(real, work) || contains(work, real)) {
     throw new ConfigError(
-      `source と道具の work/ が重なっています（source: ${source}）`,
+      `source とツールの work/ が重なっています（source: ${source}）`,
       "source には、このリポジトリの work/ を含まない・work/ の中でもないフォルダを指定してください",
     );
   }

@@ -150,7 +150,7 @@ function Candidate({ k, onApply, busy, cannotApply, replay }: { k: CauseCandidat
                   <li key={i}>{s}</li>
                 ))}
               </ol>
-              <p className={styles.muted}>1か所の書き換えでは直せないので、道具では当てません。直したあと「実行して判定する」で確かめられます。</p>
+              <p className={styles.muted}>1か所の書き換えでは直せないので、ツールでは当てません。直したあと「実行して判定する」で確かめられます。</p>
             </>
           )}
         </dd>

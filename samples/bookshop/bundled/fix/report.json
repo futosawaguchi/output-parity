@@ -3,7 +3,7 @@
   "origin": "run",
   "subjectId": "bookshop",
   "configName": "架空書店の注文管理 Web アプリ（PHP 7.4 → 8.5）",
-  "configDescription": "架空の書店の注文管理画面（samples/bookshop/app/。PHP・SQLite）を、道具が PHP 7.4 と PHP 8.5 の内蔵サーバで手元（127.0.0.1）に立て、注文の一覧と注文 30 件の画面、注文の書き出し（CSV）を開いて比べます。注文・書名・お客様は今回作った架空のものです。",
+  "configDescription": "架空の書店の注文管理画面（samples/bookshop/app/。PHP・SQLite）を、ツールが PHP 7.4 と PHP 8.5 の内蔵サーバで手元（127.0.0.1）に立て、注文の一覧と注文 30 件の画面、注文の書き出し（CSV）を開いて比べます。注文・書名・お客様は今回作った架空のものです。",
   "environments": {
     "old": {
       "label": "PHP 7.4",

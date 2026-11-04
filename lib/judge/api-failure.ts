@@ -41,7 +41,7 @@ export function classifyApiError(e: unknown, task = "判定"): JudgeFailure {
     }
     return {
       reason: `${task}の呼び出しが受け付けられませんでした（HTTP ${e.status ?? "不明"}）`,
-      nextStep: "この道具の不具合の可能性があります。runs/ の記録を添えて報告してください",
+      nextStep: "このツールの不具合の可能性があります。runs/ の記録を添えて報告してください",
       retryable: false,
     };
   }

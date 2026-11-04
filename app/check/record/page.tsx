@@ -34,7 +34,7 @@ async function Record({ searchParams }: Pick<PageProps<"/check/record">, "search
         <DocHeader subjectId={subjectId} kind="確かめた記録" />
         <div className={styles.problem}>
           <p>記録を作る結果が見つかりません</p>
-          <p className={styles.muted}>→ 道具の画面を読み込み直してください。サーバを起動し直した場合は npm run record で runs/ から作れます</p>
+          <p className={styles.muted}>→ ツールの画面を読み込み直してください。サーバを起動し直した場合は npm run record で runs/ から作れます</p>
         </div>
       </>
     );

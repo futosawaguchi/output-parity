@@ -367,7 +367,7 @@ function parseRequest(r: unknown, at: string, fail: (what: string) => never): We
   const path = r.path;
   // "//host" and "\\host" would name another host; whitespace and control characters have no place in a path.
   if (!path.startsWith("/") || path.startsWith("//") || /[\\\s\u0000-\u001f]/.test(path)) {
-    fail(`${at}.path は / で始まるパスにしてください（URL やホスト名は書けません。問い合わせるのは道具が立てた手元のサーバだけです）`);
+    fail(`${at}.path は / で始まるパスにしてください（URL やホスト名は書けません。問い合わせるのはツールが立てた手元のサーバだけです）`);
   }
   const method = r.method ?? "GET";
   if (method !== "GET" && method !== "POST") fail(`${at}.method は "GET" か "POST" にしてください`);
@@ -410,7 +410,7 @@ function parseRun(run: unknown, base: string, fail: (what: string) => never): Ru
     }
     const args = (env.args as string[] | undefined) ?? [];
     if (web && !args.some((a) => a.includes(PORT_PLACEHOLDER))) {
-      fail(`${at}.args に ${PORT_PLACEHOLDER} がありません（Web 型では道具が空いているポートを選んで渡します。例 ["-S", "127.0.0.1:${PORT_PLACEHOLDER}"]）`);
+      fail(`${at}.args に ${PORT_PLACEHOLDER} がありません（Web 型ではツールが空いているポートを選んで渡します。例 ["-S", "127.0.0.1:${PORT_PLACEHOLDER}"]）`);
     }
     environments[key] = { label: env.label, command: env.command, args, env: (env.env as Record<string, string> | undefined) ?? {} };
   }
