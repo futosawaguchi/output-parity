@@ -217,7 +217,12 @@ export function RunPanel() {
         />
       </header>
       <main className={styles.main}>
-        <p className={styles.appLead}>バージョンを上げる前と後の出力を比べ、違いを「読む人の判断が変わるか」で分けるツール</p>
+        <div className={styles.appLead}>
+          <p>バージョンを上げる前と後の出力を比べ、見るべき違いだけを選び出すツール</p>
+          <p className={styles.appLeadNote}>
+            印刷した日時が変わっただけなら「無害」。金額や在庫の表示が変わって、読んだ人が判断を誤るなら「壊れている」。
+          </p>
+        </div>
         {loading && <p className={styles.loading} role="status">読み込んでいます…</p>}
         {target && <TargetIntro target={target} showCases={!shown && !running} />}
         {!loading && (

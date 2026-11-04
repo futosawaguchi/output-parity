@@ -38,9 +38,13 @@
 }
 
 .appLead {
-  color: var(--muted);
-  font-size: 15px;
+  font-size: 16px;
   margin-bottom: 10px;
+}
+
+.appLeadNote {
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .loading {
