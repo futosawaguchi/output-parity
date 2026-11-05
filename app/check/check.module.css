@@ -565,9 +565,21 @@
 
 .compareColumns {
   --output-height: min(76vh, 860px);
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
+}
+
+/* A line in the middle of the gap, so the two cases read as two columns. It takes no space: the columns stay where they were. */
+.compareColumns::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--line);
 }
 
 .compareColumn {
