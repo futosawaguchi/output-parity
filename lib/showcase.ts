@@ -68,7 +68,7 @@ export function gate(pathname: string, signedIn: boolean): GateDecision {
 }
 
 function isOpen(pathname: string): boolean {
-  return pathname === "/login" || pathname === "/api/login" || pathname.startsWith("/_next/") || pathname === "/favicon.ico";
+  return pathname === "/login" || pathname === "/api/login" || pathname.startsWith("/_next/") || pathname === "/favicon.ico" || pathname === "/icon.svg";
 }
 
 async function hmacHex(key: string, text: string): Promise<string> {
