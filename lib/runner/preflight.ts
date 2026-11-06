@@ -24,13 +24,14 @@ export async function preflight(config: ParityConfig, root: string): Promise<voi
   if (!dir?.isDirectory()) {
     throw new ConfigError(`実行するディレクトリがありません: ${cwd}`, "パスを確認してください");
   }
-  for (const env of Object.values(run.environments)) {
+  for (const [side, env] of Object.entries(run.environments)) {
     try {
       await access(env.command, constants.X_OK);
     } catch {
+      // The path itself is not shown: in a bundled sample it is the author's machine, which means nothing to the reader.
       throw new CommandNotFoundError(
-        `設定された実行コマンドが見つからないか、実行できません: ${env.command}（${env.label}）`,
-        "設定ファイルの run.environments の command を確認してください",
+        `${env.label}（${side === "old" ? "旧" : "新"}）の実行コマンドが見つからないか、実行できません`,
+        `設定ファイルの run.environments.${side}.command に、このパソコンでの ${env.label} のフルパスを書いてください`,
       );
     }
   }

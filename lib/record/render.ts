@@ -88,8 +88,9 @@ function where(report: RunReport, createdAt: Date): Block[] {
         `実行: ${time(report.startedAt)} 〜 ${time(report.finishedAt)}（この記録を作ったのは ${time(createdAt.toISOString())}）`,
         `題材: ${report.configName}（${report.subjectId}）`,
         `説明: ${oneLine(report.configDescription)}`,
-        `旧: ${env.old.label}（\`${env.old.command}\`）`,
-        `新: ${env.new.label}（\`${env.new.command}\`）`,
+        // Labels only: a command is a path on the machine that ran it (the author's, for a bundled run).
+        `旧: ${env.old.label}`,
+        `新: ${env.new.label}`,
         `出力の形式: ${describeFormats(report)}`,
       ].map((text) => ({ text })),
     },
