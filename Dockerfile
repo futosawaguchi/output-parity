@@ -18,4 +18,6 @@ COPY --from=build --chown=node:node /app ./
 USER node
 EXPOSE 3000
 # One instance only: jobs are held in memory, and one job runs at a time (lib/jobs.ts).
-CMD ["sh", "-c", "exec node_modules/.bin/next start -H 0.0.0.0 -p ${PORT:-3000}"]
+# Without the code the app would fall back to the local check, which trusts the Host header; on a
+# public address anyone can send that header. So the container refuses to start instead.
+CMD ["sh", "-c", "if [ -z \"$(printf %s \"$KAWARIME_ACCESS_CODE\" | tr -d '[:space:]')\" ]; then echo 'KAWARIME_ACCESS_CODE が設定されていません。公開環境はアクセスコード無しでは起動しません → 置き場の環境変数に 12 文字以上の値を入れてください' >&2; exit 1; fi; exec node_modules/.bin/next start -H 0.0.0.0 -p ${PORT:-3000}"]
