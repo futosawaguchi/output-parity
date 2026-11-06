@@ -14,6 +14,8 @@ FROM node:22-slim
 WORKDIR /app
 ENV NODE_ENV=production
 # runs/ is written when Claude judges again or looks for a cause, so the app's own user owns the tree.
+# --chown covers only what is copied; /app itself, made by WORKDIR, would stay root's and runs/ could not be made.
+RUN chown node:node /app
 COPY --from=build --chown=node:node /app ./
 USER node
 EXPOSE 3000
