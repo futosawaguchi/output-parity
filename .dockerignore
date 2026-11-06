@@ -1,0 +1,18 @@
+# The image holds what GitHub holds, minus what the showcase never uses.
+.git
+node_modules
+.next
+.env
+.env.*
+docs
+.claude
+CLAUDE.md
+targets
+work
+runs
+**/vendor
+test
+scripts
+*.key
+*.pem
+secrets
