@@ -34,7 +34,7 @@ test("signed in, everything passes", () => {
 });
 
 test("not signed in: the sign-in page and what draws it are open, other pages go to it, the API refuses", () => {
-  for (const path of ["/login", "/api/login", "/_next/static/chunks/a.js", "/favicon.ico"]) assert.equal(gate(path, false), "pass", path);
+  for (const path of ["/login", "/api/login", "/_next/static/chunks/a.js", "/favicon.ico", "/icon.svg"]) assert.equal(gate(path, false), "pass", path);
   for (const path of ["/", "/check", "/check/sent/x", "/check/record", "/loginx"]) assert.equal(gate(path, false), "login", path);
   for (const path of ["/api/runs", "/api/rejudge", "/api/cause", "/api/apply", "/api/login/x"]) assert.equal(gate(path, false), "deny", path);
 });
