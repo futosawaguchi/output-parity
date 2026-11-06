@@ -11,6 +11,7 @@ import { runPipeline } from "@/lib/pipeline";
 import { preflight } from "@/lib/runner/preflight";
 import { listSubjects, loadSubject, subjectIdOf, whyNoApplying, type SubjectEntry } from "@/lib/subject";
 import { isFromOurPage } from "@/lib/same-origin";
+import { NOT_BUNDLED_IN_SHOWCASE, NOT_IN_SHOWCASE, readShowcase } from "@/lib/showcase";
 import { alreadyRunning, busyWithAnother, NO_BUNDLE, NO_KEY, notFromOurPage } from "../responses";
 import { tally } from "@/app/check/case-order";
 
@@ -25,6 +26,8 @@ export async function POST(request: Request): Promise<Response> {
   if (!isFromOurPage(request)) {
     return notFromOurPage();
   }
+  // The showcase runs no programs, whatever is installed (DESIGN 7-2 revised).
+  if (readShowcase(process.env)) return Response.json(NOT_IN_SHOWCASE, { status: 400 });
   const subjectId = subjectIdOf(((await request.json().catch(() => ({}))) as { subject?: unknown }).subject);
   let subject, adapters;
   try {
@@ -70,6 +73,7 @@ export async function GET(request: Request): Promise<Response> {
   let cannotAskClaude = null;
   const bundled = await loadBundledReport(root, subjectId);
   const noKey = process.env.ANTHROPIC_API_KEY ? null : NO_KEY;
+  const showcase = readShowcase(process.env) !== null;
   try {
     const subject = await loadSubject(root, subjectId);
     const { config } = subject;
@@ -81,13 +85,13 @@ export async function GET(request: Request): Promise<Response> {
       // Shown before anything is pressed (DESIGN 7-4e ④).
       claudeScope: describeScope(config),
     };
-    const cannotExecute = await whyCannotExecute(config);
+    const cannotExecute = showcase ? NOT_IN_SHOWCASE : await whyCannotExecute(config);
     const notJudging = whyNotSending(config, "judge");
     cannotApply = busyElsewhere ?? whyNoApplying(subject) ?? cannotExecute;
     // A run without judging needs no key.
     cannotRun = busyElsewhere ?? cannotExecute ?? (notJudging ? null : noKey);
     // Judging the bundled outputs again needs the key, not PHP.
-    cannotRejudge = bundled === null ? NO_BUNDLE : (notJudging ?? noKey);
+    cannotRejudge = bundled === null ? (showcase ? NOT_BUNDLED_IN_SHOWCASE : NO_BUNDLE) : (notJudging ?? noKey);
     // Looking for a cause needs the key and the source, not PHP.
     cannotAskClaude = whyNotSending(config, "cause") ?? noKey;
   } catch (e) {
@@ -96,6 +100,8 @@ export async function GET(request: Request): Promise<Response> {
   }
   return Response.json({
     subjectId,
+    // The page says it is the showcase, and what that means, on every subject.
+    showcase,
     subjects: await withLatest(await listSubjects(root)),
     job: job ? { jobId: job.jobId, status: job.status } : null,
     target,

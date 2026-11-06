@@ -52,6 +52,8 @@ export function RunPanel() {
   const [target, setTarget] = useState<Target | null>(null);
   // Why this machine cannot run the samples (no PHP, no key), as checked before any click.
   const [cannotRun, setCannotRun] = useState<Problem | null>(null);
+  // The public showcase for the judges (DESIGN 7-2 revised): programs never run there.
+  const [showcase, setShowcase] = useState(false);
   // The report on screen: the last finished job's, or the bundled one until then (DESIGN 7-2b).
   // Kept while a cause is looked for, so the page does not go blank under the reader.
   const [report, setReport] = useState<RunReport | null>(null);
@@ -106,6 +108,7 @@ export function RunPanel() {
         setSubjectId(body.subjectId);
         setTarget(body.target);
         setCannotRun(body.cannotRun);
+        setShowcase(body.showcase === true);
         if (body.bundled) setReport(body.bundled);
         setBundledFix(body.bundledFix);
         setCannotRejudge(body.cannotRejudge);
@@ -213,6 +216,11 @@ export function RunPanel() {
         />
       </header>
       <main className={styles.main}>
+        {showcase && (
+          <p className={styles.showcaseBand}>
+            審査用の公開環境（見本）です。Claude の判定と原因探しは、その場で動きます。旧と新の実行と、当てて確かめた結果は、手元で実行したときの記録です。
+          </p>
+        )}
         <div className={styles.appLead}>
           <p>バージョンを上げる前と後の出力を比べ、見るべき違いだけを選び出すツール</p>
           <p className={styles.appLeadNote}>
@@ -239,12 +247,20 @@ export function RunPanel() {
         {job?.status === "running" && job.kind !== "cause" && target && <RunningView job={job} cases={target.cases} />}
         {cannotRun && !job && (
           <p className={styles.notice}>
-            この環境ではまだ実行できません: {cannotRun.message}
+            {showcase ? "この公開環境では実行しません" : "この環境ではまだ実行できません"}: {cannotRun.message}
             <br />→ {cannotRun.nextStep}
             {!cannotRejudge && (
               <>
                 <br />
-                プログラムを動かせなくても、API キーがあれば「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま判定させられます。
+                {showcase
+                  ? "「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま Claude に判定させられます。"
+                  : "プログラムを動かせなくても、API キーがあれば「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま判定させられます。"}
+              </>
+            )}
+            {showcase && cannotRejudge && (
+              <>
+                <br />
+                {cannotRejudge.message}。{cannotRejudge.nextStep}
               </>
             )}
           </p>

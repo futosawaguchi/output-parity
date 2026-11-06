@@ -48,6 +48,15 @@
   font-size: 14px;
 }
 
+/* The showcase only: says on every subject that the runs are records and Claude is live. */
+.showcaseBand {
+  margin-bottom: 24px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--foreground);
+  background: var(--surface);
+  font-size: 15px;
+}
+
 .loading {
   color: var(--muted);
   padding: 40px 0;

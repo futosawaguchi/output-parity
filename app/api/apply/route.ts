@@ -7,6 +7,7 @@ import { applyAndVerify } from "@/lib/fix/apply-and-verify";
 import { currentJob, runningJob, startJob } from "@/lib/jobs";
 import { preflight } from "@/lib/runner/preflight";
 import { isFromOurPage } from "@/lib/same-origin";
+import { NOT_IN_SHOWCASE, readShowcase } from "@/lib/showcase";
 import { loadSubject, subjectIdOf, whyNoApplying } from "@/lib/subject";
 import { alreadyRunning, notFromOurPage } from "../responses";
 
@@ -21,6 +22,8 @@ const root = process.cwd();
  */
 export async function POST(request: Request): Promise<Response> {
   if (!isFromOurPage(request)) return notFromOurPage();
+  // The showcase runs no programs and writes no copy (DESIGN 7-2 revised).
+  if (readShowcase(process.env)) return Response.json(NOT_IN_SHOWCASE, { status: 400 });
   const body = (await request.json().catch(() => ({}))) as { subject?: unknown; caseId?: unknown; candidate?: unknown };
   const { caseId, candidate } = body;
   const subjectId = subjectIdOf(body.subject);
