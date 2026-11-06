@@ -192,7 +192,8 @@ export function RunPanel() {
     cannot: cannotAskClaude,
     find: (caseId) => {
       setAskedCause(caseId);
-      start("cause", { caseId });
+      // Which report the cause is for: this page's own job, or (without one) the bundled report.
+      start("cause", { caseId, fromJob: job?.status === "done" && job.report === shown ? job.jobId : undefined });
     },
     cannotApply,
     apply: (caseId, candidate) => start("verify", { caseId, candidate }),

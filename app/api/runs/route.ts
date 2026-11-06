@@ -62,7 +62,11 @@ export async function POST(request: Request): Promise<Response> {
 export async function GET(request: Request): Promise<Response> {
   await connection();
   const subjectId = subjectIdOf(new URL(request.url).searchParams.get("subject"));
-  const job = currentJob(subjectId);
+  // In the showcase a finished job is another judge's (or this one's from earlier): every page opened
+  // anew starts from the bundled run, so a failure (the spending limit reached) never spreads to the
+  // next judge. A running one is still followed, as the button would be refused while it runs.
+  const latest = currentJob(subjectId);
+  const job = readShowcase(process.env) && latest?.status !== "running" ? undefined : latest;
   // A job of another subject holds the programs and work/ until it ends.
   const elsewhere = runningJob();
   const busyElsewhere = elsewhere && elsewhere.subjectId !== subjectId ? busyWithAnother(elsewhere.subjectId) : null;
@@ -120,11 +124,12 @@ export async function GET(request: Request): Promise<Response> {
 /**
  * Each subject with the counts of its latest result: the finished job of this server when there is
  * one, the bundled run otherwise, nothing for a subject that has neither (shown as "not run yet").
+ * In the showcase always the bundled run, as on the page.
  */
 async function withLatest(subjects: SubjectEntry[]) {
   return Promise.all(
     subjects.map(async (s) => {
-      const job = currentJob(s.id);
+      const job = readShowcase(process.env) ? undefined : currentJob(s.id);
       const latest = job?.status === "done" ? job.report : await loadBundledReport(root, s.id);
       return { ...s, latest: latest ? tally(latest.cases) : null };
     }),

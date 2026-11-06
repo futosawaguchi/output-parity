@@ -7,6 +7,7 @@ import { addCause } from "@/lib/fix/add-cause";
 import { currentJob, runningJob, startJob } from "@/lib/jobs";
 import { SetupError } from "@/lib/errors";
 import { isFromOurPage } from "@/lib/same-origin";
+import { readShowcase } from "@/lib/showcase";
 import { loadSubject, subjectIdOf } from "@/lib/subject";
 import { alreadyRunning, NO_KEY, notFromOurPage } from "../responses";
 
@@ -20,13 +21,15 @@ const root = process.cwd();
  */
 export async function POST(request: Request): Promise<Response> {
   if (!isFromOurPage(request)) return notFromOurPage();
-  const body = (await request.json().catch(() => ({}))) as { subject?: unknown; caseId?: unknown };
+  const body = (await request.json().catch(() => ({}))) as { subject?: unknown; caseId?: unknown; fromJob?: unknown };
   const { caseId } = body;
   const subjectId = subjectIdOf(body.subject);
   const running = runningJob();
   if (running) return alreadyRunning(running, subjectId);
   const job = currentJob(subjectId);
-  const base = job?.status === "done" ? job.report : await loadBundledReport(root, subjectId);
+  // In the showcase the last job may be another judge's: use it only for the page that made it.
+  const ownJob = readShowcase(process.env) ? job?.jobId === body.fromJob : true;
+  const base = job?.status === "done" && ownJob ? job.report : await loadBundledReport(root, subjectId);
   if (typeof caseId !== "string" || !CASE_ID_PATTERN.test(caseId) || !base?.cases.some((c) => c.caseId === caseId)) {
     return Response.json({ message: "その入力は結果にありません", nextStep: "画面を読み込み直してください" }, { status: 400 });
   }
