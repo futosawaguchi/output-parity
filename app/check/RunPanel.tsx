@@ -10,10 +10,17 @@ import type { CauseActions } from "./CauseView";
 import { MANY_CASES, tally } from "./case-order";
 import { ReportView } from "./ReportView";
 import { RunningView } from "./RunningView";
+import { ShowcaseScope } from "./ShowcaseScope";
 import { SubjectPicker, type ListedSubject } from "./SubjectPicker";
 import { recordUrls } from "./urls";
 
 type Problem = { message: string; nextStep: string };
+
+/** Said both here and in the showcase, where there is no npm run dev to look at. */
+const SERVER_UNREACHABLE: Problem = {
+  message: "画面のサーバに接続できません",
+  nextStep: "少し待ってから、画面を読み込み直してください（ローカル環境なら npm run dev が動いているか確かめてください）",
+};
 
 /** What GET /api/runs says will be checked. Labels only; no local paths. */
 type Target = {
@@ -78,7 +85,7 @@ export function RunPanel() {
     stopPolling();
     const tick = async () => {
       const res = await fetch(`/api/runs/${jobId}`, { cache: "no-store" }).catch(() => null);
-      if (!res) return setProblem({ message: "画面のサーバに接続できません", nextStep: "npm run dev が動いているか確認してください" });
+      if (!res) return setProblem(SERVER_UNREACHABLE);
       const body = await res.json();
       if (!res.ok) {
         stopPolling();
@@ -119,7 +126,7 @@ export function RunPanel() {
       .catch(() => {
         if (mine !== loads.current) return;
         setLoading(false);
-        setProblem({ message: "画面のサーバに接続できません", nextStep: "npm run dev が動いているか確認してください" });
+        setProblem(SERVER_UNREACHABLE);
       });
   }, [poll]);
 
@@ -167,7 +174,7 @@ export function RunPanel() {
       if (!res.ok) return setProblem(body);
       poll(body.jobId);
     } catch {
-      setProblem({ message: "画面のサーバに接続できません", nextStep: "npm run dev が動いているか確認してください" });
+      setProblem(SERVER_UNREACHABLE);
     } finally {
       setStarting(null);
     }
@@ -180,6 +187,7 @@ export function RunPanel() {
   const replacing = (busy !== null && busy !== "cause") || (job?.status === "failed" && job.kind !== "cause");
   const shown = replacing ? null : report;
   const causeActions: CauseActions = {
+    showcase,
     busy: running,
     cannot: cannotAskClaude,
     find: (caseId) => {
@@ -217,9 +225,10 @@ export function RunPanel() {
       </header>
       <main className={styles.main}>
         {showcase && (
-          <p className={styles.showcaseBand}>
-            審査用の公開環境（見本）です。Claude の判定と原因探しは、その場で動きます。旧と新の実行と、当てて確かめた結果は、手元で実行したときの記録です。
-          </p>
+          <section className={styles.showcaseIntro}>
+            <h2 className={styles.showcaseTitle}>審査用の公開環境（見本）</h2>
+            <ShowcaseScope />
+          </section>
         )}
         <div className={styles.appLead}>
           <p>バージョンを上げる前と後の出力を比べ、見るべき違いだけを選び出すツール</p>
@@ -245,22 +254,23 @@ export function RunPanel() {
           </div>
         )}
         {job?.status === "running" && job.kind !== "cause" && target && <RunningView job={job} cases={target.cases} />}
-        {cannotRun && !job && (
+        {cannotRun && !job && showcase && (
+          <p className={styles.showcaseNotice}>
+            <b>「実行して判定する」は、この公開環境では押せません。</b>理由は上の「ここでできないこと」にあります。
+            <br />
+            {cannotRejudge
+              ? `${cannotRejudge.message}。${cannotRejudge.nextStep}`
+              : "Claude の判定は、「同梱の出力を Claude に判定し直させる」で、Claude を実際に呼んで確かめられます。"}
+          </p>
+        )}
+        {cannotRun && !job && !showcase && (
           <p className={styles.notice}>
-            {showcase ? "この公開環境では実行しません" : "この環境ではまだ実行できません"}: {cannotRun.message}
+            この環境ではまだ実行できません: {cannotRun.message}
             <br />→ {cannotRun.nextStep}
             {!cannotRejudge && (
               <>
                 <br />
-                {showcase
-                  ? "「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま Claude に判定させられます。"
-                  : "プログラムを動かせなくても、API キーがあれば「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま判定させられます。"}
-              </>
-            )}
-            {showcase && cannotRejudge && (
-              <>
-                <br />
-                {cannotRejudge.message}。{cannotRejudge.nextStep}
+                プログラムを動かせなくても、API キーがあれば「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま判定させられます。
               </>
             )}
           </p>

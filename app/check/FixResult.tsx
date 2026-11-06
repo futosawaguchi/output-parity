@@ -22,9 +22,11 @@ type Props = {
   bundled: boolean;
   /** The edit as a patch for the original source, to save. */
   patchUrl: string | null;
+  /** The public showcase: the steps into the source are for one's own machine. */
+  showcase: boolean;
 };
 
-export function FixResult({ attempt, labelOf, onUndo, busy, bundled, patchUrl }: Props) {
+export function FixResult({ attempt, labelOf, onUndo, busy, bundled, patchUrl, showcase }: Props) {
   const { edit, applied, verification } = attempt;
   const earlier: Edit[] = attempt.earlier ?? [];
   if (applied.kind === "refused") {
@@ -45,7 +47,7 @@ export function FixResult({ attempt, labelOf, onUndo, busy, bundled, patchUrl }:
         {target && `: ${labelOf(attempt.caseId)} は ${describeRemaining(target.before)} → ${describeRemaining(target.after)}`}
       </p>
       <p className={styles.muted}>
-        {bundled && "同梱の結果です（開発者の手元で当てて流し直したもの）。"}
+        {bundled && "同梱の結果です（開発者のローカル環境で当てて流し直したもの）。"}
         <code className={styles.location}>
           {applied.file}:{applied.line}
         </code>{" "}
@@ -67,7 +69,7 @@ export function FixResult({ attempt, labelOf, onUndo, busy, bundled, patchUrl }:
       </ul>
       {verification.outcome === "fixed" && <LeftOver cases={leftAsTheyWere(verification.deltas, attempt.caseId)} />}
       {verification.outcome === "fixed" && (
-        <IntoTheSource where={earlier.length > 0 ? [...new Set([...earlier, edit].map((e) => e.file))].join("・") : `${applied.file}:${applied.line}`} patchUrl={patchUrl} />
+        <IntoTheSource where={earlier.length > 0 ? [...new Set([...earlier, edit].map((e) => e.file))].join("・") : `${applied.file}:${applied.line}`} patchUrl={patchUrl} showcase={showcase} />
       )}
       <UndoRow onUndo={onUndo} busy={busy} bundled={bundled} />
     </section>
@@ -91,11 +93,11 @@ function LeftOver({ cases }: { cases: CaseDelta[] }) {
  * What to do next: the edit was made to the copy only. A person puts it into the original with
  * their usual steps, then runs again, which copies the original afresh and checks the real fix.
  */
-function IntoTheSource({ where, patchUrl }: { where: string; patchUrl: string | null }) {
+function IntoTheSource({ where, patchUrl, showcase }: { where: string; patchUrl: string | null; showcase: boolean }) {
   const patch = usePatch(patchUrl);
   return (
     <div className={styles.nextSteps}>
-      <p className={styles.nextStepsTitle}>元のソースに入れるには</p>
+      <p className={styles.nextStepsTitle}>元のソースに入れるには{showcase && "（ローカル環境での手順です）"}</p>
       <p className={styles.muted}>かわりめが書き換えたのはコピー（work/）だけです。元のソースは、いつもの手順（ブランチ・レビュー・コミット）で直してください。</p>
       <ol className={styles.nextStepsList}>
         <li>
@@ -152,7 +154,7 @@ function usePatch(url: string | null): PatchState {
         const body = await res.json().catch(() => null);
         setState({ kind: "unavailable", message: body?.message ?? `HTTP ${res.status}`, nextStep: body?.nextStep ?? "画面を読み込み直してください" });
       })
-      .catch(() => !cancelled && setState({ kind: "unavailable", message: "画面のサーバに接続できません", nextStep: "npm run dev が動いているか確認してください" }));
+      .catch(() => !cancelled && setState({ kind: "unavailable", message: "画面のサーバに接続できません", nextStep: "少し待ってから、画面を読み込み直してください（ローカル環境なら npm run dev が動いているか確かめてください）" }));
     return () => {
       cancelled = true;
     };

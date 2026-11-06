@@ -51,7 +51,7 @@ export function startJob(
       const error =
         e instanceof SetupError
           ? { message: e.message, nextStep: e.nextStep }
-          : { message: "予期しないエラーで止まりました", nextStep: "npm run dev を動かしているターミナルのログを確認してください" };
+          : { message: "予期しないエラーで止まりました", nextStep: "もう一度押してください。続くときは、サーバのログを確かめてください（ローカル環境なら npm run dev のターミナル）" };
       registry.current = { jobId, kind, subjectId, status: "failed", progress, error };
     },
   );

@@ -1,0 +1,45 @@
+/* The showcase's two boxes. No red or yellow: on this page those mean broken and needs review. */
+.scope {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.box {
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* What cannot be done is the part a judge must not miss: a darker edge and the grey ground. */
+.cannot {
+  border-color: var(--foreground);
+  background: var(--surface);
+}
+
+.boxTitle {
+  margin-bottom: 8px;
+  font-size: 17px;
+}
+
+.list {
+  padding-left: 1.3em;
+  font-size: 15px;
+}
+
+.list li + li {
+  margin-top: 8px;
+}
+
+.boxNote {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .scope {
+    grid-template-columns: 1fr;
+  }
+}

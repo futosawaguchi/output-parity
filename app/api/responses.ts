@@ -1,4 +1,5 @@
 import type { JobState } from "@/lib/jobs";
+import { readShowcase } from "@/lib/showcase";
 
 // Responses shared by the routes that start a job. Fixed wording, nothing from the SDK or the system.
 
@@ -15,10 +16,21 @@ export function notFromOurPage(): Response {
  */
 export function alreadyRunning(running: JobState, subjectId: string): Response {
   if (running.subjectId !== subjectId) return Response.json(busyWithAnother(running.subjectId), { status: 409 });
-  return Response.json({ message: "すでに実行中です", nextStep: "終わるまで待ってください", jobId: running.jobId }, { status: 409 });
+  const busy = inShowcase()
+    ? { message: "この題材で、いま Claude が動いています（ほかの方の操作かもしれません）", nextStep: "終わると、その結果がこの画面に出ます" }
+    : { message: "すでに実行中です", nextStep: "終わるまで待ってください" };
+  return Response.json({ ...busy, jobId: running.jobId }, { status: 409 });
 }
 
 /** Why nothing can start while a job of another subject runs: the programs and work/ are shared. */
 export function busyWithAnother(runningSubjectId: string): { message: string; nextStep: string } {
+  // In the showcase it is likely another judge, and the subject's id means nothing to them.
+  if (inShowcase()) {
+    return { message: "別の題材で、いま Claude が動いています（ほかの方の操作かもしれません。一度に動かせるのは1つです）", nextStep: "終わるまで待ってから、画面を読み込み直してください" };
+  }
   return { message: `別の題材「${runningSubjectId}」を実行中です（一度に動かせるのは1つです）`, nextStep: "終わるまで待ってから、画面を読み込み直してください" };
+}
+
+function inShowcase(): boolean {
+  return readShowcase(process.env) !== null;
 }

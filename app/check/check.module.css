@@ -48,11 +48,22 @@
   font-size: 14px;
 }
 
-/* The showcase only: says on every subject that the runs are records and Claude is live. */
-.showcaseBand {
-  margin-bottom: 24px;
-  padding: 10px 14px;
-  border-left: 3px solid var(--foreground);
+/* The showcase only: what can and cannot be tried here, on every subject (ShowcaseScope). */
+.showcaseIntro {
+  margin-bottom: 32px;
+}
+
+.showcaseTitle {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+/* Beside the run button that cannot be pressed in the showcase: said in black, not in grey. */
+.showcaseNotice {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--foreground);
+  border-radius: 6px;
   background: var(--surface);
   font-size: 15px;
 }
@@ -637,6 +648,20 @@
 
 .steps {
   padding-left: 1.4em;
+}
+
+/* The edit that cannot be applied here: the real button (unpressable), why, and the record in its place. */
+.applyBlocked {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--foreground);
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 15px;
+}
+
+.applyBlocked p {
+  margin-top: 10px;
 }
 
 .applyRow {

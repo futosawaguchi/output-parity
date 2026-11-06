@@ -24,6 +24,8 @@ export type CauseActions = {
   replay: { caseId: string; edit: Edit; show: () => void } | null;
   /** A cause being looked for: which case (null until the server has answered) and every step so far. */
   working: { caseId: string | null; steps: string[] } | null;
+  /** The public showcase (DESIGN 7-2 revised): nothing is ever applied there, so say so to a judge, not to a developer. */
+  showcase: boolean;
 };
 
 /** Where in the source a broken or doubtful case comes from (DESIGN 7-4). Asked for by a button. */
@@ -57,6 +59,7 @@ export function CauseSection({ c, subjectId, actions }: { c: CaseReport; subject
           busy={actions.busy}
           cannotApply={actions.cannotApply}
           replay={actions.replay?.caseId === c.caseId ? actions.replay : null}
+          showcase={actions.showcase}
         />
       ) : (
         <p className={styles.muted}>
@@ -85,7 +88,7 @@ function Trail({ steps }: { steps: string[] }) {
   );
 }
 
-type ApplyProps = { onApply: (candidate: number) => void; busy: boolean; cannotApply: Problem | null; replay: CauseActions["replay"] };
+type ApplyProps = { onApply: (candidate: number) => void; busy: boolean; cannotApply: Problem | null; replay: CauseActions["replay"]; showcase: boolean };
 
 function CauseResult({ cause, subjectId, ...apply }: { cause: CauseReport; subjectId: string } & ApplyProps) {
   if (cause.kind === "failed") {
@@ -118,7 +121,7 @@ function sameEdit(a: Edit, b: Edit): boolean {
   return a.file === b.file && a.oldText === b.oldText && a.newText === b.newText;
 }
 
-function Candidate({ k, onApply, busy, cannotApply, replay }: { k: CauseCandidate; onApply: () => void } & Omit<ApplyProps, "onApply">) {
+function Candidate({ k, onApply, busy, cannotApply, replay, showcase }: { k: CauseCandidate; onApply: () => void } & Omit<ApplyProps, "onApply">) {
   return (
     <li className={styles.finding}>
       <p className={styles.findingWhat}>
@@ -141,7 +144,7 @@ function Candidate({ k, onApply, busy, cannotApply, replay }: { k: CauseCandidat
                 {[...k.edit.oldText.split("\n").map((l) => `- ${l}`), ...k.edit.newText.split("\n").map((l) => `+ ${l}`)].join("\n")}
               </pre>
               <p className={k.editCheck === "once" ? styles.calcOk : styles.calcWrong}>{EDIT_CHECK[k.editCheck ?? "missing"](k.edit.file)}</p>
-              {k.editCheck === "once" && <ApplyRow onApply={onApply} busy={busy} cannotApply={cannotApply} replay={replay} />}
+              {k.editCheck === "once" && <ApplyRow onApply={onApply} busy={busy} cannotApply={cannotApply} replay={replay} showcase={showcase} />}
             </>
           ) : (
             <>
@@ -150,7 +153,9 @@ function Candidate({ k, onApply, busy, cannotApply, replay }: { k: CauseCandidat
                   <li key={i}>{s}</li>
                 ))}
               </ol>
-              <p className={styles.muted}>1か所の書き換えでは直せないので、ツールでは当てません。直したあと「実行して判定する」で確かめられます。</p>
+              <p className={styles.muted}>
+                1か所の書き換えでは直せないので、ツールでは当てません。直したあと{showcase ? "、ローカル環境の" : ""}「実行して判定する」で確かめられます。
+              </p>
             </>
           )}
         </dd>
@@ -160,27 +165,47 @@ function Candidate({ k, onApply, busy, cannotApply, replay }: { k: CauseCandidat
 }
 
 /** Apply the edit and run everything again, or, where that cannot run, look at the bundled result of doing so. */
-function ApplyRow({ onApply, busy, cannotApply, replay }: { onApply: () => void } & Omit<ApplyProps, "onApply">) {
-  if (cannotApply && replay) {
+function ApplyRow({ onApply, busy, cannotApply, replay, showcase }: { onApply: () => void } & Omit<ApplyProps, "onApply">) {
+  if (cannotApply) {
+    // The real step stays in sight, unpressable, so the record below reads as a stand-in for it, not as the way to use the tool.
     return (
-      <div className={styles.applyRow}>
-        <button className={styles.subButton} onClick={replay.show} disabled={busy}>
-          同梱の「当てて確かめた結果」を見る
+      <div className={styles.applyBlocked}>
+        <button className={styles.subButton} disabled>
+          コピー（work/）に直しを入れて、もう一度動かして確かめる
         </button>
-        <span className={styles.muted}>
-          この環境では当てて流し直せません（{cannotApply.message}）。開発者の手元で同じ直し方をコピー（work/）に入れ、全部の入力を流し直した結果を見せます
-        </span>
+        <p>
+          {showcase ? (
+            <>
+              <b>この公開環境では、直しを当てて確かめられません</b>（理由は上の「ここでできないこと」）。
+              <br />
+              ローカル環境では、このボタンでコピー（work/）に直しを入れ、全部の入力を動かし直して確かめます。
+            </>
+          ) : (
+            <>
+              <b>この環境では、直しを当てて確かめられません</b>（{cannotApply.message}）。
+              <br />→ {cannotApply.nextStep}
+            </>
+          )}
+        </p>
+        {replay ? (
+          <>
+            <p>{showcase ? "ここでは、" : "かわりに、"}開発者がローカル環境で同じように確かめたときの記録を見られます。</p>
+            <button className={styles.subButton} onClick={replay.show} disabled={busy}>
+              同梱の「当てて確かめた結果」を見る
+            </button>
+          </>
+        ) : (
+          showcase && <p>この直し方が効くかは、ローカル環境で確かめられます（README「全部動かす」）。</p>
+        )}
       </div>
     );
   }
   return (
     <div className={styles.applyRow}>
-      <button className={styles.subButton} onClick={onApply} disabled={busy || cannotApply !== null}>
+      <button className={styles.subButton} onClick={onApply} disabled={busy}>
         コピー（work/）に直しを入れて、もう一度動かして確かめる
       </button>
-      <span className={styles.muted}>
-        {cannotApply ? `いまは押せません: ${cannotApply.message} → ${cannotApply.nextStep}` : "元のソースは書き換えません"}
-      </span>
+      <span className={styles.muted}>元のソースは書き換えません</span>
     </div>
   );
 }

@@ -1,49 +1,27 @@
-.page {
-  padding: 0 56px 96px;
-}
-
-.top {
-  padding: 22px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.main {
-  max-width: 820px;
-  padding-top: 40px;
-}
-
+/* Inside the frame of /check (check.module.css): the title, the boxes, then the code. */
 .title {
-  font-size: 26px;
-  margin-bottom: 12px;
+  font-size: 22px;
+  margin-bottom: 8px;
 }
 
 .lead {
-  margin-bottom: 28px;
-}
-
-.section {
-  margin-bottom: 24px;
-}
-
-.section h2 {
-  font-size: 17px;
-  margin-bottom: 6px;
-}
-
-.section ul {
-  padding-left: 1.4em;
+  margin-bottom: 20px;
 }
 
 .note {
-  margin-top: 10px;
+  margin-top: 14px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 14px;
 }
 
+/* As wide as one of the two boxes above, so the edges line up. */
 .form {
-  margin-top: 36px;
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
+  width: calc(50% - 8px);
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
 }
 
 .label {
@@ -87,8 +65,8 @@
   color: var(--broken-fg);
 }
 
-@media (max-width: 640px) {
-  .page {
-    padding: 0 16px 64px;
+@media (max-width: 900px) {
+  .form {
+    width: auto;
   }
 }
