@@ -86,9 +86,9 @@ test("a verdict carried over an edit is said to be the one from before, not a ne
 
 test("it says where the outputs came from, and what it cannot say", () => {
   const bundled = renderRecord(reportOf([caseOf("a", [date], harmless)], { origin: "bundled" }), opts);
-  assert.match(bundled, /この手元では実行も判定もしていません/);
+  assert.match(bundled, /この環境では実行も判定もしていません/);
   const rejudged = renderRecord(reportOf([caseOf("a", [date], harmless)], { origin: "rejudge" }), opts);
-  assert.match(rejudged, /この手元では実行していません。判定だけを/);
+  assert.match(rejudged, /この環境では実行していません。判定だけを/);
   for (const md of [bundled, rejudged]) {
     assert.match(md, /試していない入力については、何も言えません/);
     assert.match(md, /本番で保証したことにはなりません/);
