@@ -138,3 +138,9 @@ test("each item of what was sent names its file for the page to link to, and the
   assert.deepEqual(items.filter((i) => i.sent).map((i) => i.sent), ["j.txt"]);
   assert.doesNotMatch(renderRecord(report, opts), /送った全文を見る/);
 });
+
+test("the environments are named by their labels; the commands (paths on the machine that ran them) are left out", () => {
+  const md = renderRecord(reportOf([caseOf("a", [date], harmless)]), opts);
+  assert.match(md, /旧: PHP 7\.4/);
+  assert.doesNotMatch(md, /php7|php8/);
+});

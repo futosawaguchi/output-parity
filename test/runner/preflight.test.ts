@@ -40,6 +40,13 @@ test("a missing interpreter is said first: it is the first thing to fix", async 
   await assert.rejects(preflight(config, dir), CommandNotFoundError);
 });
 
+test("a missing interpreter is named by its label and setting, not by the path (a bundled sample's path is the author's)", async () => {
+  const { dir, config } = await setUp("/no/such/php");
+  await assert.rejects(preflight(config, dir), (e: Error & { nextStep?: string }) =>
+    e instanceof CommandNotFoundError && !e.message.includes("/no/such/php") && /x（旧）/.test(e.message) && /run\.environments\.old\.command/.test(e.nextStep ?? ""),
+  );
+});
+
 test("run.needs stays inside the source", () => {
   const env = { label: "x", command: "/bin/x" };
   const settings = (needs: string[]) => ({
