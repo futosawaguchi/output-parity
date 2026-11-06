@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { SetupError } from "./errors";
+import { describeFailure } from "./job-failure";
 import type { ProgressEvent, RunReport } from "./pipeline";
 
 // Server-side "a run is in progress" (DESIGN 5: the second of three layers against double
@@ -45,13 +46,10 @@ export function startJob(
       registry.current = { jobId, kind, subjectId, status: "done", progress, report };
     },
     (e: unknown) => {
-      // Setup problems carry their own wording (DESIGN 7-6 B). Anything else is a bug in this
-      // tool: log it here and show a fixed message, so no SDK or system detail reaches the page.
+      // Setup problems carry their own wording (DESIGN 7-6 B). Anything else is logged here, for
+      // the details the page does not show (lib/job-failure.ts).
       if (!(e instanceof SetupError)) console.error(e);
-      const error =
-        e instanceof SetupError
-          ? { message: e.message, nextStep: e.nextStep }
-          : { message: "予期しないエラーで止まりました", nextStep: "もう一度押してください。続くときは、サーバのログを確かめてください（ローカル環境なら npm run dev のターミナル）" };
+      const error = describeFailure(e, process.cwd());
       registry.current = { jobId, kind, subjectId, status: "failed", progress, error };
     },
   );
