@@ -41,7 +41,7 @@ export async function screenChecks(results: Results, base: string, browser: Brow
         // The record streams in after the page's frame.
         await waitForText(other, "この記録で言えないこと", 30_000);
         const text = await other.locator("body").innerText();
-        for (const want of ["このままでは移せません", "この記録で言えないこと", "18 種類（3 件の入力で）", "この手元では実行も判定もしていません"]) {
+        for (const want of ["このままでは移せません", "この記録で言えないこと", "18 種類（3 件の入力で）", "この環境では実行も判定もしていません"]) {
           expect(text.includes(want), `記録のページに「${want}」がありません`);
         }
         expect(!(await other.content()).includes("/Users/"), "記録のページにホームのパスがあります");

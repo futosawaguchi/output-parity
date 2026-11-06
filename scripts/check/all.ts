@@ -45,7 +45,7 @@ async function main(): Promise<void> {
       return tally(report);
     }),
     results.step("4-", "画面のサーバを組み立てる（ポート 3100）", async () => void (await buildApp(root))),
-    results.step("6-", "コミット済みの状態を clone して npm ci と build（審査員の手元）", async () => {
+    results.step("6-", "コミット済みの状態を clone して npm ci と build（審査員のローカル環境）", async () => {
       await rm(cloneDir, { recursive: true, force: true });
       await run("git", ["clone", "-q", root, cloneDir]);
       await run("npm", ["ci", "--silent"], { cwd: cloneDir });

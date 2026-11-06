@@ -162,7 +162,7 @@ async function requestPage(
 export function pageUrl(port: number, path: string): URL {
   const url = new URL(path, `http://${HOST}:${port}`);
   if (url.protocol !== "http:" || url.hostname !== HOST || url.port !== String(port)) {
-    throw new ConfigError(`手元のサーバ以外を指すパスです: ${path}`, "設定の request.path は / で始まるパスだけにしてください");
+    throw new ConfigError(`ツールがローカル環境に立てたサーバ以外を指すパスです: ${path}`, "設定の request.path は / で始まるパスだけにしてください");
   }
   return url;
 }

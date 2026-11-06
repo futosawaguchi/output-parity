@@ -367,7 +367,7 @@ function parseRequest(r: unknown, at: string, fail: (what: string) => never): We
   const path = r.path;
   // "//host" and "\\host" would name another host; whitespace and control characters have no place in a path.
   if (!path.startsWith("/") || path.startsWith("//") || /[\\\s\u0000-\u001f]/.test(path)) {
-    fail(`${at}.path は / で始まるパスにしてください（URL やホスト名は書けません。問い合わせるのはツールが立てた手元のサーバだけです）`);
+    fail(`${at}.path は / で始まるパスにしてください（URL やホスト名は書けません。問い合わせるのはツールがローカル環境（127.0.0.1）に立てたサーバだけです）`);
   }
   const method = r.method ?? "GET";
   if (method !== "GET" && method !== "POST") fail(`${at}.method は "GET" か "POST" にしてください`);
