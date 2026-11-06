@@ -81,7 +81,7 @@ export async function withoutPhpFlows(results: Results, base: string, browser: B
     await Promise.all(files.map((f, i) => writeFile(f, originals[i].replaceAll("/opt/homebrew/opt/php@7.4/bin/php\"", "/opt/homebrew/opt/php@7.4/bin/php-missing\""))));
     await results.step("4h", "php が無いとき（見積書）: 実行は押せず、同梱の当てて確かめた結果を見て戻せる", async () => {
       await page.goto(`${base}/check`);
-      await waitForText(page, "この環境ではまだ実行できません", 30_000);
+      await waitForText(page, "この環境では「実行して判定する」を押せません", 30_000);
       expect(await page.getByRole("button", { name: "実行して判定する" }).isDisabled(), "実行ボタンが押せてしまいます");
       await replay(page, /入力 C/, "直りました: 入力 C", "4 件: 壊れている 1・無害 3", "4 件: 壊れている 2・要確認 1・無害 1");
     });

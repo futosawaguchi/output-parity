@@ -256,7 +256,7 @@ export function RunPanel() {
         )}
         {job?.status === "running" && job.kind !== "cause" && target && <RunningView job={job} cases={target.cases} />}
         {cannotRun && !job && showcase && (
-          <p className={styles.showcaseNotice}>
+          <p className={styles.blockedNotice}>
             <b>「実行して判定する」は、この公開環境では押せません。</b>理由は上の「ここでできないこと」にあります。
             <br />
             {cannotRejudge
@@ -265,13 +265,13 @@ export function RunPanel() {
           </p>
         )}
         {cannotRun && !job && !showcase && (
-          <p className={styles.notice}>
-            この環境ではまだ実行できません: {cannotRun.message}
+          <p className={styles.blockedNotice}>
+            <b>この環境では「実行して判定する」を押せません</b>（{cannotRun.message}）
             <br />→ {cannotRun.nextStep}
             {!cannotRejudge && (
               <>
                 <br />
-                プログラムを動かせなくても、API キーがあれば「同梱の出力を Claude に判定し直させる」で、同梱の出力をいま判定させられます。
+                プログラムを動かせなくても、「同梱の出力を Claude に判定し直させる」で、Claude を実際に呼んで確かめられます。
               </>
             )}
           </p>

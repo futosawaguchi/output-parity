@@ -58,8 +58,8 @@
   font-size: 18px;
 }
 
-/* Beside the run button that cannot be pressed in the showcase: said in black, not in grey. */
-.showcaseNotice {
+/* Beside the run button that cannot be pressed (the showcase, or no PHP here): said in black, not in grey. */
+.blockedNotice {
   margin-top: 14px;
   padding: 12px 16px;
   border: 1px solid var(--foreground);
