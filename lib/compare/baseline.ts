@@ -10,12 +10,16 @@ import { diffLines, type Hunk } from "./line-diff";
 
 /**
  * Which parts of an unstable line may differ: per token, or the whole line when it cannot tell.
- * A number means only that many leading characters of the token may differ (see changedTokens).
+ * A pair [from, to] means only the characters from..to-1 of the token may differ (see changedPart).
  */
-export type Unstable = (boolean | number)[] | "whole";
+export type Unstable = (boolean | [number, number])[] | "whole";
 
-/** How many unchanged characters must follow a change inside a token before they are kept. */
+/** How many unchanged digits must follow a change inside a token before they are kept. */
 const KEPT_TAIL = 4;
+
+/** Half-width and full-width digits, and what a time puts between them. */
+const DIGIT = /[0-9０-９]/;
+const TIME = /[0-9０-９:：.．]/;
 
 /**
  * A line in pieces: a run of ASCII letters and digits with the separators inside it
@@ -27,9 +31,12 @@ const KEPT_TAIL = 4;
  * timestamp that changes on every run must not carry the amount next to it into the set-aside
  * part. "72,000" becomes three pieces; only the pieces that changed are set aside, so a changed
  * amount still reaches the judge.
+ *
+ * Full-width letters and digits are read the same way: Japanese forms often write
+ * "合計７２，０００円（１０：００：０１発行）", and the amount and the time must be pieces of their own.
  */
 export function tokens(line: string): string[] {
-  return line.match(/[A-Za-z0-9][A-Za-z0-9.:\-/+'_]*|\s+|[^A-Za-z0-9\s]+/g) ?? [];
+  return line.match(/[A-Za-z0-9Ａ-Ｚａ-ｚ０-９][A-Za-z0-9Ａ-Ｚａ-ｚ０-９.:\-/+'_．：－／＋＿]*|\s+|[^A-Za-z0-9Ａ-Ｚａ-ｚ０-９\s]+/g) ?? [];
 }
 
 /** Lines in `current` that are not reproduced by `repeat` (same environment, same input), and how. */
@@ -48,22 +55,29 @@ function changedTokens(a: string, b: string): Unstable {
   const ta = tokens(a);
   const tb = tokens(b);
   if (ta.length !== tb.length) return "whole";
-  return ta.map((t, i) => (t === tb[i] ? false : changedHead(t, tb[i])));
+  return ta.map((t, i) => (t === tb[i] ? false : changedPart(t, tb[i])));
 }
 
 /**
- * A fixed-width record has no separator between its fields ("H20261107100001" then a count and an
- * amount), so a timestamp and an amount are one token. When the two runs differ only in the head
- * of such a token and agree on a tail of KEPT_TAIL characters or more, only the head up to the
- * last change is set aside and the tail is still compared. Everything before that change is set
- * aside with it, since a timestamp's higher digits can roll over between the old and new runs.
- * A shorter agreeing tail can be chance (two random ids ending alike), so the whole token goes.
+ * The part of a token that changes on every run, when the rest of it can still be compared.
+ * A token can hold more than a timestamp: a fixed-width record has no separator between its
+ * fields ("H20261107100001" then a count and an amount), and a file name holds an amount before
+ * its time ("estimate_72000_20261107100001.pdf"). So when the two runs differ in digits only:
+ * - the part set aside starts where the changed digits start, taken back over the digits and
+ *   time separators before them, since a time's higher digits can roll over between old and new;
+ * - it ends at the last changed digit, when what follows starts with something other than a digit
+ *   or runs KEPT_TAIL characters or more. A short run of digits there can agree by chance.
+ * A token whose letters change too (a random id) is set aside whole: its unchanged letters are chance.
  */
-function changedHead(a: string, b: string): number | true {
+function changedPart(a: string, b: string): [number, number] | true {
   if (a.length !== b.length) return true;
-  let last = a.length - 1;
-  while (a[last] === b[last]) last--;
-  return a.length - (last + 1) >= KEPT_TAIL ? last + 1 : true;
+  const changed = [...a].flatMap((c, i) => (c === b[i] ? [] : [i]));
+  if (changed.some((i) => !DIGIT.test(a[i]) || !DIGIT.test(b[i]))) return true;
+  let from = changed[0];
+  while (from > 0 && TIME.test(a[from - 1])) from--;
+  const after = changed[changed.length - 1] + 1;
+  const to = after === a.length || (DIGIT.test(a[after]) && a.length - after < KEPT_TAIL) ? a.length : after;
+  return from === 0 && to === a.length ? true : [from, to];
 }
 
 /**
@@ -78,10 +92,11 @@ export function sameApartFromUnstable(oldLine: string, newLine: string, unstable
   return to.length === tn.length && tn.every((t, i) => samePiece(to[i], t, unstable[i]));
 }
 
-function samePiece(oldPiece: string, newPiece: string, unstable: boolean | number): boolean {
+function samePiece(oldPiece: string, newPiece: string, unstable: boolean | [number, number]): boolean {
   if (unstable === true) return true;
   if (unstable === false) return oldPiece === newPiece;
-  return oldPiece.length === newPiece.length && oldPiece.slice(unstable) === newPiece.slice(unstable);
+  const [from, to] = unstable;
+  return oldPiece.length === newPiece.length && oldPiece.slice(0, from) === newPiece.slice(0, from) && oldPiece.slice(to) === newPiece.slice(to);
 }
 
 export type Change = Hunk & {
