@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, realpath, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { hiddenBy } from "../../lib/fix/read-scope";
+import { ALWAYS_HIDDEN, hiddenBy } from "../../lib/fix/read-scope";
 import { listDir, readLines, searchText } from "../../lib/fix/source-tools";
 
 /**
@@ -72,4 +72,10 @@ test("patterns work like .gitignore: names anywhere, paths from the root, * with
   assert.equal(hiddenBy("storage/logs/x/y.log", ["storage/**/*.log"]), "storage/**/*.log");
   assert.equal(hiddenBy("storage/app.php", ["storage/*.log"]), null);
   assert.equal(hiddenBy("app.php", ["*.key"]), null);
+});
+
+test("hidden names are matched ignoring case, since server.KEY is server.key on many disks", () => {
+  assert.equal(hiddenBy("certs/server.KEY", ALWAYS_HIDDEN), "*.key");
+  assert.equal(hiddenBy("App/.ENV", ALWAYS_HIDDEN), ".env");
+  assert.equal(hiddenBy("Config/Local.php", ["config/local.php"]), "config/local.php");
 });
