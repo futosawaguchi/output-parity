@@ -48,5 +48,5 @@ PHP 7.4・8.5 と Python 3.10・3.12 は、同梱の題材を作ったときの�
 ```sh
 npm run check          # テスト・型・lint と、題材を Claude なしで流して期待値と照らす（約1分）
 npm run check:screen   # 組み立てた画面を Google Chrome で動かして確かめる（約1分）
-npm run check:all      # 上の全部と、Claude を呼ぶ往復・PHP が無いとき・TCPDF・clone した状態（約5分。Claude を6回ほど呼ぶ）
+npm run check:all      # 上の全部と、Claude を呼ぶ往復・PHP が無いとき・TCPDF・clone した状態（約6分。Claude を6回ほど呼ぶ）
 ```
