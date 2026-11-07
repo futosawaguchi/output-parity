@@ -1,4 +1,4 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { classifyApiError, type JudgeFailure } from "./api-failure";
 import { JudgeResponseSchema, type JudgeResponse } from "./schema";
@@ -32,6 +32,12 @@ export async function askClaude(client: Anthropic, system: string, user: string)
       { timeout: 180_000 },
     );
   } catch (e) {
+    if (isUnreadableAnswer(e)) {
+      return {
+        kind: "failed",
+        failure: { reason: "判定の返事を読み取れませんでした（決めた形になっていませんでした）", nextStep: "もう一度実行してください。続く場合は人が確認してください", retryable: true },
+      };
+    }
     return { kind: "failed", failure: classifyApiError(e) };
   }
 
@@ -54,4 +60,13 @@ export async function askClaude(client: Anthropic, system: string, user: string)
     };
   }
   return { kind: "answered", response: message.parsed_output, model: message.model };
+}
+
+/**
+ * The SDK throws its base error, not an API error, when Claude's answer does not fit the schema
+ * (cut short, malformed). That is about the answer, not a bug in this tool, so the case fails like
+ * any other call and becomes "needs review" instead of stopping the whole run.
+ */
+export function isUnreadableAnswer(e: unknown): boolean {
+  return e instanceof Anthropic.AnthropicError && !(e instanceof Anthropic.APIError);
 }

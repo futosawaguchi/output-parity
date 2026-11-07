@@ -4,7 +4,7 @@ import type { BetaMessage } from "@anthropic-ai/sdk/resources/beta";
 import { z } from "zod";
 import type { EnvironmentSummaries } from "../config";
 import { classifyApiError } from "../judge/api-failure";
-import { JUDGE_MODEL } from "../judge/call-claude";
+import { isUnreadableAnswer, JUDGE_MODEL } from "../judge/call-claude";
 import type { CaseReport, ProgressEvent } from "../pipeline";
 import { redactSecrets } from "../redact";
 import type { SentRecord, SentRecorder } from "../sent-log";
@@ -67,9 +67,16 @@ export async function locateCause(client: Anthropic, c: CaseReport, opts: CauseO
     transcript.push(`--- ${label}\n${r.text}`);
     return r.text;
   };
-  const report = await askForCause(client, c, opts, send);
-  const sent = await opts.record?.({ caseId: c.caseId, purpose: "cause", text: transcript.join("\n\n"), masked, maskedKinds: [...maskedKinds] });
-  return { ...report, sent };
+  // What was sent is kept even when looking stops with an error: it has already left the machine.
+  const record = () => opts.record?.({ caseId: c.caseId, purpose: "cause", text: transcript.join("\n\n"), masked, maskedKinds: [...maskedKinds] });
+  let report: CauseReport;
+  try {
+    report = await askForCause(client, c, opts, send);
+  } catch (e) {
+    await record();
+    throw e;
+  }
+  return { ...report, sent: await record() };
 }
 
 async function askForCause(client: Anthropic, c: CaseReport, opts: CauseOptions, send: (label: string, text: string) => string): Promise<CauseReport> {
@@ -138,6 +145,7 @@ async function askForCause(client: Anthropic, c: CaseReport, opts: CauseOptions,
     if (e instanceof Anthropic.APIUserAbortError) {
       return failed(`原因探しが ${TIME_LIMIT_MS / 60000} 分で終わりませんでした`, "もう一度「原因を探す」を押してください");
     }
+    if (isUnreadableAnswer(e)) return failed("原因探しの返事を読み取れませんでした（決めた形になっていませんでした）", "もう一度「原因を探す」を押してください");
     const f = classifyApiError(e, "原因探し");
     return { kind: "failed", reason: f.reason, nextStep: f.nextStep };
   }
