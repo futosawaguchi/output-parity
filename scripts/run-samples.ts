@@ -52,6 +52,7 @@ async function main(): Promise<void> {
     }
     printComparison(c.comparison);
     if (c.verdict) printVerdict(c.verdict);
+    else console.log(`  判定: なし — ${whyNoVerdict(report.judgeHeld !== undefined)}`);
     console.log();
   }
   if (report.judgeHeld) {
@@ -92,6 +93,13 @@ function printComparison(c: Comparison): void {
       for (const u of [...c.old.unreadable, ...c.new.unreadable]) console.log(`    ⚠️ 読めなかった部分: ${u}`);
     }
   }
+}
+
+// A case left without a verdict says so, so it never reads as if the judging silently skipped it.
+function whyNoVerdict(held: boolean): string {
+  if (held) return "Claude に送らずに止めました（下の ⚠️ を見てください）";
+  if (!withJudge) return "Claude を呼ばずに流しました（判定させるなら --judge を付ける）";
+  return "判定されていません";
 }
 
 function printVerdict(v: CaseVerdict): void {
