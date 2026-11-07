@@ -80,8 +80,8 @@ PHP と API キーが無くても動きます。Node.js 22.13 以上が要りま
    npm ci
    npm run dev
    ```
-2. ブラウザで http://127.0.0.1:3000/check を開きます。同梱の結果が最初から出ます
-3. Claude を呼ぶ機能（判定し直し・原因を探す）を使うときだけ、API キーを入れます。`cp .env.example .env` で写し、`.env` の `ANTHROPIC_API_KEY=` のあとにキーを書いて、`npm run dev` を起動し直します。`.env` はコミットされない設定になっています。キーはほかのファイルに書かないでください
+2. ブラウザで http://127.0.0.1:3000/check を開きます。同梱の結果が最初から出ます（TCPDF の65本は、[guide/setup.md](guide/setup.md) の手順で取ってきて動かしたときに出ます）
+3. Claude を呼ぶ機能（実行して判定する・判定し直し・原因を探す）を使うときだけ、API キーを入れます。`cp .env.example .env` で写し、`.env` の `ANTHROPIC_API_KEY=` のあとにキーを書いて、`npm run dev` を起動し直します。`.env` はコミットされない設定になっています。キーはほかのファイルに書かないでください
 
 旧と新を実際に動かす手順は [guide/setup.md](guide/setup.md) にあります。
 
