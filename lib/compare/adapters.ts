@@ -26,6 +26,7 @@ const adapters: Record<string, (encoding: string) => Adapter> = {
       "PDF から取り出したテキスト。先頭に文書のメタデータ（meta・xmp・id で始まる行）、" +
       "続いてページごとに「--- page N ---」の行と本文の行が上から順に並ぶ。" +
       "文字の位置（座標）は捨てているので、同じ高さにある文字は1行にまとめてある。" +
+      "「form」で始まる行はフォームの欄（AcroForm）の名前と値で、選ぶ欄には（選択肢 …）として選べる選択肢を並べてある。" +
       "各ページの最後の「layout」で始まる行は、文字以外の見た目（用紙の大きさ・画像の数・文字のはみ出し）を表す。",
   }),
   text: (encoding) => ({
@@ -36,7 +37,7 @@ const adapters: Record<string, (encoding: string) => Adapter> = {
     extract: (path) => extractHtml(path, encoding),
     description:
       "HTML の画面の文字を上から順に行にしたもの（隠された要素の中の文字も含む）。段落や見出しなどのまとまりごとに1行、" +
-      "表は1つの行（tr）を1行にしてセルを「 | 」で区切る。「[input …]」「[select …]」「[textarea …]」「[checkbox …]」の形の部分はフォームの値（hidden を含む。select は選ばれている選択肢の文字）。" +
+      "表は1つの行（tr）を1行にしてセルを「 | 」で区切る。「[input …]」「[select …]」「[textarea …]」「[checkbox …]」の形の部分はフォームの値（hidden を含む。select は選ばれている選択肢の文字と、（選択肢 …）として選べる選択肢の文字）。" +
       "「title:」で始まる行はページの題名。最後の「layout」で始まる行はツールが付けた行で、画像（img）の数を表す。script・style は除いてあり、色や配置などの見た目と、リンク先・選択肢の value・押せるかどうか（disabled）などの属性は見ていない。",
   }),
 };
