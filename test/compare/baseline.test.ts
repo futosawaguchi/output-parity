@@ -108,3 +108,25 @@ test("in a fixed-width record, a timestamp whose minute rolls over between old a
   const changes = applyBaseline(diffLines([record("20261107095958", "0000057000")], [record("20261107100001", "0000057000")]), unstable);
   assert.equal(changes[0].explainedByBaseline, true);
 });
+
+test("full-width digits are pieces too, so a full-width amount next to a full-width time is not hidden", () => {
+  const unstable = unstableLines(["合計金額５７，０００円（１０：００：０５発行）"], ["合計金額５７，０００円（１０：００：０９発行）"]);
+  const changes = applyBaseline(diffLines(["合計金額７２，０００円（１０：００：０１発行）"], ["合計金額５７，０００円（１０：００：０５発行）"]), unstable);
+  assert.equal(changes[0].explainedByBaseline, false);
+});
+
+test("an amount before a time in the same piece is not hidden (a file name)", () => {
+  const unstable = unstableLines(["estimate_57000_20261107100005.pdf"], ["estimate_57000_20261107100007.pdf"]);
+  assert.equal(applyBaseline(diffLines(["estimate_72000_20261107100001.pdf"], ["estimate_57000_20261107100005.pdf"]), unstable)[0].explainedByBaseline, false);
+  assert.equal(applyBaseline(diffLines(["estimate_57000_20261107095958.pdf"], ["estimate_57000_20261107100005.pdf"]), unstable)[0].explainedByBaseline, true);
+});
+
+test("a short value right after a time is kept when something other than a digit separates them", () => {
+  const unstable = unstableLines(["D20261107100005-2"], ["D20261107100007-2"]);
+  assert.equal(applyBaseline(diffLines(["D20261107100001-3"], ["D20261107100005-2"]), unstable)[0].explainedByBaseline, false);
+});
+
+test("a random id whose letters change is set aside whole, however many characters agree by chance", () => {
+  const unstable = unstableLines(["uuid:a2bd23ec-4862"], ["uuid:a7c1f5d0-4862"]);
+  assert.equal(applyBaseline(diffLines(["uuid:9f00e1b2-77aa"], ["uuid:a2bd23ec-4862"]), unstable)[0].explainedByBaseline, true);
+});
