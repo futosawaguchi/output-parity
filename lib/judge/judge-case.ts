@@ -141,6 +141,7 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
   const findings = [
     ...fromClaude(answer.response, ids).map((f) => reviewByMachine(f, quotable)),
     ...unanswered(answer.response, ids, kept),
+    ...maskedAway(ids, kept),
     // What the machine knows outside the compared text holds whatever Claude says about the text.
     ...(await machineFloors(c, ctx, true)),
   ];
@@ -194,6 +195,19 @@ function unanswered(response: JudgeResponse, ids: string[], kept: Change[]): Fin
     covered.has(id)
       ? []
       : [finding("needs_review", `変更 ${id} に判定が返ってきませんでした`, "Claude の返事にこの変更が含まれていませんでした", [...kept[i].oldLines, ...kept[i].newLines], "変更された行", [id])],
+  );
+}
+
+/**
+ * Changes whose difference was masked away before sending: a value that looks like a key changed
+ * on both sides, so Claude saw the same *** twice. Whatever Claude said, it did not see this change.
+ */
+function maskedAway(ids: string[], kept: Change[]): Finding[] {
+  const masked = (lines: string[]) => redactSecrets(lines.join("\n")).text;
+  return ids.flatMap((id, i) =>
+    masked(kept[i].oldLines) === masked(kept[i].newLines)
+      ? [finding("needs_review", `変更 ${id} は、伏せ字にすると旧と新が同じになり、Claude は違いを見ていません`, "鍵らしい値は *** に伏せてから送るので、伏せた部分だけが変わった変更は判定できません", [...kept[i].oldLines, ...kept[i].newLines], "変更された行", [id])]
+      : [],
   );
 }
 
