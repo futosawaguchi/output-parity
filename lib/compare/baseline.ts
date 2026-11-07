@@ -8,8 +8,14 @@ import { diffLines, type Hunk } from "./line-diff";
 // timestamp next to an amount ("発行 10:00:01 合計 72,000"): the timestamp changes on every run,
 // the amount does not, and a changed amount must still reach the judge.
 
-/** Which parts of an unstable line may differ: per token, or the whole line when it cannot tell. */
-export type Unstable = boolean[] | "whole";
+/**
+ * Which parts of an unstable line may differ: per token, or the whole line when it cannot tell.
+ * A number means only that many leading characters of the token may differ (see changedTokens).
+ */
+export type Unstable = (boolean | number)[] | "whole";
+
+/** How many unchanged characters must follow a change inside a token before they are kept. */
+const KEPT_TAIL = 4;
 
 /**
  * A line in pieces: a run of ASCII letters and digits with the separators inside it
@@ -42,7 +48,22 @@ function changedTokens(a: string, b: string): Unstable {
   const ta = tokens(a);
   const tb = tokens(b);
   if (ta.length !== tb.length) return "whole";
-  return ta.map((t, i) => t !== tb[i]);
+  return ta.map((t, i) => (t === tb[i] ? false : changedHead(t, tb[i])));
+}
+
+/**
+ * A fixed-width record has no separator between its fields ("H20261107100001" then a count and an
+ * amount), so a timestamp and an amount are one token. When the two runs differ only in the head
+ * of such a token and agree on a tail of KEPT_TAIL characters or more, only the head up to the
+ * last change is set aside and the tail is still compared. Everything before that change is set
+ * aside with it, since a timestamp's higher digits can roll over between the old and new runs.
+ * A shorter agreeing tail can be chance (two random ids ending alike), so the whole token goes.
+ */
+function changedHead(a: string, b: string): number | true {
+  if (a.length !== b.length) return true;
+  let last = a.length - 1;
+  while (a[last] === b[last]) last--;
+  return a.length - (last + 1) >= KEPT_TAIL ? last + 1 : true;
 }
 
 /**
@@ -54,7 +75,13 @@ export function sameApartFromUnstable(oldLine: string, newLine: string, unstable
   if (unstable === "whole") return oldLine === newLine;
   const to = tokens(oldLine);
   const tn = tokens(newLine);
-  return to.length === tn.length && tn.every((t, i) => unstable[i] || t === to[i]);
+  return to.length === tn.length && tn.every((t, i) => samePiece(to[i], t, unstable[i]));
+}
+
+function samePiece(oldPiece: string, newPiece: string, unstable: boolean | number): boolean {
+  if (unstable === true) return true;
+  if (unstable === false) return oldPiece === newPiece;
+  return oldPiece.length === newPiece.length && oldPiece.slice(unstable) === newPiece.slice(unstable);
 }
 
 export type Change = Hunk & {
