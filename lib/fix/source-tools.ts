@@ -1,6 +1,7 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { access, refusal, type ReadScope } from "./read-scope";
+import { readSourceText } from "./source-text";
 
 // What Claude may do with the program's source while looking for a cause (DESIGN 7-4): read,
 // list and search. Nothing here writes. Every path comes from Claude, so it goes through the
@@ -15,15 +16,17 @@ const MAX_SEARCH_FILE_BYTES = 4 * 1024 * 1024;
 export async function readLines(scope: ReadScope, path: string, start = 1, end?: number): Promise<string> {
   const a = await access(scope, path);
   if (!a.ok) return refusal(a.why, path);
-  const text = await readFile(a.path, "utf8").catch(() => null);
-  if (text === null) return `ファイルがありません: ${path}`;
+  const source = await readSourceText(a.path);
+  if (source === null) return `ファイルがありません: ${path}`;
+  const text = source === "notUtf8" ? (await readFile(a.path)).toString("utf8") : source;
+  const note = source === "notUtf8" ? `（${path} は UTF-8 ではない文字コードで書かれていて、日本語などは � に見えます。この文字はソースの不具合ではありません）\n` : "";
   const lines = text.split("\n");
   const from = Math.max(1, start);
   const to = Math.min(lines.length, end ?? from + MAX_LINES - 1, from + MAX_LINES - 1);
   if (from > lines.length) return `${path} は ${lines.length} 行しかありません`;
   const body = lines.slice(from - 1, to).map((l, i) => `${String(from + i).padStart(6)}| ${l}`);
   const more = to < lines.length ? `\n（${path} は全 ${lines.length} 行。続きは start_line=${to + 1} で読めます）` : "";
-  return body.join("\n") + more;
+  return note + body.join("\n") + more;
 }
 
 /** The entries of one directory, directories marked with a trailing slash. Hidden entries are left out. */

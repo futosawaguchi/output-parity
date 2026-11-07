@@ -1,5 +1,6 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { writableFile } from "../workspace";
+import { readSourceText } from "./source-text";
 
 /** One proposed change: replace `oldText` with `newText` in `file` (relative to work/). */
 export type Edit = { file: string; oldText: string; newText: string };
@@ -18,7 +19,11 @@ export async function applyEdit(work: string, edit: Edit): Promise<ApplyResult> 
   if (!path) {
     return refused(`書き換え先が work/ の中のファイルではありません: ${edit.file}`, "原因をもう一度探してください（依存ライブラリと work/ の外は書き換えません）");
   }
-  const text = await readFile(path, "utf8");
+  const text = await readSourceText(path);
+  if (text === null) return refused(`${edit.file} が読めません`, "「実行して判定する」で work/ を作り直してから、原因をもう一度探してください");
+  if (text === "notUtf8") {
+    return refused(`${edit.file} は UTF-8 ではない文字コード（Shift_JIS など）で書かれているので、書き換えません（日本語が壊れるため）`, "示された直し方を見て、元のソースを手で直してください");
+  }
   const at = text.indexOf(edit.oldText);
   if (edit.oldText === "" || at === -1) {
     return refused(`書き換える前の文が ${edit.file} に見つかりません`, "ファイルが変わっている可能性があります。「実行して判定する」で work/ を作り直してから、原因をもう一度探してください");

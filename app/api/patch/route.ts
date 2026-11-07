@@ -1,8 +1,8 @@
-import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { connection } from "next/server";
 import { SetupError } from "@/lib/errors";
 import { applyAll, makePatch } from "@/lib/fix/patch";
+import { readSourceText } from "@/lib/fix/source-text";
 import { editsIn } from "@/lib/fix/verify";
 import { reportForRecord } from "@/lib/record/build";
 import { insideRoot } from "@/lib/safe-path";
@@ -35,8 +35,9 @@ export async function GET(request: Request): Promise<Response> {
   const originals = new Map<string, string>();
   for (const name of files) {
     const path = insideRoot(source, name);
-    const text = path ? await readFile(path, "utf-8").catch(() => null) : null;
+    const text = path ? await readSourceText(path) : null;
     if (text === null) return problem(404, `元のソースに ${name} がありません`, "設定の source が元のソースを指しているか確かめてください");
+    if (text === "notUtf8") return problem(409, `元のソースの ${name} は UTF-8 ではない文字コード（Shift_JIS など）なので、パッチを作れません`, "画面の差分のとおりに、元のソースを手で直してください");
     originals.set(name, text);
   }
   // The original may have been edited since the copy was made: a patch is only made where it still applies as checked.
