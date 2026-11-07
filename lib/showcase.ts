@@ -17,13 +17,13 @@ export const MIN_CODE_LENGTH = 12;
 /** Why nothing runs here, for the buttons that would run programs. Fixed wording. */
 export const NOT_IN_SHOWCASE = {
   message: "旧と新の実行環境（PHP 7.4・8.5 や Python 3.10・3.12）を入れていません",
-  nextStep: "実際に実行するには、ローカル環境で動かしてください（README「全部動かす」）",
+  nextStep: "実際に実行するには、ローカル環境で動かしてください（手順は guide/setup.md）",
 };
 
 /** A subject with no bundled run (TCPDF's 65 examples) has nothing to show here. */
 export const NOT_BUNDLED_IN_SHOWCASE = {
   message: "この題材は、実行した結果を同梱していません",
-  nextStep: "ローカル環境でだけ動く題材です（README「全部動かす」）",
+  nextStep: "ローカル環境でだけ動く題材です（手順は guide/setup.md）",
 };
 
 /** The showcase, when the environment asks for one. A code too short to keep anyone out is a mistake, not a choice. */

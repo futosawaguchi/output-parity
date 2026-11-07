@@ -195,7 +195,7 @@ function ApplyRow({ onApply, busy, cannotApply, replay, showcase }: { onApply: (
             </button>
           </>
         ) : (
-          showcase && <p>この直し方が効くかは、ローカル環境で確かめられます（README「全部動かす」）。</p>
+          showcase && <p>この直し方が効くかは、ローカル環境で確かめられます（手順は guide/setup.md）。</p>
         )}
       </div>
     );

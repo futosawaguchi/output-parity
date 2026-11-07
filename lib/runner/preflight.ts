@@ -40,7 +40,7 @@ export async function preflight(config: ParityConfig, root: string): Promise<voi
     if (!(await stat(join(root, need)).catch(() => null))) {
       throw new ConfigError(
         `実行に要るものがありません: ${join(root, need)}（設定の run.needs）`,
-        "依存を取得してから実行してください（composer install など。README の「全部動かす」）",
+        "依存を取得してから実行してください（composer install など。手順は guide/setup.md）",
       );
     }
   }

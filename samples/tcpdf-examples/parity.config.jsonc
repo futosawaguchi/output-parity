@@ -1,5 +1,5 @@
 // 本物の OSS の題材。PDF ライブラリ TCPDF 6.3.0 に付属する公式の例 65 本を、PHP 7.4 と 8.5 で同じように動かして比べる。
-// 書き方は README の「設定ファイル」。パスはこのファイルからの相対で書く。
+// 書き方は guide/config.md。パスはこのファイルからの相対で書く。
 // ⚠️ TCPDF は composer で取得する（composer install -d samples/tcpdf-examples/app）。LGPL-3.0 なので vendor/ はコミットしない
 {
   "version": 1,

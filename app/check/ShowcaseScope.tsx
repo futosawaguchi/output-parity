@@ -1,6 +1,6 @@
 import styles from "./showcase.module.css";
 
-const README = "https://github.com/futosawaguchi/output-parity#readme";
+const SETUP = "https://github.com/futosawaguchi/output-parity/blob/main/guide/setup.md";
 
 /**
  * What the public showcase can and cannot do, and why (DESIGN 7-2 revised). The same words on the
@@ -33,7 +33,7 @@ export function ShowcaseScope() {
           </li>
         </ul>
         <p className={styles.boxNote}>
-          全部を動かす手順は <a href={README}>README</a> の「全部動かす」にあります。
+          全部を動かす手順は <a href={SETUP}>guide/setup.md</a> にあります。
         </p>
       </section>
     </div>

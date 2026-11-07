@@ -103,7 +103,7 @@ export async function loadSubject(root: string, id: string = DEFAULT_SUBJECT): P
   if (!dir) {
     throw new ConfigError(
       `題材「${id}」の設定が見つかりません（samples/${id}/ にも targets/${id}/ にも ${CONFIG_FILE} がありません）`,
-      `自分のシステムなら targets/${id}/${CONFIG_FILE} を作ってください（書き方は README の「設定ファイル」）`,
+      `自分のシステムなら targets/${id}/${CONFIG_FILE} を作ってください（書き方は guide/config.md）`,
     );
   }
   const settings = await loadConfig(join(dir, CONFIG_FILE));

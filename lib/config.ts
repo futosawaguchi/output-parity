@@ -228,7 +228,7 @@ export function parseConfig(json: unknown, path: string): ParityConfig {
   if (fixes !== undefined && fixes !== "apply" && fixes !== "suggest-only") fail('fixes は "apply" か "suggest-only" にしてください');
 
   if (!isObject(claude) || claude.send === undefined) {
-    fail(`claude.send がありません。Claude に送る範囲を選んでください（${SEND_SCOPES.join(" / ")}。README の「Claude に送るもの」）`);
+    fail(`claude.send がありません。Claude に送る範囲を選んでください（${SEND_SCOPES.join(" / ")}。guide/safety.md の「Claude に送るもの」）`);
   }
   if (!SEND_SCOPES.includes(claude.send as SendScope)) fail(`claude.send は ${SEND_SCOPES.map((s) => `"${s}"`).join(" / ")} のどれかにしてください`);
   const neverRead = (claude.neverRead as unknown) ?? [];

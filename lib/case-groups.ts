@@ -43,7 +43,7 @@ async function fileNames(dir: string): Promise<string[]> {
   if (!(await stat(dir).catch(() => null))?.isDirectory()) {
     throw new ConfigError(
       `caseGroups のファイルを探すフォルダがありません: ${dir}`,
-      "設定の run.cwd を確かめてください。依存（composer の vendor/ など）の中なら、先に取得してください（README の「全部動かす」）",
+      "設定の run.cwd を確かめてください。依存（composer の vendor/ など）の中なら、先に取得してください（手順は guide/setup.md）",
     );
   }
   return (await readdir(dir, { withFileTypes: true })).filter((e) => e.isFile()).map((e) => e.name).sort();
