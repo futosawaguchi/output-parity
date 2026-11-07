@@ -93,3 +93,18 @@ test("in a CSV row, a timestamp that changes on every run is still set aside", (
   const changes = applyBaseline(diffLines(["2026-11-02 10:00:01,1001,57000"], ["2026-11-02 10:00:05,1001,57000"]), unstable);
   assert.equal(changes[0].explainedByBaseline, true);
 });
+
+// A fixed-width record: type (1), created yyyymmddhhmmss (14), count (4), total (10), with no separator.
+const record = (created: string, total: string) => `H${created}0003${total}`;
+
+test("in a fixed-width record, a changed amount after a timestamp is not hidden by the baseline", () => {
+  const unstable = unstableLines([record("20261107100005", "0000057000")], [record("20261107100007", "0000057000")]);
+  const changes = applyBaseline(diffLines([record("20261107100001", "0000072000")], [record("20261107100005", "0000057000")]), unstable);
+  assert.equal(changes[0].explainedByBaseline, false);
+});
+
+test("in a fixed-width record, a timestamp whose minute rolls over between old and new is still set aside", () => {
+  const unstable = unstableLines([record("20261107100001", "0000057000")], [record("20261107100003", "0000057000")]);
+  const changes = applyBaseline(diffLines([record("20261107095958", "0000057000")], [record("20261107100001", "0000057000")]), unstable);
+  assert.equal(changes[0].explainedByBaseline, true);
+});
