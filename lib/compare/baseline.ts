@@ -14,7 +14,7 @@ import { diffLines, type Hunk } from "./line-diff";
  */
 export type Unstable = (boolean | [number, number])[] | "whole";
 
-/** How many unchanged digits must follow a change inside a token before they are kept. */
+/** How many unchanged digits must follow a change, in the same run of digits, before they are kept. */
 const KEPT_TAIL = 4;
 
 /** Half-width and full-width digits, and what a time puts between them. */
@@ -65,8 +65,10 @@ function changedTokens(a: string, b: string): Unstable {
  * its time ("estimate_72000_20261107100001.pdf"). So when the two runs differ in digits only:
  * - the part set aside starts where the changed digits start, taken back over the digits and
  *   time separators before them, since a time's higher digits can roll over between old and new;
- * - it ends at the last changed digit, when what follows starts with something other than a digit
- *   or runs KEPT_TAIL characters or more. A short run of digits there can agree by chance.
+ * - it ends at the last changed digit, taken on over the digits right after it when there are fewer
+ *   than KEPT_TAIL of them: two runs ten seconds apart agree on the last digit by chance
+ *   ("…13:33:28" and "…13:33:38"), and the old run's last digit is no reason to keep a difference.
+ *   A longer run of digits after it is kept (the count and the amount in a fixed-width record).
  * A token whose letters change too (a random id) is set aside whole: its unchanged letters are chance.
  */
 function changedPart(a: string, b: string): [number, number] | true {
@@ -75,8 +77,10 @@ function changedPart(a: string, b: string): [number, number] | true {
   if (changed.some((i) => !DIGIT.test(a[i]) || !DIGIT.test(b[i]))) return true;
   let from = changed[0];
   while (from > 0 && TIME.test(a[from - 1])) from--;
-  const after = changed[changed.length - 1] + 1;
-  const to = after === a.length || (DIGIT.test(a[after]) && a.length - after < KEPT_TAIL) ? a.length : after;
+  let to = changed[changed.length - 1] + 1;
+  let digits = 0;
+  while (to + digits < a.length && DIGIT.test(a[to + digits])) digits++;
+  if (digits < KEPT_TAIL) to += digits;
   return from === 0 && to === a.length ? true : [from, to];
 }
 
