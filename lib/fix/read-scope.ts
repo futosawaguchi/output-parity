@@ -70,7 +70,8 @@ export function refusal(why: "outside" | "hidden", path: string, verb = "読め�
  * The first pattern that hides `rel` (a/b/c), or null. Like .gitignore: a pattern without a slash
  * matches a name anywhere (".env" hides every .env and everything under a folder named .env);
  * a pattern with a slash matches from the source's root ("config/local.php", "storage/**").
- * `*` and `?` stay within one name; `**` crosses folders.
+ * `*` and `?` stay within one name; `**` crosses folders. Case is ignored: on a disk that ignores
+ * it (macOS, Windows) server.KEY is the same file as server.key, and must be hidden as well.
  */
 export function hiddenBy(rel: string, patterns: readonly string[]): string | null {
   const names = rel.split("/");
@@ -78,8 +79,8 @@ export function hiddenBy(rel: string, patterns: readonly string[]): string | nul
     const p = pattern.replace(/^\.\//, "").replace(/\/+$/, "");
     if (p === "") continue;
     if (p.includes("/")) {
-      if (new RegExp(`^${globToRegex(p)}(/.*)?$`).test(rel)) return pattern;
-    } else if (names.some((n) => new RegExp(`^${globToRegex(p)}$`).test(n))) {
+      if (new RegExp(`^${globToRegex(p)}(/.*)?$`, "i").test(rel)) return pattern;
+    } else if (names.some((n) => new RegExp(`^${globToRegex(p)}$`, "i").test(n))) {
       return pattern;
     }
   }
