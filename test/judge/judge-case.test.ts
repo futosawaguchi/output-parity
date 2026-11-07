@@ -180,3 +180,15 @@ test("an answer the SDK cannot parse makes that case needs review instead of sto
   assert.equal(v.verdict, "needs_review");
   assert.equal(v.judgedBy.kind, "failed");
 });
+
+test("a change that masking makes look the same is needs review, whatever Claude says", async () => {
+  const masked = { ...removed, oldLines: ["DB_PASSWORD=hunter2"], newLines: ["DB_PASSWORD=hunter3"] } as Change;
+  const v = await judgeCase(compared([masked]), ctx(fakeClient(allHarmless)));
+  assert.equal(v.verdict, "needs_review");
+  assert.ok(v.findings.some((f) => f.what.includes("伏せ字にすると旧と新が同じ")));
+});
+
+test("a change still visible after masking is left to Claude", async () => {
+  const v = await judgeCase(compared([removed]), ctx(fakeClient(allHarmless)));
+  assert.equal(v.verdict, "harmless");
+});
