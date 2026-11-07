@@ -146,3 +146,30 @@ test("what is sent is masked first, and kept exactly as sent", async () => {
   assert.equal(kept[0].masked, 1);
   assert.equal(v.sent?.file, "f.txt");
 });
+
+const allHarmless: JudgeResponse = {
+  summary: "問題なし",
+  findings: [{ verdict: "harmless", change_ids: ["C1"], what: "w", why: "y", evidence: ["合計 23,000"], calculation: null, check_here: "h" }],
+};
+
+test("a harmless answer from Claude does not clear a different ending", async () => {
+  const c = compared([removed]);
+  (c.runs[1] as { outcome: unknown }).outcome = { kind: "exited", exitCode: 255 };
+  const v = await judgeCase(c, ctx(fakeClient(allHarmless)));
+  assert.equal(v.verdict, "needs_review");
+  assert.ok(v.findings.some((f) => f.what.startsWith("終わり方が違います")));
+});
+
+test("a harmless answer from Claude does not clear text the encoding could not read", async () => {
+  const c = compared([removed]);
+  if (c.comparison.kind === "compared") c.comparison.new.undecodable = 2;
+  const v = await judgeCase(c, ctx(fakeClient(allHarmless)));
+  assert.equal(v.verdict, "needs_review");
+});
+
+test("a broken answer from Claude stays broken when the ending also differs", async () => {
+  const c = compared([removed]);
+  (c.runs[1] as { outcome: unknown }).outcome = { kind: "exited", exitCode: 255 };
+  const broken: JudgeResponse = { ...allHarmless, findings: [{ ...allHarmless.findings[0], verdict: "broken" }] };
+  assert.equal((await judgeCase(c, ctx(fakeClient(broken)))).verdict, "broken");
+});
