@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { compareCase } from "../../lib/compare/compare-case";
 import { diffLines } from "../../lib/compare/line-diff";
+import { ExtractionError } from "../../lib/compare/document";
 import { extractPdf } from "../../lib/compare/pdf";
 import type { CaseResult, Slot } from "../../lib/runner/run-case";
 
@@ -131,4 +132,15 @@ test("a value in a form field is a line, so a changed total in a field is a diff
   await writeFile(join(dir, "new.pdf"), formPdf("57000"));
   assert.ok((await extractPdf(join(dir, "old.pdf"))).lines.includes("form total: 72000"));
   assert.ok((await extractPdf(join(dir, "new.pdf"))).lines.includes("form total: 57000"));
+});
+
+test("a page that cannot be read makes the file unreadable, not the whole run fail", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "output-parity-"));
+  // The second page points to an object that does not exist.
+  await writeFile(join(dir, "broken.pdf"), pdfOf([
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R 9 0 R] /Count 2 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] >>",
+  ]));
+  await assert.rejects(extractPdf(join(dir, "broken.pdf")), (e) => e instanceof ExtractionError && /2 ページ目が読めません/.test(e.message));
 });
