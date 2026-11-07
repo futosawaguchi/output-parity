@@ -10,7 +10,7 @@
 
 ### 毎回変わる値を、行ごと除いていた
 
-新の環境で2回流して、2回で違う行を「毎回変わる値」として除いていました。ところが、日時と金額が同じ行にあると、金額の変化まで一緒に消えていました。経緯を知らない Claude（サブエージェント blank-reviewer）の1回目の審査で見つかり、行の中の変わった部分だけを除く形に直しました（[bd483cd](https://github.com/futosawaguchi/output-parity/commit/bd483cd)）。
+新の環境で2回流して、2回で違う行を「毎回変わる値」として除いていました。ところが、日時と金額が同じ行にあると、金額の変化まで一緒に消えていました。経緯を知らない Claude（サブエージェント blank-reviewer）の審査で見つかり、行の中の変わった部分だけを除く形に直しました（[bd483cd](https://github.com/futosawaguchi/output-parity/commit/bd483cd)）。
 
 ### 画像が消えても「差なし」だった
 
@@ -30,6 +30,7 @@ PDF は文字を取り出して比べています。そのため、画像だけ�
 - 左右に旧と新の出力を並べても、違いを目で探すのが大変でした。違う行に赤い枠を付け、新で消えた所には消えた行の数を出しました（PDF は [b943415](https://github.com/futosawaguchi/output-parity/commit/b943415)、HTML は [d28a8cd](https://github.com/futosawaguchi/output-parity/commit/d28a8cd)）
 - 確かめた記録と Claude に送った全文は、黒い背景のただのテキストで開いていて読みづらいものでした。表と色つきの判定で読めるページにしました（[37f0f1c](https://github.com/futosawaguchi/output-parity/commit/37f0f1c)）
 - 詳細では素朴な diff が前に出ていて、判定が後ろに隠れていました。左右の出力、判定、原因の順にし、diff はたたんで参考にしました（[2dca40d](https://github.com/futosawaguchi/output-parity/commit/2dca40d)）
+- 同梱の結果のまま作業日報に直し方を当てると、直したはずなのに「ほかの入力が悪くなりました」と出ました。出力の1行目にある出力日が、同梱の結果を作った日と当てた日とで違い、その違いが差として残っていたためです。同梱の結果から当てるときは、当てる前の出力をその場で作り直してから比べるようにしました（[2814a6b](https://github.com/futosawaguchi/output-parity/commit/2814a6b)）
 
 ## 確かめるのに時間がかかった
 

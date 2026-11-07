@@ -41,27 +41,48 @@ Claude を信じきらない作りにしたことで、判定や原因探しを 
 
 経緯を知らない別の Claude（サブエージェント [blank-reviewer](../.claude/agents/blank-reviewer.md)）に、こちらの結論を渡さずにコードを審査させました。
 
-1回目の指摘のうち、判定が黙って間違う不具合は4つでした。
+審査は何度か繰り返し、見つかったものを直しました。直したものは、判定が黙って間違う・止まる不具合が8つ、壊れているのに「無害」や「直りました」と言う抜け道が17です。どちらも見つかった順に並べます。
+
+判定が黙って間違う・止まる不具合（8つ）
 
 - 直ったかどうかを、当てる前ではなく書き換えたあとの旧の出力と比べていた（[c48a922](https://github.com/futosawaguchi/output-parity/commit/c48a922)）
 - 検算が掛け算の式を「合わない」と誤り、崩れた根拠でも「無害」のまま残っていた（[d03b28d](https://github.com/futosawaguchi/output-parity/commit/d03b28d)）
 - 毎回変わる値を行ごと除いていて、同じ行の金額の変化まで消えていた（[bd483cd](https://github.com/futosawaguchi/output-parity/commit/bd483cd)）
 - PDF の画像が消えても、文字が同じなら「差なし」になっていた（[8f90407](https://github.com/futosawaguchi/output-parity/commit/8f90407)）
+- Claude の返事が途中で切れるなどして読み取れないと、実行全体が止まり、ほかの入力の結果も残らなかった（[1535bc8](https://github.com/futosawaguchi/output-parity/commit/1535bc8)）
+- 一部のページが読めない PDF があると、実行全体が止まった（[1ca5b2b](https://github.com/futosawaguchi/output-parity/commit/1ca5b2b)）
+- 直し方を確かめるコピーで、シンボリックリンクが消えていた（[ffab97e](https://github.com/futosawaguchi/output-parity/commit/ffab97e)）
+- Shift_JIS で書かれたソースに直し方を当てると、日本語が壊れていた（[c0e8032](https://github.com/futosawaguchi/output-parity/commit/c0e8032)）
 
-2回目の重い指摘のうち、壊れているのに「無害」や「直りました」と言う抜け道は4つでした。
+壊れているのに「無害」や「直りました」と言う抜け道（17）
 
 - プログラムの終わり方（終了コードや HTTP の状態）が変わっても、出力の文字が同じなら「無害」になっていた（[0b4fd83](https://github.com/futosawaguchi/output-parity/commit/0b4fd83)）
 - 文字コードで読めない部分があっても「無害」になっていた（同じコミット）
 - 新の2回で行の対応が取れないとき、行全体を毎回変わる値として除き、合計の変化まで消えていた（[7da88c0](https://github.com/futosawaguchi/output-parity/commit/7da88c0)）
 - 直し方を当てたあと、ほかの入力の差の中身が変わっても、行数が同じなら「直りました」になっていた（[4a59f63](https://github.com/futosawaguchi/output-parity/commit/4a59f63)）
+- CSV のように日時・番号・金額がカンマだけでつながった行では、毎回変わる日時と一緒に金額の変化まで除き、「無害」になっていた（[43af82a](https://github.com/futosawaguchi/output-parity/commit/43af82a)）
+- 終わり方の違いや読めない文字があっても、差が残っていて Claude が「無害」と答えると、そのまま「無害」になっていた（[47d2a16](https://github.com/futosawaguchi/output-parity/commit/47d2a16)）
+- テキストの出力で、改行コード・先頭の BOM・最後の改行が変わっても「差なし」になっていた（[045c5ee](https://github.com/futosawaguchi/output-parity/commit/045c5ee)）
+- HTML の alt の無い画像が消えても、PDF の文字が一部だけ左へはみ出しても「差なし」になっていた（[c5c44b6](https://github.com/futosawaguchi/output-parity/commit/c5c44b6)）
+- HTML の select で、選べる選択肢が消えても「差なし」になっていた（[5a6f165](https://github.com/futosawaguchi/output-parity/commit/5a6f165)）
+- PDF のフォームの欄に書かれた値を比べていなかった（[fa2da87](https://github.com/futosawaguchi/output-parity/commit/fa2da87)）
+- 区切りの無い固定長の行で、毎回変わる日時のうしろの金額の変化まで除いていた（[f0ac850](https://github.com/futosawaguchi/output-parity/commit/f0ac850)）
+- 鍵らしい値を伏せたあと旧と新が同じに見え、Claude が違いを見ないまま「無害」と答えられた（[d9c63f9](https://github.com/futosawaguchi/output-parity/commit/d9c63f9)）
+- 表のセルの中の画像の alt を比べていなかった（[20f1055](https://github.com/futosawaguchi/output-parity/commit/20f1055)）
+- Web 型で、ページがファイルの保存に変わっても（Content-Type や Content-Disposition の違い）「差なし」になっていた（[c86e34a](https://github.com/futosawaguchi/output-parity/commit/c86e34a)）
+- 全角の数字で書かれた金額や、毎回変わる日時と同じひと続きの文字の中にある金額の変化まで除いていた（[836480e](https://github.com/futosawaguchi/output-parity/commit/836480e)）
+- PDF の前に PHP の警告が混ざって、ほかのソフトで開けなくなっても「差なし」になっていた（[7738200](https://github.com/futosawaguchi/output-parity/commit/7738200)）
+- 直し方を当てたあと、ほかの入力で合計の行が消えても「変わっていません」と出ていた（[fd975dc](https://github.com/futosawaguchi/output-parity/commit/fd975dc)）
 
-いちばん驚いたのは2回目の4つです。どれも自分で読み返しても気づかなかった所でした。見つかったものはすべて直しました。7つには、テストも足しています。
+ほかに、旧と新が同じフォルダで動くので、旧が書いたキャッシュを新が読むと違いが見えなくなる、という指摘がありました。キャッシュするシステムは、このツールの対象外として [guide/safety.md](../guide/safety.md) に書きました。
+
+いちばん驚いたのは、抜け道の最初の4つです。どれも自分で読み返しても気づかなかった所でした。審査を繰り返すごとに、見つかる所は、判定の芯から、出力の形式の細部、そして動かす環境の側へと移っていきました。1つを除いて、直したものにはテストも足しています。
 
 ### 大きく変えるのが怖くなくなった
 
 大きく変えるたびに手で確かめていたら、1回に30分かかり、開発が止まりました。確かめる手順をスキル（[regression-check](../.claude/skills/regression-check/SKILL.md)）にまとめてスクリプトで流すようにし、約6分になりました。
 
-変えるたびに全部を確かめられるので、画面の作り直しのような大きな変更も、怖がらずにできました。スキルの手順で毎回全部を確かめたことで、検算が式の中の鉤括弧に入れた名前の数字まで計算に読んでいた誤り（[c627225](https://github.com/futosawaguchi/output-parity/commit/c627225)）も、提出の前に見つけられました。
+変えるたびに全部を確かめられるので、画面の作り直しのような大きな変更も、怖がらずにできました。スキルの手順で毎回全部を確かめたことで、検算が式の中の鉤括弧に入れた名前の数字まで計算に読んでいた誤り（[c627225](https://github.com/futosawaguchi/output-parity/commit/c627225)）も見つけられました。
 
 ### 1人で進められる範囲が広がった
 
@@ -73,7 +94,7 @@ Claude を信じきらない作りにしたことで、判定や原因探しを 
 
 もう1つは、Claude Code で動画まで作れると知ったことです。デモ動画のツールの画面は、Claude Code が書いたスクリプトが、画面を出さない Chrome を動かして録画しました。切り出し、早送り、テロップ、AI 音声のナレーション、BGM をつなぐ編集も、スクリプトで組みました。「シーン3を2秒詰める」のように言葉で頼んで直せます。動画の編集をここまで任せられることも、実際の画面の録画まで任せられることも、作る前は知りませんでした（動画を作ったスクリプトは、このリポジトリには入れていません）。
 
-6日で、題材4つ、出力の形式3つ（PDF・テキスト・HTML）、つなぎ方3つ（コマンド・ファイル・Web）、CI、審査用の公開環境まで作れました。コミットは 200 を超え、テストは 251 件です（2026-11-07 時点）。
+6日で、題材4つ、出力の形式3つ（PDF・テキスト・HTML）、つなぎ方3つ（コマンド・ファイル・Web）、CI、審査用の公開環境まで作れました。コミットは 200 を超え、テストは 286 件です。
 
 ### そのほかに使った機能
 
