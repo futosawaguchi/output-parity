@@ -56,7 +56,7 @@ test("a group that matches nothing, or makes an id that cannot be used, says whi
 
 test("a run.cwd that is not there yet (dependencies not installed) points to getting them", async () => {
   const config = await setUp({ caseGroups: [{ each: { file: "*.php" }, args: ["{file}"] }] });
-  await assert.rejects(expandCaseGroups({ ...config, run: { ...(config.run as CommandRun), cwd: "vendor/x/examples" } }), (e: Error) => e instanceof ConfigError && /全部動かす/.test(e.nextStep));
+  await assert.rejects(expandCaseGroups({ ...config, run: { ...(config.run as CommandRun), cwd: "vendor/x/examples" } }), (e: Error) => e instanceof ConfigError && /guide\/setup\.md/.test(e.nextStep));
 });
 
 test("the settings say what is wrong with a group before any file is looked at", async () => {
