@@ -49,9 +49,10 @@ export async function extractPdf(path: string): Promise<ExtractedDocument> {
 
       const layout = layoutOf(n, width, height, items);
       const images = (await page.getOperatorList()).fnArray.filter((op) => imageOps.has(op)).length;
+      const fields = formLines(await page.getAnnotations());
       // What the text alone cannot show is put into lines too, so that it is compared like text:
-      // a vanished logo or seal, a changed paper size, text pushed off the page.
-      lines.push(`--- page ${n} ---`, ...groupIntoLines(items), ...layoutLines(layout, images));
+      // the values in form fields, a vanished logo or seal, a changed paper size, text pushed off the page.
+      lines.push(`--- page ${n} ---`, ...groupIntoLines(items), ...fields, ...layoutLines(layout, images));
       pages.push(layout);
       if (images > 0) unreadable.push(`page ${n}: 画像 ${images} 個（中の文字は比較できません）`);
     }
@@ -105,6 +106,26 @@ function layoutOf(page: number, width: number, height: number, items: TextItem[]
     textLeft: round(textLeft),
     textTop: round(textTop),
   };
+}
+
+type Annotation = { subtype?: string; fieldName?: string; fieldValue?: unknown; options?: { displayValue?: string }[] };
+
+/**
+ * A form field (AcroForm) as a line: its name and value, with the choices offered for a list.
+ * A value lives in the field, not in the page's text, so a total written into a field is compared here.
+ * Radio buttons share one name and one value, so each name is one line.
+ */
+function formLines(annotations: Annotation[]): string[] {
+  const seen = new Set<string>();
+  const lines: string[] = [];
+  for (const a of annotations) {
+    if (a.subtype !== "Widget" || !a.fieldName || seen.has(a.fieldName)) continue;
+    seen.add(a.fieldName);
+    const value = Array.isArray(a.fieldValue) ? a.fieldValue.join(", ") : String(a.fieldValue ?? "");
+    const choices = a.options?.length ? `（選択肢 ${a.options.map((o) => o.displayValue ?? "").join(" / ")}）` : "";
+    lines.push(`form ${a.fieldName}: ${value}${choices}`);
+  }
+  return lines;
 }
 
 function layoutLines(p: PageLayout, images: number): string[] {
