@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { lstat, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readFile, readlink, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -53,4 +53,40 @@ test("writing through a linked dependency into the original is refused", async (
 test("a file that does not exist is refused", async () => {
   const { work } = await setUp();
   assert.equal(await writableFile(work, "missing.php"), null);
+});
+
+/** A source whose config is a link: one to a file beside it, one to a folder outside the source. */
+async function setUpLinks() {
+  const dir = await mkdtemp(join(tmpdir(), "output-parity-"));
+  const source = join(dir, "samples");
+  await mkdir(join(dir, "shared"), { recursive: true });
+  await mkdir(source, { recursive: true });
+  await writeFile(join(source, "config.local.php"), "<?php return 1;\n");
+  await writeFile(join(dir, "shared", "config.prod.php"), "<?php return 2;\n");
+  await symlink("config.local.php", join(source, "config.php"));
+  await symlink("../shared/config.prod.php", join(source, "prod.php"));
+  const work = join(dir, "work");
+  await prepareWorkspace(source, work, []);
+  return { dir, source, work };
+}
+
+test("a link in the source stays a link in work/, so the program still finds its file", async () => {
+  const { work } = await setUpLinks();
+  assert.ok((await lstat(join(work, "config.php"))).isSymbolicLink());
+  assert.equal(await readFile(join(work, "config.php"), "utf8"), "<?php return 1;\n");
+  assert.equal(await readFile(join(work, "prod.php"), "utf8"), "<?php return 2;\n");
+});
+
+test("a link to a file inside the source leads to its copy in work/, never to the original", async () => {
+  const { source, work } = await setUpLinks();
+  assert.equal(await readlink(join(work, "config.php")), join(work, "config.local.php"));
+  const writable = await writableFile(work, "config.php");
+  assert.ok(writable);
+  await writeFile(writable, "changed\n");
+  assert.equal(await readFile(join(source, "config.local.php"), "utf8"), "<?php return 1;\n");
+});
+
+test("writing through a link to a file outside the source is refused", async () => {
+  const { work } = await setUpLinks();
+  assert.equal(await writableFile(work, "prod.php"), null);
 });
