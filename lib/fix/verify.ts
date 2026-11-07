@@ -109,6 +109,19 @@ function differenceOf({ comparison, runs }: Compared): string[] {
   return lines;
 }
 
+/**
+ * Whether the difference is not the one it was. Lines leaving it is the edit helping here too, as
+ * long as an old line ("-") went with them: the new output came back to what the old one said. A
+ * new line ("+") going while every old line stays is the new output losing something instead
+ * ("-合計 72,000" left where "+合計 72,000円" was: the total line is gone), so that counts too.
+ * A case with no difference left has not changed for the worse.
+ */
+function differenceChanged(before: string[], after: string[]): boolean {
+  if (holdsSomethingNew(before, after)) return true;
+  const went = (sign: string) => holdsSomethingNew(after.filter((l) => l.startsWith(sign)), before.filter((l) => l.startsWith(sign)));
+  return after.length > 0 && went("+") && !went("-");
+}
+
 /** Whether `after` holds a line `before` did not (as many times as it appears). */
 function holdsSomethingNew(before: string[], after: string[]): boolean {
   const left = new Map<string, number>();
@@ -126,7 +139,7 @@ export function assessFix(caseId: string, before: RunReport, after: RunReport): 
     const afterR = remainingOf(c);
     // A case that did not exist before is compared with itself: it cannot have got worse.
     if (!old) return { caseId: c.caseId, label: c.label, before: afterR, after: afterR };
-    const changed = c.caseId !== caseId && holdsSomethingNew(differenceOf(old), differenceOf(c));
+    const changed = c.caseId !== caseId && differenceChanged(differenceOf(old), differenceOf(c));
     return { caseId: c.caseId, label: c.label, before: remainingOf(old), after: afterR, ...(changed ? { changed: true as const } : {}) };
   });
   const others = deltas.filter((d) => d.caseId !== caseId);
