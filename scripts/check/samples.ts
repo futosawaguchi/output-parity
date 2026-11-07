@@ -38,7 +38,13 @@ export async function runSamples(subjectId: string, extra: string[] = []): Promi
     // Another subject running side by side may not have written its report yet.
     const text = await readFile(join(runsRoot, id, "report.json"), "utf8").catch(() => null);
     const report = text ? (JSON.parse(text) as RunReport) : null;
-    if (report?.subjectId === subjectId) return report;
+    if (report?.subjectId === subjectId) {
+      // A case without a verdict must still say so on the terminal, not just leave the line out.
+      const unjudged = report.cases.filter((c) => !c.verdict).length;
+      const said = (output.match(/^ {2}判定: なし — /gm) ?? []).length;
+      if (said !== unjudged) throw new Error(`判定の無い入力 ${unjudged} 件のうち、「判定: なし」と出たのは ${said} 件（ログ: runs/check/${log.split("/").at(-1)}）`);
+      return report;
+    }
   }
   throw new Error(`題材 ${subjectId} の新しい実行が runs/ に見つかりません`);
 }
