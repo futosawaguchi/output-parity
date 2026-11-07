@@ -23,7 +23,8 @@ const adapters: Record<string, (encoding: string) => Adapter> = {
   pdf: () => ({
     extract: extractPdf,
     description:
-      "PDF から取り出したテキスト。先頭に文書のメタデータ（meta・xmp・id で始まる行）、" +
+      "PDF から取り出したテキスト。先頭の「file」で始まる行は、ファイルの %PDF- の前と %%EOF のうしろに余分な文字（混ざった警告など）があるか。" +
+      "続いて文書のメタデータ（meta・xmp・id で始まる行）、" +
       "続いてページごとに「--- page N ---」の行と本文の行が上から順に並ぶ。" +
       "文字の位置（座標）は捨てているので、同じ高さにある文字は1行にまとめてある。" +
       "「form」で始まる行はフォームの欄（AcroForm）の名前と値で、選ぶ欄には（選択肢 …）として選べる選択肢を並べてある。" +

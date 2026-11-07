@@ -17,6 +17,8 @@ export async function extractPdf(path: string): Promise<ExtractedDocument> {
   } catch {
     throw new ExtractionError(`出力ファイルが読めません: ${path}`);
   }
+  // Before pdf.js takes the bytes over.
+  const file = fileLine(data);
 
   const task = pdfjs.getDocument({
     data,
@@ -35,7 +37,10 @@ export async function extractPdf(path: string): Promise<ExtractedDocument> {
   }
 
   try {
-    const lines = await metadataLines(doc);
+    const metadata = await metadataLines(doc).catch((e) => {
+      throw new ExtractionError(`PDF の文書の情報が読めません: ${path}（${(e as Error).message}）`);
+    });
+    const lines = [file, ...metadata];
     const pages: PageLayout[] = [];
     const unreadable: string[] = [];
     const imageOps = imageOperatorCodes(pdfjs.OPS);
@@ -69,6 +74,20 @@ type PdfjsDocument = Awaited<ReturnType<typeof import("pdfjs-dist/legacy/build/p
 async function readPage(doc: PdfjsDocument, n: number) {
   const page = await doc.getPage(n);
   return { page, text: await page.getTextContent(), operators: await page.getOperatorList(), annotations: (await page.getAnnotations()) as Annotation[] };
+}
+
+/**
+ * Whether anything sits before %PDF- or after the last %%EOF, as a line. pdf.js reads past it, but
+ * other readers do not: a PHP warning printed into the output ("Deprecated: …") makes the file one
+ * that will not open, though its text is the same.
+ */
+function fileLine(data: Uint8Array): string {
+  const text = Buffer.from(data).toString("latin1");
+  const start = text.indexOf("%PDF-");
+  const end = text.lastIndexOf("%%EOF");
+  const before = start === -1 ? "%PDF- が無い" : start > 0 ? "あり" : "なし";
+  const after = end === -1 ? "%%EOF が無い" : text.slice(end + 5).trim() !== "" ? "あり" : "なし";
+  return `file: %PDF- の前の余分な文字 ${before}・%%EOF のうしろの余分な文字 ${after}`;
 }
 
 type PdfDocument = {
