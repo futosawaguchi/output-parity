@@ -12,8 +12,12 @@ export type ExecOutcome =
   | { kind: "spawnFailed"; code: string; message: string }
   /** Nothing ran: the output was given as a file (run.type "files"), or that file was not there. */
   | { kind: "given"; found: boolean }
-  /** A page was requested from the tool's own server (run.type "web"). 5xx means no page: the server failed. */
-  | { kind: "http"; status: number; location: string | null }
+  /**
+   * A page was requested from the tool's own server (run.type "web"). 5xx means no page: the server failed.
+   * The two headers that change what the reader gets (a page, or a file to save) are kept with it;
+   * results made before they were kept have neither.
+   */
+  | { kind: "http"; status: number; location: string | null; contentType?: string | null; contentDisposition?: string | null }
   /** The server did not answer (it stopped, or refused the connection). */
   | { kind: "requestFailed"; message: string };
 
@@ -50,5 +54,26 @@ export function differentEndings(runs: { slot: string; outcome: ExecOutcome }[])
   const [oldRun, newRun] = [of("old"), of("new")];
   if (!oldRun || !newRun) return null;
   const ending = { old: describeOutcome(oldRun.outcome), new: describeOutcome(newRun.outcome) };
-  return ending.old === ending.new ? null : ending;
+  if (ending.old !== ending.new) return ending;
+  const [oldHeaders, newHeaders] = [headersOf(oldRun.outcome), headersOf(newRun.outcome)];
+  if (!oldHeaders || !newHeaders || sameHeaders(oldHeaders, newHeaders)) return null;
+  return { old: `${ending.old}・${describeHeaders(oldHeaders)}`, new: `${ending.new}・${describeHeaders(newHeaders)}` };
+}
+
+type Headers = { contentType: string | null; contentDisposition: string | null };
+
+/** The kept headers of a page, or null when the result has none to compare (not a page, or made before they were kept). */
+function headersOf(o: ExecOutcome): Headers | null {
+  if (o.kind !== "http" || o.contentType === undefined) return null;
+  return { contentType: o.contentType, contentDisposition: o.contentDisposition ?? null };
+}
+
+/** "text/html; charset=UTF-8" and "text/html;charset=utf-8" say the same thing. */
+function sameHeaders(a: Headers, b: Headers): boolean {
+  const type = (t: string | null) => t?.toLowerCase().replace(/\s+/g, "") ?? null;
+  return type(a.contentType) === type(b.contentType) && a.contentDisposition === b.contentDisposition;
+}
+
+function describeHeaders(h: Headers): string {
+  return `Content-Type: ${h.contentType ?? "なし"}・Content-Disposition: ${h.contentDisposition ?? "なし"}`;
 }

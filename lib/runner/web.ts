@@ -126,7 +126,13 @@ async function requestPage(
       signal: AbortSignal.timeout(run.timeoutMs),
     });
     body = Buffer.from(await res.arrayBuffer());
-    outcome = body.length > MAX_STDOUT_BYTES ? { kind: "outputTooLarge", maxBufferBytes: MAX_STDOUT_BYTES } : { kind: "http", status: res.status, location: res.headers.get("location") };
+    outcome = body.length > MAX_STDOUT_BYTES ? { kind: "outputTooLarge", maxBufferBytes: MAX_STDOUT_BYTES } : {
+            kind: "http",
+            status: res.status,
+            location: res.headers.get("location"),
+            contentType: res.headers.get("content-type"),
+            contentDisposition: res.headers.get("content-disposition"),
+          };
   } catch (e) {
     outcome = e instanceof DOMException && e.name === "TimeoutError" ? { kind: "timedOut", timeoutMs: run.timeoutMs } : { kind: "requestFailed", message: causeOf(e) };
   }

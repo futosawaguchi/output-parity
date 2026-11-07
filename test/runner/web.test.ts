@@ -66,7 +66,7 @@ test("each page is requested from both servers; the database is put back before 
     const pages = await Promise.all(counted.slots.map((s) => readFile(s.outputPath!, "utf8")));
     // Without putting the database back, old/new/baseline would read 1, 2, 3.
     assert.deepEqual(pages, ["<p>count 1</p>", "<p>count 1</p>", "<p>count 1</p>"]);
-    assert.deepEqual(counted.slots[0].outcome, { kind: "http", status: 200, location: null });
+    assert.deepEqual(counted.slots[0].outcome, { kind: "http", status: 200, location: null, contentType: null, contentDisposition: null });
     assert.equal(counted.slots[0].request, "GET /count");
     assert.equal(await readFile(join(dir, "data.db"), "utf8"), "", "the original is never written");
 
@@ -82,11 +82,11 @@ test("a redirect is not followed, and a 5xx is no page, with the server's log ke
   const runner = webRunner(config, run, work, join(dir, "run"));
   try {
     const moved = await runner.runCase(config.cases[0], join(dir, "run", "redirect"));
-    assert.deepEqual(moved.slots[1].outcome, { kind: "http", status: 302, location: "http://example.com/" });
+    assert.deepEqual(moved.slots[1].outcome, { kind: "http", status: 302, location: "http://example.com/", contentType: null, contentDisposition: null });
     assert.equal(await readFile(moved.slots[1].outputPath!, "utf8"), "");
 
     const failed = await runner.runCase(config.cases[1], join(dir, "run", "fail"));
-    assert.deepEqual(failed.slots[1].outcome, { kind: "http", status: 500, location: null });
+    assert.deepEqual(failed.slots[1].outcome, { kind: "http", status: 500, location: null, contentType: null, contentDisposition: null });
     assert.equal(failed.slots[1].outputPath, null);
     assert.equal(await readFile(failed.slots[1].stdoutPath, "utf8"), "error page");
     assert.match(await readFile(failed.slots[1].stderrPath, "utf8"), /boom in app\.js:3/);
