@@ -1,5 +1,5 @@
-import { copyFile, mkdir, readdir, realpath, rm, symlink } from "node:fs/promises";
-import { join, sep } from "node:path";
+import { copyFile, mkdir, readdir, readlink, realpath, rm, symlink } from "node:fs/promises";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { insideRoot } from "./safe-path";
 
 // work/: the copy of the program that the tool runs and may change (DESIGN 7-4). The original
@@ -11,18 +11,34 @@ import { insideRoot } from "./safe-path";
  */
 export async function prepareWorkspace(source: string, work: string, link: readonly string[]): Promise<void> {
   await rm(work, { recursive: true, force: true });
-  await copyTree(source, work, new Set(link));
+  await copyTree(source, work, new Set(link), { source: resolve(source), work: resolve(work) });
 }
 
-async function copyTree(from: string, to: string, link: ReadonlySet<string>): Promise<void> {
+type Roots = { source: string; work: string };
+
+async function copyTree(from: string, to: string, link: ReadonlySet<string>, roots: Roots): Promise<void> {
   await mkdir(to, { recursive: true });
   for (const entry of await readdir(from, { withFileTypes: true })) {
     const src = join(from, entry.name);
     const dest = join(to, entry.name);
     if (entry.isDirectory() && link.has(entry.name)) await symlink(src, dest, "dir");
-    else if (entry.isDirectory()) await copyTree(src, dest, link);
+    else if (entry.isDirectory()) await copyTree(src, dest, link, roots);
     else if (entry.isFile()) await copyFile(src, dest);
+    else if (entry.isSymbolicLink()) await symlink(await linkTarget(src, roots), dest);
   }
+}
+
+/**
+ * Where a link in the source points to, for the same link in work/. A link is part of the program
+ * (config.php -> config.local.php), so it is not dropped. A target inside the source points to its
+ * copy in work/; a target outside it points to the same place as before. writableFile follows
+ * links, so the original stays out of reach for writing either way.
+ */
+async function linkTarget(src: string, roots: Roots): Promise<string> {
+  const target = resolve(dirname(src), await readlink(src));
+  const inside = relative(roots.source, target);
+  const outside = inside === ".." || inside.startsWith(".." + sep) || isAbsolute(inside);
+  return outside ? target : join(roots.work, inside);
 }
 
 /**
