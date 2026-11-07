@@ -73,10 +73,8 @@ function walk(node: T.ParentNode, lines: Lines): void {
       lines.flush();
       for (const line of textOf(el, true).split("\n")) lines.push(line);
     } else if (tag === "input" || tag === "select" || tag === "textarea") lines.push(formValue(el));
-    else if (tag === "img") {
-      const alt = attr(el, "alt");
-      if (alt) lines.add(`[画像: ${alt}]`);
-    } else if (BLOCK.has(tag)) {
+    else if (tag === "img") lines.add(imageText(el));
+    else if (BLOCK.has(tag)) {
       lines.flush();
       walk(el, lines);
       lines.flush();
@@ -187,12 +185,19 @@ function textOf(el: T.Element, keepLines = false): string {
     else if ("tagName" in n && !SKIP.has(n.tagName)) {
       // A field in a table cell is part of what the row says.
       if (n.tagName === "input" || n.tagName === "select" || n.tagName === "textarea") text += ` ${formValue(n)} `;
+      else if (n.tagName === "img") text += imageText(n);
       else if (n.tagName === "br") text += keepLines ? "\n" : " ";
       else n.childNodes.forEach(visit);
     }
   };
   el.childNodes.forEach(visit);
   return keepLines ? text.replace(/\r\n/g, "\n").replace(/^\n/, "").replace(/\n$/, "") : text.replace(/\s+/g, " ").trim();
+}
+
+/** An image as text: its alt, the same in a table cell as anywhere else. */
+function imageText(img: T.Element): string {
+  const alt = attr(img, "alt");
+  return alt ? `[画像: ${alt}]` : "";
 }
 
 function isCell(n: T.ChildNode): n is T.Element {
