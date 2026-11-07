@@ -13,12 +13,17 @@ export type Unstable = boolean[] | "whole";
 
 /**
  * A line in pieces: a run of ASCII letters and digits with the separators inside it
- * (72,000 / 10:00:01 / 2026-11-02T07:17:45+00:00 / uuid:32067e12-e78d-…), a run of white space,
+ * (10:00:01 / 2026-11-02T07:17:45+00:00 / uuid:32067e12-e78d-…), a run of white space,
  * or a run of anything else (Japanese text, which often sits right next to a number with no
- * space: "合計72,000" stays two pieces). Pure text: no knowledge of any format.
+ * space: "合計72" stays two pieces). Pure text: no knowledge of any format.
+ *
+ * A comma always ends a piece. In a CSV row ("10:00:05,1001,57000") it separates fields, and a
+ * timestamp that changes on every run must not carry the amount next to it into the set-aside
+ * part. "72,000" becomes three pieces; only the pieces that changed are set aside, so a changed
+ * amount still reaches the judge.
  */
 export function tokens(line: string): string[] {
-  return line.match(/[A-Za-z0-9][A-Za-z0-9,.:\-/+'_]*|\s+|[^A-Za-z0-9\s]+/g) ?? [];
+  return line.match(/[A-Za-z0-9][A-Za-z0-9.:\-/+'_]*|\s+|[^A-Za-z0-9\s]+/g) ?? [];
 }
 
 /** Lines in `current` that are not reproduced by `repeat` (same environment, same input), and how. */
