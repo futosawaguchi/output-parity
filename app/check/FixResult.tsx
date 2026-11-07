@@ -98,7 +98,7 @@ function IntoTheSource({ where, patchUrl, showcase }: { where: string; patchUrl:
   return (
     <div className={styles.nextSteps}>
       <p className={styles.nextStepsTitle}>元のソースに入れるには{showcase && "（ローカル環境での手順です）"}</p>
-      <p className={styles.muted}>かわりめが書き換えたのはコピー（work/）だけです。元のソースは、いつもの手順（ブランチ・レビュー・コミット）で直してください。</p>
+      <p className={styles.muted}>かわりめが書き換えたのはコピー（work/）だけです。元のソースは、ふだんコードを変えるときと同じ流れ（ブランチを切ってコミットし、レビューを通すなど）で直してください。</p>
       <ol className={styles.nextStepsList}>
         <li>
           元のソースの <code className={styles.location}>{where}</code> を開く
