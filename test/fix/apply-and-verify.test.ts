@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { adaptersForConfig } from "../../lib/compare/adapters";
 import { parseConfig } from "../../lib/config";
 import { applyAndVerify } from "../../lib/fix/apply-and-verify";
+import type { CauseReport } from "../../lib/fix/locate-cause";
 import { runPipeline, type RunReport } from "../../lib/pipeline";
 
 // The bundled outputs were made on another day. A program that prints today's date must not read
@@ -46,7 +47,8 @@ test("an edit applied from the bundled outputs is checked against outputs made h
   const old = run.cases[0].runs.find((r) => r.slot === "old")!;
   await writeFile(old.outputPath!, (await readFile(old.outputPath!, "utf8")).replace(/\d{4}-\d{2}-\d{2}/, "2026-11-03"));
   const edit = { file: "prog.js", oldText: "const FIXED = false", newText: "const FIXED = true" };
-  const cause = { kind: "found" as const, summary: "", model: "", reads: [], candidates: [{ file: "prog.js", line: 1, code: "", change: "", why: "", edit }] };
+  // Only what applyAndVerify reads is filled in.
+  const cause = { kind: "found", summary: "", model: "", reads: [], candidates: [{ file: "prog.js", line: 1, edit }] } as unknown as CauseReport;
   const bundled: RunReport = { ...run, origin: "bundled", cases: run.cases.map((c) => ({ ...c, cause })) };
 
   const after = await applyAndVerify(bundled, "a", 0, opts);
