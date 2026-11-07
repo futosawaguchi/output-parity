@@ -130,3 +130,9 @@ test("a random id whose letters change is set aside whole, however many characte
   const unstable = unstableLines(["uuid:a2bd23ec-4862"], ["uuid:a7c1f5d0-4862"]);
   assert.equal(applyBaseline(diffLines(["uuid:9f00e1b2-77aa"], ["uuid:a2bd23ec-4862"]), unstable)[0].explainedByBaseline, true);
 });
+
+test("two runs ten seconds apart agree on the last digit by chance, and the time is still set aside", () => {
+  const time = (t: string) => [`meta CreationDate: D:${t}+00'00'`];
+  const unstable = unstableLines(time("20261107133328"), time("20261107133338"));
+  assert.equal(applyBaseline(diffLines(time("20261107133322"), time("20261107133328")), unstable)[0].explainedByBaseline, true);
+});
