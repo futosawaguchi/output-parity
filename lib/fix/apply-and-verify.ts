@@ -28,14 +28,16 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
   const edit = cause?.kind === "found" ? cause.candidates[candidate]?.edit : null;
   if (!edit) throw new Error(`no edit ${candidate} for ${caseId}`);
   const say = (message: string) => opts.onProgress?.({ caseId, message });
-  const original: RunReport = { ...(base.fixAttempt?.original ?? base), fixAttempt: undefined };
 
   // The edit was read from the source that produced this report. A run made here left that source
   // in work/; for the bundled outputs it is the original, so work/ starts from a fresh copy.
+  let before = base;
   if (base.origin !== "run") {
     say("work/ を作っています");
     await prepareWorkspace(opts.config.source, opts.workDir, opts.config.workspace.link);
+    before = await rebuildBefore(base, opts);
   }
+  const original: RunReport = { ...(before.fixAttempt?.original ?? before), fixAttempt: undefined };
   say("コピー（work/）に直しを入れています");
   const applied = await applyEdit(opts.workDir, edit);
   // On a run made here, work/ still holds the edits applied before this one; a bundled report starts from a fresh copy.
@@ -54,10 +56,33 @@ export async function applyAndVerify(base: RunReport, caseId: string, candidate:
     onProgress: opts.onProgress,
   });
   const after = carryVerdicts(original, rerun);
-  attempt.verification = assessFix(caseId, base, after);
+  attempt.verification = assessFix(caseId, before, after);
   // Saved with the edit and the verdict on it: the record of what was applied (DESIGN 4-5), and
   // what npm run bundle ships so the round trip can be seen without PHP.
   const report: RunReport = { ...after, fixAttempt: attempt };
   await writeFile(join(opts.runsRoot, after.runId, "report.json"), JSON.stringify(report, null, 2) + "\n");
   return report;
+}
+
+/**
+ * The outputs before the edit, made here. The bundled outputs were made on another day, perhaps on
+ * another machine: a date the program prints would differ from today's, and after the edit it would
+ * read as a difference left over (the baseline sees only two runs a moment apart). So every side
+ * runs once here on the original code, keeping the bundled verdicts where the difference is the
+ * same, and the causes found (they are about the source, which is the same).
+ */
+async function rebuildBefore(bundled: RunReport, opts: ApplyOptions): Promise<RunReport> {
+  opts.onProgress?.({ caseId: "", message: "当てる前の出力を、この環境で作り直しています（同梱の結果は別の日に作ったため）" });
+  const fresh = await runPipeline({
+    subjectId: bundled.subjectId,
+    config: opts.config,
+    adapters: opts.adapters,
+    root: opts.workDir,
+    runsRoot: opts.runsRoot,
+    client: null,
+    onProgress: opts.onProgress,
+  });
+  const causes = new Map(bundled.cases.map((c) => [c.caseId, c.cause]));
+  const carried = carryVerdicts(bundled, fresh);
+  return { ...carried, cases: carried.cases.map((c) => (causes.get(c.caseId) ? { ...c, cause: causes.get(c.caseId) } : c)) };
 }
