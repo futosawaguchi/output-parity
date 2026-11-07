@@ -86,17 +86,30 @@ function layoutOf(page: number, width: number, height: number, items: TextItem[]
   let charCount = 0;
   let textRight = 0;
   let textBottom = 0;
+  let textLeft = 0;
+  let textTop = 0;
   for (const item of items) {
     charCount += item.str.replace(/\s/g, "").length;
     textRight = Math.max(textRight, item.transform[4] + item.width);
     textBottom = Math.max(textBottom, height - item.transform[5]);
+    textLeft = Math.min(textLeft, item.transform[4]);
+    textTop = Math.min(textTop, height - item.transform[5]);
   }
-  return { page, width: round(width), height: round(height), charCount, textRight: round(textRight), textBottom: round(textBottom) };
+  return {
+    page,
+    width: round(width),
+    height: round(height),
+    charCount,
+    textRight: round(textRight),
+    textBottom: round(textBottom),
+    textLeft: round(textLeft),
+    textTop: round(textTop),
+  };
 }
 
 function layoutLines(p: PageLayout, images: number): string[] {
   const lines = [`layout page ${p.page}: 用紙 ${p.width}×${p.height}・画像 ${images} 個`];
-  if (p.textRight > p.width || p.textBottom > p.height) lines.push(`layout page ${p.page}: 文字が用紙からはみ出している`);
+  if (p.textRight > p.width || p.textBottom > p.height || p.textLeft < 0 || p.textTop < 0) lines.push(`layout page ${p.page}: 文字が用紙からはみ出している`);
   return lines;
 }
 

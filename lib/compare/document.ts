@@ -27,6 +27,10 @@ export type PageLayout = {
   textRight: number;
   /** Lowest text baseline, in points from the top edge. */
   textBottom: number;
+  /** Leftmost start of any text, in points from the left edge (below 0 is off the paper). */
+  textLeft: number;
+  /** Highest text baseline, in points from the top edge (below 0 is off the paper). */
+  textTop: number;
 };
 
 export type Extractor = (path: string) => Promise<ExtractedDocument>;
