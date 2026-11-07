@@ -170,7 +170,8 @@ function formValue(el: T.Element): string {
     const options = collect(el, (n) => n.tagName === "option");
     const chosen = options.filter((o) => attr(o, "selected") !== null);
     const shown = (chosen.length > 0 ? chosen : options.slice(0, 1)).map((o) => textOf(o)).join(", ");
-    return `[select ${name}: ${shown}]`;
+    // The choices offered are part of the page too: a vanished option is a changed form.
+    return `[select ${name}: ${shown}（選択肢 ${options.map((o) => textOf(o)).join(" / ")}）]`;
   }
   if (el.tagName === "textarea") return `[textarea ${name}: ${textOf(el, true)}]`;
   const type = (attr(el, "type") ?? "text").toLowerCase();

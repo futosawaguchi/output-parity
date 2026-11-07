@@ -37,7 +37,7 @@ test("form values are lines too, hidden ones included (a token that changes ever
   const lines = await page(`<form><input type="hidden" name="token" value="abc123">
     <select name="tax"><option value="8">8%</option><option value="10" selected>10%</option></select>
     <input type="checkbox" name="paid" value="1" checked><textarea name="note">至急</textarea></form>`);
-  assert.deepEqual(lines, ["[input hidden token: abc123]", "[select tax: 10%]", "[checkbox paid=1 選択]", "[textarea note: 至急]"]);
+  assert.deepEqual(lines, ["[input hidden token: abc123]", "[select tax: 10%（選択肢 8% / 10%）]", "[checkbox paid=1 選択]", "[textarea note: 至急]"]);
 });
 
 test("a page that declares Shift_JIS is read as Shift_JIS, whatever the settings say", async () => {
