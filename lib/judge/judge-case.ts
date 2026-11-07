@@ -45,25 +45,37 @@ export async function judgeByMachine(c: CaseComparison, ctx: Labels): Promise<Ca
   const dropped = cmp.changes.filter((ch) => ch.explainedByBaseline);
   if (kept.length > 0) return null;
   // "No difference" holds only for what the machine compared: how the runs ended, and text it could decode.
+  const [floor] = await machineFloors(c, ctx, false);
+  if (floor) return machine(c.caseId, "needs_review", floor.what, [floor]);
+  const note = dropped.length > 0 ? `（毎回変わる値 ${dropped.length} か所は除外）` : "";
+  return machine(c.caseId, "harmless", `旧と新の出力に違いはありません${note}`, []);
+}
+
+/**
+ * What the comparison of the text cannot see, as "needs review" findings: the runs ended
+ * differently, or part of the output could not be decoded. These hold with or without differences
+ * in the text, so a "harmless" from Claude about the text cannot clear them.
+ */
+async function machineFloors(c: CaseComparison, ctx: Labels, textDiffers: boolean): Promise<Finding[]> {
+  const cmp = c.comparison as Extract<CaseComparison["comparison"], { kind: "compared" }>;
+  const floors: Finding[] = [];
   const ending = differentEndings(c.runs);
   if (ending) {
-    const what = `出力は同じですが、終わり方が違います（${ctx.oldLabel}: ${ending.old}／${ctx.newLabel}: ${ending.new}）`;
-    return machine(c.caseId, "needs_review", what, [
-      finding("needs_review", what, "出力のあとで失敗した・別のページへ移すようになった、などは出力の比較には出ません", [`${ctx.oldLabel}: ${ending.old}`, `${ctx.newLabel}: ${ending.new}`, ...(await stderrHead(run("new")))], "実行の記録（終了コード・HTTP の状態・stderr）"),
-    ]);
+    const what = `${textDiffers ? "" : "出力は同じですが、"}終わり方が違います（${ctx.oldLabel}: ${ending.old}／${ctx.newLabel}: ${ending.new}）`;
+    const newRun = c.runs.find((r) => r.slot === "new")!;
+    floors.push(
+      finding("needs_review", what, "出力のあとで失敗した・別のページへ移すようになった、などは出力の比較には出ません", [`${ctx.oldLabel}: ${ending.old}`, `${ctx.newLabel}: ${ending.new}`, ...(await stderrHead(newRun))], "実行の記録（終了コード・HTTP の状態・stderr）"),
+    );
   }
   const misread = [
     ...(cmp.old.undecodable ? [`${ctx.oldLabel}: 読めない文字 ${cmp.old.undecodable} か所`] : []),
     ...(cmp.new.undecodable ? [`${ctx.newLabel}: 読めない文字 ${cmp.new.undecodable} か所`] : []),
   ];
   if (misread.length > 0) {
-    const what = "差は見つかりませんでしたが、文字コードとして読めない部分があります";
-    return machine(c.caseId, "needs_review", what, [
-      finding("needs_review", what, "読めない文字はどれも同じ記号（�）になるので、その部分の違いは比べられていません", misread, "設定の output.encoding（出力の文字コード）"),
-    ]);
+    const what = `${textDiffers ? "" : "差は見つかりませんでしたが、"}文字コードとして読めない部分があります`;
+    floors.push(finding("needs_review", what, "読めない文字はどれも同じ記号（�）になるので、その部分の違いは比べられていません", misread, "設定の output.encoding（出力の文字コード）"));
   }
-  const note = dropped.length > 0 ? `（毎回変わる値 ${dropped.length} か所は除外）` : "";
-  return machine(c.caseId, "harmless", `旧と新の出力に違いはありません${note}`, []);
+  return floors;
 }
 
 /**
@@ -126,7 +138,12 @@ export async function judgeCase(c: CaseComparison, ctx: JudgeContext): Promise<C
   // Claude saw the masked text, so a quote of it is a quote of the output.
   const raw = [...cmp.old.lines, ...cmp.new.lines];
   const quotable = [...raw, ...raw.map((l) => redactSecrets(l).text)];
-  const findings = [...fromClaude(answer.response, ids).map((f) => reviewByMachine(f, quotable)), ...unanswered(answer.response, ids, kept)];
+  const findings = [
+    ...fromClaude(answer.response, ids).map((f) => reviewByMachine(f, quotable)),
+    ...unanswered(answer.response, ids, kept),
+    // What the machine knows outside the compared text holds whatever Claude says about the text.
+    ...(await machineFloors(c, ctx, true)),
+  ];
   return {
     caseId: c.caseId,
     verdict: worstOf(findings.map((f) => f.verdict)),
