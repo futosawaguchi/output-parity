@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "PATH=\"$HOME/.nodenv/shims:$PATH\" node \"$CLAUDE_PROJECT_DIR/.claude/hooks/no-key-in-commit.mjs\"",
+            "timeout": 30,
+            "onFailure": "block",
+            "statusMessage": "コミットに API キーが混ざっていないか確かめています"
+          }
+        ]
+      }
+    ]
+  }
+}

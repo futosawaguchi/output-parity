@@ -2,8 +2,8 @@
 CLAUDE.md
 docs/
 
-# Claude Code の設定（サブエージェント・スキル・フック）。中身を確かめてから公開する
-/.claude/
+# Claude Code の自分用の許可（ローカルのパスが入る）。サブエージェント・スキル・フックは公開する
+/.claude/settings.local.json
 
 # 作業用コピー。題材のソースから work/<題材>/ に毎回作り直す（先頭の / で直下だけ。app/api/ などの同名フォルダを巻き込まない）
 /work/
