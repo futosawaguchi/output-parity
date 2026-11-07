@@ -41,15 +41,16 @@ export async function extractPdf(path: string): Promise<ExtractedDocument> {
     const imageOps = imageOperatorCodes(pdfjs.OPS);
 
     for (let n = 1; n <= doc.numPages; n++) {
-      const page = await doc.getPage(n);
+      // A broken page is this file's problem, not the run's: it is reported like a file that cannot be opened.
+      const { page, text, operators, annotations } = await readPage(doc, n).catch((e) => {
+        throw new ExtractionError(`PDF の ${n} ページ目が読めません: ${path}（${(e as Error).message}）`);
+      });
       const { width, height } = page.getViewport({ scale: 1 });
-      const items = (await page.getTextContent()).items.filter(
-        (i): i is TextItem & typeof i => "str" in i && i.str.trim() !== "",
-      );
+      const items = text.items.filter((i): i is TextItem & typeof i => "str" in i && i.str.trim() !== "");
 
       const layout = layoutOf(n, width, height, items);
-      const images = (await page.getOperatorList()).fnArray.filter((op) => imageOps.has(op)).length;
-      const fields = formLines(await page.getAnnotations());
+      const images = operators.fnArray.filter((op) => imageOps.has(op)).length;
+      const fields = formLines(annotations);
       // What the text alone cannot show is put into lines too, so that it is compared like text:
       // the values in form fields, a vanished logo or seal, a changed paper size, text pushed off the page.
       lines.push(`--- page ${n} ---`, ...groupIntoLines(items), ...fields, ...layoutLines(layout, images));
@@ -60,6 +61,14 @@ export async function extractPdf(path: string): Promise<ExtractedDocument> {
   } finally {
     await task.destroy();
   }
+}
+
+type PdfjsDocument = Awaited<ReturnType<typeof import("pdfjs-dist/legacy/build/pdf.mjs").getDocument>["promise"]>;
+
+/** Everything read from one page, so that a page pdf.js cannot read fails in one place. */
+async function readPage(doc: PdfjsDocument, n: number) {
+  const page = await doc.getPage(n);
+  return { page, text: await page.getTextContent(), operators: await page.getOperatorList(), annotations: (await page.getAnnotations()) as Annotation[] };
 }
 
 type PdfDocument = {
