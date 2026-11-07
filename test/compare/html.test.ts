@@ -56,3 +56,8 @@ test("an option that vanishes from a select changes its line, even when the chos
   const after = await page('<select name="pay"><option selected>振込</option></select>');
   assert.notDeepEqual(before, after);
 });
+
+test("an image's alt text in a table cell is part of the row, as it is anywhere else", async () => {
+  const lines = await page('<table><tr><td>承認</td><td><img src="seal.png" alt="社印"></td></tr></table><p><img src="logo.png" alt="ロゴ"></p>');
+  assert.deepEqual(lines, ["承認 | [画像: 社印]", "[画像: ロゴ]"]);
+});
