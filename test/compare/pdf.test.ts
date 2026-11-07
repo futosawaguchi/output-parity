@@ -83,13 +83,27 @@ test("an image that disappears is a difference, even when the text is the same",
 /** A one-page PDF, 200×200 points, with "Hello" drawn at (x, y). */
 function helloPdf(x: number, y: number): string {
   const stream = `BT /F1 12 Tf ${x} ${y} Td (Hello) Tj ET`;
-  const objects = [
+  return pdfOf([
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
     `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-  ];
+  ]);
+}
+
+/** A one-page PDF whose only value is in a text field named total (none of it is in the page's text). */
+function formPdf(total: string): string {
+  return pdfOf([
+    "<< /Type /Catalog /Pages 2 0 R /AcroForm << /Fields [4 0 R] >> >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Annots [4 0 R] >>",
+    `<< /Type /Annot /Subtype /Widget /FT /Tx /T (total) /V (${total}) /Rect [50 100 150 120] /P 3 0 R >>`,
+  ]);
+}
+
+/** Objects numbered from 1, the first being the catalog, with a correct cross-reference table. */
+function pdfOf(objects: string[]): string {
   let out = "%PDF-1.4\n";
   const offsets: number[] = [];
   objects.forEach((o, i) => {
@@ -109,4 +123,12 @@ test("text pushed off the left edge of the paper is a difference", async () => {
   };
   assert.ok(!(await extract("inside.pdf", 50)).includes("layout page 1: 文字が用紙からはみ出している"));
   assert.ok((await extract("left.pdf", -10)).includes("layout page 1: 文字が用紙からはみ出している"));
+});
+
+test("a value in a form field is a line, so a changed total in a field is a difference", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "output-parity-"));
+  await writeFile(join(dir, "old.pdf"), formPdf("72000"));
+  await writeFile(join(dir, "new.pdf"), formPdf("57000"));
+  assert.ok((await extractPdf(join(dir, "old.pdf"))).lines.includes("form total: 72000"));
+  assert.ok((await extractPdf(join(dir, "new.pdf"))).lines.includes("form total: 57000"));
 });
