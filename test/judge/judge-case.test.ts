@@ -173,3 +173,10 @@ test("a broken answer from Claude stays broken when the ending also differs", as
   const broken: JudgeResponse = { ...allHarmless, findings: [{ ...allHarmless.findings[0], verdict: "broken" }] };
   assert.equal((await judgeCase(c, ctx(fakeClient(broken)))).verdict, "broken");
 });
+
+test("an answer the SDK cannot parse makes that case needs review instead of stopping the run", async () => {
+  const unreadable = new Anthropic.AnthropicError("Failed to parse structured output: Unexpected end of JSON input");
+  const v = await judgeCase(compared([removed]), ctx(fakeClient(unreadable)));
+  assert.equal(v.verdict, "needs_review");
+  assert.equal(v.judgedBy.kind, "failed");
+});
