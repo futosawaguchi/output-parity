@@ -9,7 +9,15 @@ async function page(html: string | Uint8Array): Promise<string[]> {
   const path = join(await mkdtemp(join(tmpdir(), "output-parity-")), "out.html");
   await writeFile(path, html);
   const doc = await adapterFor({ format: "html" }).extract(path);
-  return doc.lines;
+  // The last line is the tool's own count of images; the tests below look at the text before it.
+  assert.match(doc.lines.at(-1) ?? "", /^layout: 画像 \d+ 個$/);
+  return doc.lines.slice(0, -1);
+}
+
+async function imageLine(html: string): Promise<string | undefined> {
+  const path = join(await mkdtemp(join(tmpdir(), "output-parity-")), "out.html");
+  await writeFile(path, html);
+  return (await adapterFor({ format: "html" }).extract(path)).lines.at(-1);
 }
 
 test("what a reader sees, in order: the title, one line per block, scripts and styles left out", async () => {
@@ -36,4 +44,9 @@ test("a page that declares Shift_JIS is read as Shift_JIS, whatever the settings
   const head = Buffer.from('<meta charset="Shift_JIS"><p>', "latin1");
   const body = Buffer.from([0x93, 0xfa, 0x95, 0xf1]); // 日報
   assert.deepEqual(await page(Buffer.concat([head, body, Buffer.from("</p>")])), ["日報"]);
+});
+
+test("an image with no alt text that vanishes still changes a line (the image count)", async () => {
+  assert.equal(await imageLine('<p>印</p><img src="seal.png">'), "layout: 画像 1 個");
+  assert.equal(await imageLine("<p>印</p>"), "layout: 画像 0 個");
 });
