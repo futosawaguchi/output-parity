@@ -30,7 +30,7 @@ const adapters: Record<string, (encoding: string) => Adapter> = {
   }),
   text: (encoding) => ({
     extract: (path) => extractText(path, encoding),
-    description: `テキストの出力（ログ・CSV・標準出力など）を、文字コード ${encoding} で読んで行ごとに並べたもの。行の中身には手を加えていない。`,
+    description: `テキストの出力（ログ・CSV・標準出力など）を、文字コード ${encoding} で読んで行ごとに並べたもの。行の中身には手を加えていない。最後の「layout」で始まる行はツールが付けた行で、改行コード・先頭の BOM・最後の改行の有無を表す。`,
   }),
   html: (encoding) => ({
     extract: (path) => extractHtml(path, encoding),
