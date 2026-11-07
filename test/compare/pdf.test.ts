@@ -144,3 +144,15 @@ test("a page that cannot be read makes the file unreadable, not the whole run fa
   ]));
   await assert.rejects(extractPdf(join(dir, "broken.pdf")), (e) => e instanceof ExtractionError && /2 ページ目が読めません/.test(e.message));
 });
+
+test("a warning printed before the PDF is a difference, though pdf.js still reads the text", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "output-parity-"));
+  await writeFile(join(dir, "clean.pdf"), helloPdf(50, 100));
+  await writeFile(join(dir, "warned.pdf"), "\nDeprecated: something in report.php on line 3\n" + helloPdf(50, 100));
+  const [clean, warned] = [(await extractPdf(join(dir, "clean.pdf"))).lines, (await extractPdf(join(dir, "warned.pdf"))).lines];
+  assert.equal(clean[0], "file: %PDF- の前の余分な文字 なし・%%EOF のうしろの余分な文字 なし");
+  assert.equal(warned[0], "file: %PDF- の前の余分な文字 あり・%%EOF のうしろの余分な文字 なし");
+  // The text is the same; only the file line (and the file id, which pdf.js derives from the bytes) differ.
+  const pages = (lines: string[]) => lines.slice(lines.indexOf("--- page 1 ---"));
+  assert.deepEqual(pages(clean), pages(warned));
+});
