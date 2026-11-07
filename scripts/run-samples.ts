@@ -52,7 +52,7 @@ async function main(): Promise<void> {
     }
     printComparison(c.comparison);
     if (c.verdict) printVerdict(c.verdict);
-    else console.log(`  判定: なし — ${whyNoVerdict(report.judgeHeld !== undefined)}`);
+    else console.log(`  未判定 — ${whyNoVerdict(report.judgeHeld !== undefined)}`);
     console.log();
   }
   if (report.judgeHeld) {

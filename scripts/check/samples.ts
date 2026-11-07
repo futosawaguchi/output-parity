@@ -16,7 +16,7 @@ export const LOG_DIR = join(runsRoot, "check");
 /** "差なし / 無害（機械）": what is left of the difference, and the verdict with who reached it. */
 export function describeCase(c: CaseReport): string {
   const v = c.verdict;
-  const verdict = v ? `${VERDICT_LABEL[v.verdict]}（${v.judgedBy.kind === "claude" ? "Claude" : v.judgedBy.kind === "machine" ? "機械" : "判定できず"}）` : "判定なし";
+  const verdict = v ? `${VERDICT_LABEL[v.verdict]}（${v.judgedBy.kind === "claude" ? "Claude" : v.judgedBy.kind === "machine" ? "機械" : "判定できず"}）` : "未判定";
   return `${describeRemaining(remainingOf(c))} / ${verdict}`;
 }
 
@@ -41,8 +41,8 @@ export async function runSamples(subjectId: string, extra: string[] = []): Promi
     if (report?.subjectId === subjectId) {
       // A case without a verdict must still say so on the terminal, not just leave the line out.
       const unjudged = report.cases.filter((c) => !c.verdict).length;
-      const said = (output.match(/^ {2}判定: なし — /gm) ?? []).length;
-      if (said !== unjudged) throw new Error(`判定の無い入力 ${unjudged} 件のうち、「判定: なし」と出たのは ${said} 件（ログ: runs/check/${log.split("/").at(-1)}）`);
+      const said = (output.match(/^ {2}未判定 — /gm) ?? []).length;
+      if (said !== unjudged) throw new Error(`判定の無い入力 ${unjudged} 件のうち、「未判定」と出たのは ${said} 件（ログ: runs/check/${log.split("/").at(-1)}）`);
       return report;
     }
   }

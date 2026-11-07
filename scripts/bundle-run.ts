@@ -51,7 +51,7 @@ async function main(): Promise<void> {
 
   await bundleSent([report], outDir);
   await assertNoHomeDirectory(outDir);
-  const verdicts = report.cases.map((c) => `${c.caseId}: ${c.verdict?.verdict ?? "判定なし"}${c.cause ? "・原因あり" : ""}`).join("・");
+  const verdicts = report.cases.map((c) => `${c.caseId}: ${c.verdict?.verdict ?? "未判定"}${c.cause ? "・原因あり" : ""}`).join("・");
   console.log(`${runId} を ${outDir.slice(root.length + 1)}/ に写しました（${verdicts}）`);
   if (fixId) console.log(`直し方を当てたあとの ${fixId} も ${BUNDLED_FIX_DIR}/ に写しました（${(await readReport(fixId)).fixAttempt?.verification?.outcome}）`);
 }

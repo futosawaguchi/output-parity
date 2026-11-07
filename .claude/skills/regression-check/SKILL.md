@@ -43,7 +43,7 @@ npm test && npx tsc --noEmit && npm run lint
 npm run samples
 ```
 
-期待: A 無害（機械）／B・C 残った差 3 行・判定なし／D 壊れている（機械・新で出力なし）。
+期待: A 無害（機械）／B・C 残った差 3 行・未判定／D 壊れている（機械・新で出力なし）。
 
 ### 2b. ほかの題材（Claude なし）
 
@@ -56,7 +56,7 @@ npm run samples -- --subject worklog
 npm run samples -- --subject bookshop
 ```
 
-期待: Web 型（架空書店・PHP 7.4 → 8.5 の内蔵サーバ・32 件。export だけ CSV・Shift_JIS のテキスト）。無害（機械）23／order-27 だけ壊れている（機械・HTTP 500）／残る 8 件（list・export・order-4・8・12・19・21・25）は判定なし。
+期待: Web 型（架空書店・PHP 7.4 → 8.5 の内蔵サーバ・32 件。export だけ CSV・Shift_JIS のテキスト）。無害（機械）23／order-27 だけ壊れている（機械・HTTP 500）／残る 8 件（list・export・order-4・8・12・19・21・25）は未判定。
 終わったあとに `ps aux | grep "[p]hp -d display_errors=0 -S"` が 0 件（サーバが止まっている）。
 Claude ありなら（8 回）: 8・21 壊れている／4・12・19・25 無害／list は無害か要確認（並び順だけ）／export は無害か要確認（割引率の表記「10.0」→「10」だけ）。
 
@@ -81,7 +81,7 @@ dev は**起動し直す**（メモリに前の実行が残っていると、同
 | a | 開いた直後 | 上に「Claude に送るもの」。同梱の結果 4 件。入力 C の詳細で PDF が左右 2 枚描かれ、原因（estimate.php:18）が最初から出ている。判定と原因の「送った全文を見る」が開く |
 | b | 実行して判定する | 3 と同じ判定。C の詳細に PDF・計算・機械の検算・素朴な diff・「Claude に送ったもの」 |
 | c | C の「原因を探す」（API を呼ぶ） | 原因の ファイル:行 と、機械の確認 2 つ（行が実在する・書き換え前の文が 1 か所だけ） |
-| d | コピー（work/）に直しを入れて確かめる | 進み具合に「PHP 7.4 は当てる前の出力と比べます」→「直りました: 入力 C は 残った差 3 行 → 差なし」。B も差なし。一覧の判定列が A・B・C 無害、D 壊れている（「判定なし」だらけにならない） |
+| d | コピー（work/）に直しを入れて確かめる | 進み具合に「PHP 7.4 は当てる前の出力と比べます」→「直りました: 入力 C は 残った差 3 行 → 差なし」。B も差なし。一覧の判定列が A・B・C 無害、D 壊れている（「未判定」だらけにならない） |
 | e | 元に戻す | 当てる前の結果に戻る。`diff -q samples/estimate/app/estimate.php work/estimate/estimate.php` が一致 |
 | f | 同梱の出力を Claude に判定し直させる（API を呼ぶ） | 同梱と同じ 3 つの判定 |
 | g | 判定の件数の守り（変えたときだけ） | `lib/pipeline.ts` の `JUDGE_WITHOUT_ASKING` を一時的に 1 にして dev を起動し直し、見積書を実行 → 「Claude に判定させる入力が 2 件あります…」と「2 件を Claude に判定させる」、B・C は未判定。押すと 3 と同じ判定。⚠️ 終わったら `git checkout lib/pipeline.ts` |
