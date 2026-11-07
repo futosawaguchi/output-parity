@@ -6,7 +6,7 @@
 
 バージョンの変わり目で、見落とさない。
 
-[デモ動画（YouTube・3分）](https://youtu.be/_5t5zFC2Emc)　｜　[審査用の公開環境](#審査用の公開環境見本)
+[デモ動画（YouTube・3分）](https://youtu.be/qbFN_dszHlg)　｜　[審査用の公開環境](#審査用の公開環境見本)
 
 </div>
 
