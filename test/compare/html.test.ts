@@ -50,3 +50,9 @@ test("an image with no alt text that vanishes still changes a line (the image co
   assert.equal(await imageLine('<p>印</p><img src="seal.png">'), "layout: 画像 1 個");
   assert.equal(await imageLine("<p>印</p>"), "layout: 画像 0 個");
 });
+
+test("an option that vanishes from a select changes its line, even when the chosen one stays", async () => {
+  const before = await page('<select name="pay"><option selected>振込</option><option>代引き</option></select>');
+  const after = await page('<select name="pay"><option selected>振込</option></select>');
+  assert.notDeepEqual(before, after);
+});
