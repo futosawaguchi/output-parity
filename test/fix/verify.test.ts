@@ -91,3 +91,17 @@ test("a case whose difference changed is not one left as it was", () => {
   const { deltas } = assessFix("c", report({ b: lines(2, "p"), c: lines(3) }), report({ b: lines(2, "q"), c: lines(0) }));
   assert.deepEqual(leftAsTheyWere(deltas, "c"), []);
 });
+
+const diff = (oldLines: string[], newLines: string[]): Comparison =>
+  ({ kind: "compared", changes: [{ oldLines, newLines, explainedByBaseline: false }] }) as unknown as Comparison;
+
+test("another case whose new line vanished while the old one stays has changed, not stayed as it was", () => {
+  const r = assessFix("c", report({ b: diff(["合計 72,000"], ["合計 72,000円"]), c: lines(1) }), report({ b: diff(["合計 72,000"], []), c: lines(0) }));
+  assert.equal(r.outcome, "changed");
+  assert.equal(r.deltas.find((d) => d.caseId === "b")?.changed, true);
+});
+
+test("another case brought back to the old line is not a change", () => {
+  const r = assessFix("c", report({ b: diff(["合計 72,000"], ["合計 72,000円"]), c: lines(1) }), report({ b: lines(0), c: lines(0) }));
+  assert.equal(r.outcome, "fixed");
+});
