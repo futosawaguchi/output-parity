@@ -81,3 +81,15 @@ test("a line the second run could not pair up is never set aside", () => {
   const changes = applyBaseline(diffLines(["発行 09:59:58 合計 72,000"], ["発行 10:00:01 合計 57,000"]), new Map([[0, "whole" as const]]));
   assert.equal(changes[0].explainedByBaseline, false);
 });
+
+test("in a CSV row, a changed amount next to a timestamp is not hidden by the baseline", () => {
+  const unstable = unstableLines(["2026-11-02 10:00:05,1001,57000"], ["2026-11-02 10:00:07,1001,57000"]);
+  const changes = applyBaseline(diffLines(["2026-11-02 10:00:01,1001,72000"], ["2026-11-02 10:00:05,1001,57000"]), unstable);
+  assert.equal(changes[0].explainedByBaseline, false);
+});
+
+test("in a CSV row, a timestamp that changes on every run is still set aside", () => {
+  const unstable = unstableLines(["2026-11-02 10:00:05,1001,57000"], ["2026-11-02 10:00:07,1001,57000"]);
+  const changes = applyBaseline(diffLines(["2026-11-02 10:00:01,1001,57000"], ["2026-11-02 10:00:05,1001,57000"]), unstable);
+  assert.equal(changes[0].explainedByBaseline, true);
+});
